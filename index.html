@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrepreneur Simulator</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/sections.css">
+</head>
+<body>
+  <!-- Loading Bar -->
+  <div class="progress-bar" id="progress-bar" style="position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #ffd700, #00f0ff); width: 0%; z-index: 1000; transition: width 0.3s ease; box-shadow: 0 0 10px #ffd700;"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo-container" onclick="navigateTo('home')" style="cursor: pointer;">
+      <div class="logo">E</div>
+      <span class="navbar-title">EntrepreneurHub</span>
+    </div>
+    <div class="nav-menu" id="nav-menu">
+      <a href="javascript:void(0)" onclick="navigateTo('lessons')">Lecții</a>
+      <a href="javascript:void(0)" onclick="navigateTo('courses')">Cursuri</a>
+      <a href="javascript:void(0)" onclick="navigateTo('tests')">Teste</a>
+      <a href="javascript:void(0)" onclick="navigateTo('stats')">Statistici</a>
+      <a href="javascript:void(0)" onclick="navigateTo('about')">Despre</a>
+    </div>
+    <div class="nav-controls">
+      <button class="language-switch" id="lang-btn" onclick="toggleLanguage()">EN</button>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="javascript:void(0)" onclick="navigateTo('home')">Acasă</a>
+      <a href="javascript:void(0)" onclick="navigateTo('lessons')">Lecții</a>
+      <a href="javascript:void(0)" onclick="navigateTo('courses')">Cursuri</a>
+      <a href="javascript:void(0)" onclick="navigateTo('tests')">Teste</a>
+      <a href="javascript:void(0)" onclick="navigateTo('stats')">Statistici</a>
+      <a href="javascript:void(0)" onclick="navigateTo('about')">Despre</a>
+      <a href="javascript:void(0)" onclick="navigateTo('login')">Logare</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero" id="home" style="position: relative; display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 80px); overflow: hidden;">
+    <canvas id="background-canvas" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+    <div class="content animate-fadeInUp" style="text-align: center; position: relative; z-index: 2;">
+      <h1 class="title">
+        Entrepreneur <span class="highlight">Simulator</span>
+      </h1>
+      <p class="subtitle" id="hero-subtitle">Devino antreprenor și ia decizii importante pentru succesul firmei tale!</p>
+      <p class="promotional-text" id="hero-promotional" style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.85); margin: 1.5rem auto; max-width: 600px; line-height: 1.6;">
+        Intră în lumea antreprenoriatului și experimentează provocările reale ale unui om de afaceri. Iei decizii strategice, gestionezi resurse și navighezi prin piața competitivă pentru a-ți construi imperiul afacerilor. Simulatorul nostru îți permite să înveți din greșeli fără riscuri reale și să descoperi care sunt secretele succesului în lumea business-ului.
+      </p>
+      <div class="menu" style="margin-top: 2rem;">
+        <button class="menu-item stagger-item" id="start-sim-btn" onclick="document.getElementById('start-sim-btn').setAttribute('href', 'game.html'); localStorage.setItem('autoStartGame', 'true'); window.location.href='game.html';" style="background: linear-gradient(135deg, #ffd700, #ffed4e); color: #000; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer;" >Start Simulator</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lessons Section -->
+  <section id="lessons-section" class="lesson-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="lessons-title">Lecții</h2>
+    <p class="section-subtitle animate-slideInUp" id="lessons-desc">Învață de la experți și descoperă secretele succesului entrepreneurial</p>
+    <div id="lessons-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+    </div>
+  </section>
+
+  <!-- Courses Section -->
+  <section id="courses-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; background: rgba(0,240,255,0.05); display: none;">
+    <h2 class="section-title animate-slideInUp" id="courses-title">Cursuri Online</h2>
+    <p class="section-subtitle animate-slideInUp" id="courses-desc">Înscrie-te la cursuri profesionale conduse de specialiști</p>
+    <div id="courses-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+    </div>
+  </section>
+
+  <!-- Tests Section -->
+  <section id="tests-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="tests-title">Teste și Evaluări</h2>
+    <p class="section-subtitle animate-slideInUp" id="tests-desc">Testează-ți cunoștințele și progresul cu evaluări interactive</p>
+    <div id="tests-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+    </div>
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 500; padding: 2rem; overflow-y: auto;">
+      <div style="background: var(--primary-dark); max-width: 600px; margin: 2rem auto; border-radius: 10px; padding: 2rem; color: var(--text-primary);">
+        <button onclick="closeTestModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">✕</button>
+        <div id="test-modal-content" style="clear: both;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about-section" style="padding: 4rem 2rem; max-width: 900px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="about-title">Despre EntrepreneurHub</h2>
+    <div id="about-content"></div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section id="stats-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="stats-title">Statistici</h2>
+    <div id="stats-content"></div>
+  </section>
+
+  <!-- Enrollment Modal -->
+  <div id="enrollment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 600; padding: 2rem; overflow-y: auto; align-items: center; justify-content: center;">
+    <div style="background: var(--primary-dark); max-width: 500px; margin: auto; border-radius: 10px; padding: 2rem; color: var(--text-primary);">
+      <button onclick="closeEnrollmentModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">✕</button>
+      <div id="enrollment-content" style="clear: both;"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding: 2rem; color: var(--text-secondary); margin-top: 3rem; border-top: 1px solid var(--border-color);">
+    <p>&copy; 2026 EntrepreneurHub. Built with passion for entrepreneurs.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+
+  <!-- JavaScript Logic for Navigation, Translation, Tests, etc. -->
+  <script>
+    // Translation Object
+    const translations = {
+      ro: {
+        home: 'Acasă',
+        lessons: 'Lecții',
+        courses: 'Cursuri',
+        tests: 'Teste',
+        statistics: 'Statistici',
+        about: 'Despre',
+        hero_subtitle: 'Devino antreprenor și ia decizii importante pentru succesul firmei tale!',
+        hero_promotional: 'Intră în lumea antreprenoriatului și experimentează provocările reale ale unui om de afaceri. Iei decizii strategice, gestionezi resurse și navighezi prin piața competitivă pentru a-ți construi imperiul afacerilor. Simulatorul nostru îți permite să înveți din greșeli fără riscuri reale și să descoperi care sunt secretele succesului în lumea business-ului.',
+        start_simulator: 'Start Simulator',
+        lessons_title: 'Lecții',
+        lessons_desc: 'Învață de la experți și descoperă secretele succesului entrepreneurial',
+        fundamentals: 'Fundamentele Businessului',
+        fundamentals_desc: 'Învață conceptele de bază ale antreprenoriatului modern',
+        innovation: 'Inovație și Creativitate',
+        innovation_desc: 'Descoperă cum să-ți dezvolți ideile în produse de succes',
+        financial: 'Managementul Financiar',
+        financial_desc: 'Stăpânește gestiunea bugetului și finanțelor businessului',
+        marketing: 'Strategia de Marketing',
+        marketing_desc: 'Creează campanii eficiente și atrage clienți',
+        courses_title: 'Cursuri Online',
+        courses_desc: 'Înscrie-te la cursuri profesionale conduse de specialiști',
+        startup101: 'Startup 101',
+        instructor: 'Andrei Popescu',
+        weeks: 'săptămâni',
+        beginner: 'Începător',
+        enroll: 'Înscrie-te',
+        scaling: 'Scaling Your Business',
+        instructor2: 'Maria Ionescu',
+        intermediate: 'Intermediar',
+        advanced_lead: 'Advanced Leadership',
+        instructor3: 'John Smith',
+        advanced: 'Avansat',
+        tests_title: 'Teste și Evaluări',
+        tests_desc: 'Testează-ți cunoștințele și progresul cu evaluări interactive',
+        initial_assess: 'Assessment Inițial',
+        questions: 'întrebări',
+        minutes: 'minute',
+        take_test: 'Ia Testul',
+        fundamentals_test: 'Cunoștințe Fundamentale',
+        professional: 'Certificare Profesională',
+        about_title: 'Despre EntrepreneurHub',
+        mission: 'Misiunea Noastră',
+        mission_text: 'EntrepreneurHub a fost creat cu o singură misiune clară: să democratizeze educația entrepreneurială și să ofere adolescenților și tinerilor o platformă interactivă unde pot învăța, experimenta și crești ca antreprenori.',
+        team: 'Echipa Noastră',
+        founder: 'Ioana Popescu',
+        founder_role: 'Fondatoare',
+        founder_bio: 'Expert în digital marketing și transformare digitală',
+        dev_lead: 'Andrei Ionescu',
+        dev_role: 'Lead Developer',
+        dev_bio: 'Full-stack developer cu 8 ani de experiență',
+        content: 'Maria Gheorghiu',
+        content_role: 'Content Director',
+        content_bio: 'Antreprenor cu 3 startup-uri de succes',
+        statistics_title: 'Statistici',
+        total_users: 'Total Utilizatori',
+        active_courses: 'Cursuri Active',
+        completed: 'Completate',
+        avg_score: 'Scor Mediu',
+        game_stats: 'Statisticile Jocului Tău',
+        budget: 'Buget',
+        decisions: 'Decizii Luate',
+        score: 'Punctaj',
+        quiz_finished: 'Test finalizat!',
+        quiz_score: 'Punctaj:',
+        try_again: 'Incearca altul',
+        question: 'Întrebarea',
+        enrollment_form: 'Formularul de Înregistrare',
+        enrollment_subtitle: 'Completează datele pentru a te înscrie la curs',
+        first_name: 'Prenume',
+        last_name: 'Nume',
+        birth_year: 'Anul Nașterii',
+        city: 'Localitatea',
+        county: 'Județul',
+        submit_enrollment: 'Trimite Înregistrare',
+        enrollment_success: 'Mulțumesc pentru înregistrare!',
+        enrollment_success_msg: 'Vei fi contactat în 7 zile lucratoare de către profesor. Acesta îți va prezenta prețul, oferta, detalii și alte informații importante despre curs.'
+      },
+      en: {
+        home: 'Home',
+        lessons: 'Lessons',
+        courses: 'Courses',
+        tests: 'Tests',
+        statistics: 'Statistics',
+        about: 'About',
+        hero_subtitle: 'Become an entrepreneur and make important decisions for your business success!',
+        hero_promotional: 'Enter the world of entrepreneurship and experience real challenges of a business person. Make strategic decisions, manage resources, and navigate the competitive market to build your business empire. Our simulator allows you to learn from mistakes without real risks and discover the secrets of success in the business world.',
+        start_simulator: 'Start Simulator',
+        lessons_title: 'Lessons',
+        lessons_desc: 'Learn from experts and discover the secrets of entrepreneurial success',
+        fundamentals: 'Business Fundamentals',
+        fundamentals_desc: 'Learn the basic concepts of modern entrepreneurship',
+        innovation: 'Innovation and Creativity',
+        innovation_desc: 'Discover how to develop your ideas into successful products',
+        financial: 'Financial Management',
+        financial_desc: 'Master business budget and finance management',
+        marketing: 'Marketing Strategy',
+        marketing_desc: 'Create effective campaigns and attract clients',
+        courses_title: 'Online Courses',
+        courses_desc: 'Enroll in professional courses led by specialists',
+        startup101: 'Startup 101',
+        instructor: 'Andrei Popescu',
+        weeks: 'weeks',
+        beginner: 'Beginner',
+        enroll: 'Enroll',
+        scaling: 'Scaling Your Business',
+        instructor2: 'Maria Ionescu',
+        intermediate: 'Intermediate',
+        advanced_lead: 'Advanced Leadership',
+        instructor3: 'John Smith',
+        advanced: 'Advanced',
+        tests_title: 'Tests and Assessments',
+        tests_desc: 'Test your knowledge and progress with interactive assessments',
+        initial_assess: 'Initial Assessment',
+        questions: 'questions',
+        minutes: 'minutes',
+        take_test: 'Take Test',
+        fundamentals_test: 'Fundamental Knowledge',
+        professional: 'Professional Certification',
+        about_title: 'About EntrepreneurHub',
+        mission: 'Our Mission',
+        mission_text: 'EntrepreneurHub was created with one clear mission: to democratize entrepreneurial education and provide adolescents and young adults with an interactive platform where they can learn, experiment, and grow as entrepreneurs.',
+        team: 'Our Team',
+        founder: 'Ioana Popescu',
+        founder_role: 'Founder',
+        founder_bio: 'Expert in digital marketing and digital transformation',
+        dev_lead: 'Andrei Ionescu',
+        dev_role: 'Lead Developer',
+        dev_bio: 'Full-stack developer with 8 years of experience',
+        content: 'Maria Gheorghiu',
+        content_role: 'Content Director',
+        content_bio: 'Entrepreneur with 3 successful startups',
+        statistics_title: 'Statistics',
+        total_users: 'Total Users',
+        active_courses: 'Active Courses',
+        completed: 'Completed',
+        avg_score: 'Average Score',
+        game_stats: 'Your Game Statistics',
+        budget: 'Budget',
+        decisions: 'Decisions Made',
+        score: 'Score',
+        quiz_finished: 'Quiz Finished!',
+        quiz_score: 'Score:',
+        try_again: 'Try Another',
+        question: 'Question',
+        enrollment_form: 'Enrollment Form',
+        enrollment_subtitle: 'Complete your details to enroll in the course',
+        first_name: 'First Name',
+        last_name: 'Last Name',
+        birth_year: 'Birth Year',
+        city: 'City',
+        county: 'County',
+        submit_enrollment: 'Submit Enrollment',
+        enrollment_success: 'Thank you for registering!',
+        enrollment_success_msg: 'You will be contacted within 7 business days by the instructor. They will present you with the price, offer, details and other important information about the course.'
+      }
+    };
+
+    let currentLanguage = localStorage.getItem('appLanguage') || 'ro';
+    let currentPage = 'home';
+    let enrolled = new Set();
+    let currentTest = null;
+    let currentQuestion = 0;
+    let testScore = 0;
+    let testTimeLeft = 0;
+    let testTimer = null;
+
+    const testQuestions = {
+      initial: [
+        { 
+          q_ro: 'Care este definiția unui startup?', 
+          q_en: 'What is the definition of a startup?',
+          options_ro: ['O companie nouă', 'O companie mică', 'O companie cu risc'],
+          options_en: ['A new company', 'A small company', 'A company with risk'],
+          correct: 0 
+        },
+        { 
+          q_ro: 'Ce este un MVP?', 
+          q_en: 'What is an MVP?',
+          options_ro: ['Produs Minim Viabil', 'Produs Maxim Valuabil', 'Manager de Vânzări'],
+          options_en: ['Minimum Viable Product', 'Maximum Valuable Product', 'Manager of Sales'],
+          correct: 0 
+        },
+        { 
+          q_ro: 'Care este cel mai important pentru un antreprenor?', 
+          q_en: 'What is most important for an entrepreneur?',
+          options_ro: ['Bani', 'Idee bună', 'Viziune clară'],
+          options_en: ['Money', 'Good idea', 'Clear vision'],
+          correct: 2 
+        }
+      ],
+      fundamentals: [
+        { 
+          q_ro: 'Ce este un model de afaceri?', 
+          q_en: 'What is a business model?',
+          options_ro: ['Modul cum faci bani', 'Cum lucrează compania', 'Locul unde lucrezi'],
+          options_en: ['How you make money', 'How the company works', 'Where you work'],
+          correct: 1 
+        },
+        { 
+          q_ro: 'Care sunt stakeholderii?', 
+          q_en: 'Who are stakeholders?',
+          options_ro: ['Oamenii investiți în companie', 'Doar angajații', 'Doar clienții'],
+          options_en: ['People invested in the company', 'Only employees', 'Only clients'],
+          correct: 0 
+        }
+      ],
+      professional: [
+        { 
+          q_ro: 'Ce este scalabilitatea?', 
+          q_en: 'What is scalability?',
+          options_ro: ['Creșterea fără costuri duble', 'Reducerea costurilor', 'Schimbarea modelului'],
+          options_en: ['Growth without doubling costs', 'Reducing costs', 'Changing the model'],
+          correct: 0 
+        }
+      ]
+    };
+
+    function t(key) {
+      return translations[currentLanguage][key] || key;
+    }
+
+    // Determine API base so fetch works even when page opened via file://
+    const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:5000' : window.location.origin;
+    console.log('API_BASE:', API_BASE);
+
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'ro' ? 'en' : 'ro';
+      localStorage.setItem('appLanguage', currentLanguage);
+      document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+      
+      // Update navbar menu items
+      const navItems = document.querySelectorAll('#nav-menu a');
+      navItems[0].textContent = t('lessons');
+      navItems[1].textContent = t('courses');
+      navItems[2].textContent = t('tests');
+      navItems[3].textContent = t('statistics');
+      navItems[4].textContent = t('about');
+      
+      // Update mobile menu items
+      const mobileItems = document.querySelectorAll('#mobile-menu a');
+      mobileItems[0].textContent = t('home');
+      mobileItems[1].textContent = t('lessons');
+      mobileItems[2].textContent = t('courses');
+      mobileItems[3].textContent = t('tests');
+      mobileItems[4].textContent = t('statistics');
+      mobileItems[5].textContent = t('about');
+      
+      // Update hero section
+      document.getElementById('hero-subtitle').textContent = t('hero_subtitle');
+      document.getElementById('hero-promotional').textContent = t('hero_promotional');
+      document.getElementById('start-sim-btn').textContent = t('start_simulator');
+      
+      renderPage();
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function closeMenu() {
+      document.getElementById('mobile-menu').style.display = 'none';
+    }
+
+    function navigateTo(page) {
+      currentPage = page;
+      closeMenu();
+      showProgressBar();
+      renderPage();
+      // adjust hero height after navigation so centering stays strict under navbar
+      adjustHeroToNavbar();
+      window.scrollTo(0, 0);
+    }
+
+    function showProgressBar() {
+      const bar = document.getElementById('progress-bar');
+      bar.style.width = '30%';
+      setTimeout(() => bar.style.width = '70%', 100);
+      setTimeout(() => bar.style.width = '100%', 500);
+      setTimeout(() => bar.style.width = '0%', 1000);
+    }
+
+    function renderPage() {
+      const sections = ['home', 'lessons-section', 'courses-section', 'tests-section', 'about-section', 'stats-section'];
+      sections.forEach(s => document.getElementById(s).style.display = 'none');
+
+      switch(currentPage) {
+        case 'home':
+          document.getElementById('home').style.display = 'block';
+          break;
+        case 'lessons':
+          renderLessons();
+          document.getElementById('lessons-section').style.display = 'block';
+          break;
+        case 'courses':
+          renderCourses();
+          document.getElementById('courses-section').style.display = 'block';
+          break;
+        case 'tests':
+          renderTests();
+          document.getElementById('tests-section').style.display = 'block';
+          break;
+        case 'about':
+          renderAbout();
+          document.getElementById('about-section').style.display = 'block';
+          break;
+        case 'stats':
+          renderStatistics();
+          document.getElementById('stats-section').style.display = 'block';
+          break;
+      }
+    }
+
+    // Ensure hero is exactly the visible area under the navbar
+    function adjustHeroToNavbar(){
+      const nav = document.querySelector('.navbar');
+      const heroEl = document.getElementById('home');
+      if(!nav || !heroEl) return;
+      const navH = nav.offsetHeight || 80;
+      heroEl.style.minHeight = (window.innerHeight - navH) + 'px';
+      // also resize canvas used by main.js if present
+      const canvas = document.getElementById('background-canvas');
+      if(canvas){
+        canvas.width = heroEl.clientWidth;
+        canvas.height = heroEl.clientHeight;
+      }
+    }
+
+    window.addEventListener('resize', adjustHeroToNavbar);
+    window.addEventListener('orientationchange', adjustHeroToNavbar);
+    
+    // Initialize user tracking
+    function initUserTracking() {
+      let users = JSON.parse(localStorage.getItem('appUsers') || '[]');
+      const userId = localStorage.getItem('userId');
+      
+      if (!userId) {
+        const newUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', newUserId);
+        users.push(newUserId);
+        localStorage.setItem('appUsers', JSON.stringify(users));
+      }
+    }
+    
+    window.addEventListener('load', () => { 
+      adjustHeroToNavbar();
+      initUserTracking();
+      // Check if there's a view parameter in URL
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('view')) {
+        navigateTo(params.get('view'));
+      }
+    });
+
+    function renderLessons() {
+      const lessons = [
+        { id: 'fundamentals', title: t('fundamentals'), desc: t('fundamentals_desc'), link: 'lessons.html' },
+        { id: 'innovation', title: t('innovation'), desc: t('innovation_desc'), link: 'lesson2.html' },
+        { id: 'financial', title: t('financial'), desc: t('financial_desc'), link: 'lesson3.html' },
+        { id: 'marketing', title: t('marketing'), desc: t('marketing_desc'), link: 'lesson4.html' }
+      ];
+
+      document.getElementById('lessons-title').textContent = t('lessons_title');
+      document.getElementById('lessons-desc').textContent = t('lessons_desc');
+
+      const content = lessons.map(l => `
+        <div class="card" onclick="window.location.href='${l.link}'" style="padding: 2rem; cursor: pointer; transition: transform 0.3s; transform: scale(1);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--accent-cyan);">${l.title}</h3>
+          <p style="color: var(--text-secondary); line-height: 1.6;">${l.desc}</p>
+        </div>
+      `).join('');
+      document.getElementById('lessons-content').innerHTML = content;
+    }
+
+    function renderCourses() {
+      const courses = [
+        { title: t('startup101'), instructor: t('instructor'), weeks: '4', level: t('beginner'), color: '#10b981' },
+        { title: t('scaling'), instructor: t('instructor2'), weeks: '6', level: t('intermediate'), color: '#f59e0b' },
+        { title: t('advanced_lead'), instructor: t('instructor3'), weeks: '8', level: t('advanced'), color: '#ef4444' }
+      ];
+
+      document.getElementById('courses-title').textContent = t('courses_title');
+      document.getElementById('courses-desc').textContent = t('courses_desc');
+
+      const content = courses.map((c, idx) => `
+        <div class="card" style="padding: 2rem;">
+          <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--accent-yellow);">${c.title}</h3>
+          <p style="margin-bottom: 0.5rem; color: var(--text-secondary);">Profesor: ${c.instructor}</p>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);">Durata: ${c.weeks} ${t('weeks')}</p>
+          <div style="display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; background: ${c.color}; color: white; font-size: 0.9rem; font-weight: bold; margin-bottom: 1rem;">${c.level}</div>
+          <button onclick="toggleEnroll(${idx})" style="width: 100%; padding: 0.8rem; background: ${enrolled.has(idx) ? 'var(--accent-yellow)' : 'var(--accent-cyan)'}; color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ${enrolled.has(idx) ? 'Înscris' : t('enroll')}
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('courses-content').innerHTML = content;
+    }
+
+    function toggleEnroll(idx) {
+      if (enrolled.has(idx)) {
+        enrolled.delete(idx);
+      } else {
+        enrolled.add(idx);
+      }
+      renderCourses();
+    }
+
+    function renderTests() {
+      const tests = [
+        { key: 'initial', title: t('initial_assess'), questions: 25, time: 30 },
+        { key: 'fundamentals', title: t('fundamentals_test'), questions: 50, time: 60 },
+        { key: 'professional', title: t('professional'), questions: 100, time: 120 }
+      ];
+
+      document.getElementById('tests-title').textContent = t('tests_title');
+      document.getElementById('tests-desc').textContent = t('tests_desc');
+
+      const content = tests.map(test => `
+        <div class="card" style="padding: 2rem;">
+          <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--accent-cyan);">${test.title}</h3>
+          <p style="margin-bottom: 0.5rem; color: var(--text-secondary);">📋 ${test.questions} ${t('questions')}</p>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);">⏱️ ${test.time} ${t('minutes')}</p>
+          <button onclick="startTest('${test.key}')" style="width: 100%; padding: 0.8rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ${t('take_test')}
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('tests-content').innerHTML = content;
+    }
+
+    function startTest(key) {
+      currentTest = key;
+      currentQuestion = 0;
+      testScore = 0;
+      testTimeLeft = 60;
+      renderTestModal();
+      document.getElementById('test-modal').style.display = 'block';
+      
+      if (testTimer) clearInterval(testTimer);
+      testTimer = setInterval(() => {
+        testTimeLeft--;
+        if (testTimeLeft <= 0) {
+          clearInterval(testTimer);
+          answerQuestion(-1);
+        } else {
+          const modal = document.getElementById('test-modal-content');
+          if (modal && modal.querySelector('div')) {
+            const timerEl = modal.querySelector('div');
+            const timerDiv = timerEl.querySelector('div:last-child');
+            if (timerDiv) timerDiv.textContent = '⏱️ ' + testTimeLeft + 's';
+          }
+        }
+      }, 1000);
+    }
+
+    function renderTestModal() {
+      if (!currentTest || currentQuestion >= testQuestions[currentTest].length) {
+        if (testTimer) clearInterval(testTimer);
+        renderTestResults();
+        return;
+      }
+
+      const q = testQuestions[currentTest][currentQuestion];
+      const total = testQuestions[currentTest].length;
+      const progress = ((currentQuestion + 1) / total) * 100;
+      const qText = currentLanguage === 'ro' ? q.q_ro : q.q_en;
+      const optionsText = currentLanguage === 'ro' ? q.options_ro : q.options_en;
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <p style="color: var(--text-secondary);">${t('question')} ${currentQuestion + 1}/${total}</p>
+          <div style="background: var(--primary-gray); padding: 0.5rem 1rem; border-radius: 5px; border: 2px solid var(--accent-yellow); color: var(--accent-yellow); font-weight: bold;">
+            ⏱️ ${testTimeLeft}s
+          </div>
+        </div>
+        <div style="height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden; margin-bottom: 2rem;">
+          <div style="height: 100%; background: var(--accent-yellow); width: ${progress}%; transition: width 0.3s;"></div>
+        </div>
+        <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">${qText}</h3>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+      `;
+
+      optionsText.forEach((opt, idx) => {
+        html += `
+          <button onclick="answerQuestion(${idx})" style="padding: 1rem; background: var(--primary-gray); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: 5px; cursor: pointer; transition: all 0.3s; text-align: left; font-weight: 500;" onmouseover="this.style.borderColor='var(--accent-yellow)'; this.style.transform='translateX(5px)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateX(0)';">
+            ${opt}
+          </button>
+        `;
+      });
+
+      html += '</div>';
+      document.getElementById('test-modal-content').innerHTML = html;
+    }
+
+    function answerQuestion(idx) {
+      if (idx !== -1) {
+        const q = testQuestions[currentTest][currentQuestion];
+        if (idx === q.correct) {
+          testScore++;
+        }
+      }
+      currentQuestion++;
+      renderTestModal();
+    }
+
+    function renderTestResults() {
+      const total = testQuestions[currentTest].length;
+      const percentage = Math.round((testScore / total) * 100);
+      const message = percentage >= 80 ? 'Excelent!' : percentage >= 60 ? 'Bun!' : 'Mai mult studiu!';
+      
+      // Track test score in localStorage
+      const userId = localStorage.getItem('userId');
+      let testScoresData = JSON.parse(localStorage.getItem('testScores') || '[]');
+      testScoresData.push({
+        userId: userId,
+        testId: currentTest,
+        score: percentage,
+        correctAnswers: testScore,
+        totalQuestions: total,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('testScores', JSON.stringify(testScoresData));
+      
+      const html = `
+        <h2 style="color: var(--accent-yellow); font-size: 2rem; margin-bottom: 1rem; text-align: center;">${t('quiz_finished')}</h2>
+        <p style="font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 1rem; text-align: center;">${message}</p>
+        <p style="font-size: 1.5rem; color: var(--accent-cyan); margin-bottom: 2rem; text-align: center;">
+          ${t('quiz_score')} <strong>${testScore}/${total}</strong> (${percentage}%)
+        </p>
+        <div style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 2rem;">
+          <div style="height: 100%; background: linear-gradient(90deg, var(--accent-yellow), var(--accent-cyan)); width: ${percentage}%; transition: width 0.5s;"></div>
+        </div>
+        <button onclick="closeTestModal()" style="width: 100%; padding: 1rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+          Înapoi la teste
+        </button>
+      `;
+      document.getElementById('test-modal-content').innerHTML = html;
+    }
+
+    function closeTestModal() {
+      document.getElementById('test-modal').style.display = 'none';
+      currentTest = null;
+    }
+
+    function toggleEnroll(courseIndex) {
+      openEnrollmentModal(courseIndex);
+    }
+
+    function openEnrollmentModal(courseIndex) {
+      const courses = [
+        t('startup101'),
+        t('scaling'),
+        t('advanced_lead')
+      ];
+      
+      const html = `
+        <h2 style="color: var(--accent-yellow); margin-bottom: 0.5rem;">${t('enrollment_form')}</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">${courses[courseIndex]}</p>
+        <form id="enrollment-form" onsubmit="submitEnrollment(event, ${courseIndex})">
+          <div style="margin-bottom: 1rem;">
+            <input type="text" id="firstName" placeholder="${t('first_name')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <input type="text" id="lastName" placeholder="${t('last_name')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <input type="number" id="birthYear" placeholder="${t('birth_year')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <input type="text" id="city" placeholder="${t('city')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <input type="text" id="county" placeholder="${t('county')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <button type="submit" style="width: 100%; padding: 0.8rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem;">${t('submit_enrollment')}</button>
+        </form>
+      `;
+      
+      document.getElementById('enrollment-content').innerHTML = html;
+      document.getElementById('enrollment-modal').style.display = 'flex';
+    }
+
+    function submitEnrollment(event, courseIndex) {
+      event.preventDefault();
+      
+      const courses = [
+        t('startup101'),
+        t('scaling'),
+        t('advanced_lead')
+      ];
+
+      const data = {
+        courseName: courses[courseIndex],
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        birthYear: document.getElementById('birthYear').value,
+        city: document.getElementById('city').value,
+        county: document.getElementById('county').value
+      };
+
+      // Send to backend
+      fetch(API_BASE + '/api/courses/enroll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(async response => {
+        const text = await response.text();
+        let result;
+        try { result = JSON.parse(text); } catch (e) { result = { success: false, error: 'Invalid JSON response', raw: text }; }
+        console.log('Enroll response:', response.status, result);
+        if (!response.ok || !result.success) {
+          const message = result.error || result.message || 'A apărut o eroare la server.';
+          alert('Eroare înscriere: ' + message);
+          return;
+        }
+        // Track enrollment in localStorage
+        const userId = localStorage.getItem('userId');
+        let enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+        enrollments.push({
+          userId: userId,
+          courseId: courseIndex,
+          courseName: courses[courseIndex],
+          enrollmentDate: new Date().toISOString()
+        });
+        localStorage.setItem('courseEnrollments', JSON.stringify(enrollments));
+        // success path — show confirmation inside the modal (don’t immediately hide it)
+        enrolled.add(courseIndex);
+        renderCourses();
+        showSuccessMessage(data.firstName);
+        // ensure modal stays visible so the user can read the message and click OK
+        document.getElementById('enrollment-modal').style.display = 'flex';
+      })
+      .catch(async err => {
+        console.error('Network or fetch error:', err);
+        // If page opened via file://, explain the likely cause
+        if (window.location.protocol === 'file:') {
+          alert('Eroare de rețea: Se pare că ai deschis site-ul direct din fișier (file://).\n\nPornește serverul local în terminal cu `npm start` în folderul proiectului și accesează site-ul printr-un server local (ex: http://localhost:8000) sau deschide index.html cu Live Server.');
+          return;
+        }
+
+        // Otherwise try to check API health for more informative message
+        try {
+          const healthResp = await fetch(API_BASE + '/api/health');
+          const health = await healthResp.json();
+          if (!health || !health.status) {
+            alert('Eroare de rețea: Serverul nu a răspuns cum trebuie. Verifică serverul (npm start) și consultă consola server pentru erori.');
+          } else {
+            alert('Eroare de rețea: ' + (err.message || err) + '\n\nServerul pare activ, verifică consola browser pentru detalii.');
+          }
+        } catch (e) {
+          alert('Eroare de rețea: Nu se poate contacta serverul la ' + API_BASE + '.\nPornește serverul local cu `npm start` și încearcă din nou.');
+        }
+      });
+    }
+
+    function showSuccessMessage(firstName) {
+      const html = `
+        <div style="text-align: center;">
+          <h2 style="color: var(--accent-yellow); margin-bottom: 1rem;">${t('enrollment_success')}</h2>
+          <p style="color: var(--text-primary); line-height: 1.8; margin-bottom: 2rem; font-size: 1.05rem;">
+            ${t('enrollment_success_msg')}
+          </p>
+          <button onclick="closeEnrollmentModal()" style="padding: 0.8rem 2rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">OK</button>
+        </div>
+      `;
+      document.getElementById('enrollment-content').innerHTML = html;
+    }
+
+    function closeEnrollmentModal() {
+      document.getElementById('enrollment-modal').style.display = 'none';
+    }
+
+    function renderAbout() {
+      document.getElementById('about-title').textContent = t('about_title');
+
+      const team = [
+        { name: t('founder'), role: t('founder_role'), bio: t('founder_bio'), icon: '👨‍💼' },
+        { name: t('dev_lead'), role: t('dev_role'), bio: t('dev_bio'), icon: '👨‍💻' },
+        { name: t('content'), role: t('content_role'), bio: t('content_bio'), icon: '👨‍🔬' }
+      ];
+
+      let html = `
+        <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+          <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent-cyan);">${t('mission')}</h3>
+          <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">${t('mission_text')}</p>
+        </div>
+        <h3 style="font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--accent-yellow);">${t('team')}</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+      `;
+
+      team.forEach(member => {
+        html += `
+          <div class="card" style="text-align: center; padding: 2rem;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-yellow)); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">${member.icon}</div>
+            <h4 style="font-size: 1.1rem; margin-bottom: 0.3rem; color: var(--accent-cyan);">${member.name}</h4>
+            <p style="font-size: 0.9rem; color: var(--accent-yellow); margin-bottom: 1rem;">${member.role}</p>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">${member.bio}</p>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      document.getElementById('about-content').innerHTML = html;
+    }
+
+    function getAppStats() {
+      const users = JSON.parse(localStorage.getItem('appUsers') || '[]');
+      const testScores = JSON.parse(localStorage.getItem('testScores') || '[]');
+      const simScores = JSON.parse(localStorage.getItem('simulationScores') || '[]');
+      const courseEnrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      
+      const totalUsers = users.length;
+      const activeCoursesCount = new Set(courseEnrollments.map(e => e.userId)).size;
+      const completedTests = testScores.length;
+      const avgTestScore = completedTests > 0 ? (testScores.reduce((sum, t) => sum + t.score, 0) / completedTests).toFixed(1) : 0;
+      const avgSimScore = simScores.length > 0 ? (simScores.reduce((sum, s) => sum + s.score, 0) / simScores.length).toFixed(1) : 0;
+      
+      return {
+        totalUsers,
+        activeCoursesCount,
+        completedTests,
+        avgTestScore,
+        avgSimScore,
+        simCount: simScores.length
+      };
+    }
+
+    function renderStatistics() {
+      document.getElementById('stats-title').textContent = t('statistics_title');
+      const stats = getAppStats();
+
+      const html = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${stats.totalUsers}</p>
+            <p style="color: var(--text-secondary);">${t('total_users')}</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-cyan);">${stats.activeCoursesCount}</p>
+            <p style="color: var(--text-secondary);">${t('active_courses')}</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${stats.completedTests}</p>
+            <p style="color: var(--text-secondary);">${t('completed')}</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: #f59e0b;">${stats.avgTestScore}%</p>
+            <p style="color: var(--text-secondary);">Scor Mediu Teste</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: #a855f7;">${stats.avgSimScore}</p>
+            <p style="color: var(--text-secondary);">Scor Mediu Simulare</p>
+          </div>
+        </div>
+      `;
+      document.getElementById('stats-content').innerHTML = html;
+    }
+
+    // Initialize
+    function initializePage() {
+      // Set language button
+      document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+      
+      // Update navbar menu items
+      const navItems = document.querySelectorAll('#nav-menu a');
+      navItems[0].textContent = t('lessons');
+      navItems[1].textContent = t('courses');
+      navItems[2].textContent = t('tests');
+      navItems[3].textContent = t('statistics');
+      navItems[4].textContent = t('about');
+      
+      // Update mobile menu items
+      const mobileItems = document.querySelectorAll('#mobile-menu a');
+      mobileItems[0].textContent = t('home');
+      mobileItems[1].textContent = t('lessons');
+      mobileItems[2].textContent = t('courses');
+      mobileItems[3].textContent = t('tests');
+      mobileItems[4].textContent = t('statistics');
+      mobileItems[5].textContent = t('about');
+      
+      // Update hero section
+      document.getElementById('hero-subtitle').textContent = t('hero_subtitle');
+      document.getElementById('hero-promotional').textContent = t('hero_promotional');
+      document.getElementById('start-sim-btn').textContent = t('start_simulator');
+      
+      renderPage();
+    }
+    
+    initializePage();
+  </script>
+</body>
+</html>

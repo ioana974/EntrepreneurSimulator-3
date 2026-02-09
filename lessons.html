@@ -1,0 +1,574 @@
+﻿<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecții - Entrepreneur Simulator</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/sections.css">
+    <style>
+        .lesson-header {
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 240, 255, 0.1));
+            border-bottom: 2px solid var(--border-color);
+        }
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-yellow);
+            margin-bottom: 0.5rem;
+        }
+        .lesson-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .lesson-meta {
+            background: rgba(0, 240, 255, 0.1);
+            padding: 1rem;
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .lesson-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle {
+            width: 100%;
+            padding: 1.5rem;
+            background: transparent;
+            border: 2px solid;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            margin-bottom: 3rem;
+            font-family: inherit;
+        }
+
+        .section-toggle.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .section-toggle.cyan:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle.yellow {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+        .section-toggle.yellow:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .section-toggle.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        .section-toggle.green:hover {
+            background: rgba(16, 185, 130, 0.2);
+        }
+
+        .section-toggle.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: #a855f7;
+            color: #a855f7;
+        }
+        .section-toggle.purple:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .section-toggle.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .section-toggle.red:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .section-content {
+            display: none;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            margin-bottom: 3rem;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .section-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-content .badge {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .section-content h4 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .section-content p {
+            color: var(--text-primary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .section-content ul, .section-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-content li {
+            margin-bottom: 0.8rem;
+            line-height: 1.8;
+        }
+
+        .highlight-box {
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            line-height: 1.8;
+        }
+
+        .highlight-box.gold {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .highlight-box.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: #10b981;
+        }
+
+        .highlight-box.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .highlight-box.orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .highlight-box.blue {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .subsection {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .subsection:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .checklist {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .checklist h4 {
+            margin-top: 0;
+        }
+
+        .checklist ul {
+            margin-left: 2rem;
+        }
+
+        .checklist li {
+            margin-bottom: 0.6rem;
+        }
+
+        footer {
+            border-top: 2px solid var(--border-color);
+            padding-top: 2rem;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toggle-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-toggle.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .nav-links {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            padding: 0.6rem 1.2rem;
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo">E</div>
+            <span class="navbar-title">EntrepreneurHub</span>
+        </div>
+        <div class="nav-menu" id="nav-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='lessons.html'" data-ro="Lecții" data-en="Lessons">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='courses.html'" data-ro="Cursuri" data-en="Courses">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='tests.html'" data-ro="Teste" data-en="Tests">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='statistics.html'" data-ro="Statistici" data-en="Statistics">Statistici</a>
+            <a href="javascript:void(0)" onclick="window.location.href='about.html'" data-ro="Despre" data-en="About">Despre</a>
+        </div>
+        <div class="nav-controls">
+            <button class="language-switch" id="lang-btn" onclick="toggleLanguage()">EN</button>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Acasă" data-en="Home">Acasă</a>
+            <a href="javascript:void(0)" onclick="window.location.href='lessons.html'" data-ro="Lecții" data-en="Lessons">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='courses.html'" data-ro="Cursuri" data-en="Courses">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='tests.html'" data-ro="Teste" data-en="Tests">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='statistics.html'" data-ro="Statistici" data-en="Statistics">Statistici</a>
+        </div>
+    </nav>
+
+    <div class="lesson-header">
+        <h1 id="lesson1" data-ro="Lecția 1: Fundamentele Businessului – Arhitectura Structurală și Legală" data-en="Lesson 1: Business Fundamentals – Structural and Legal Architecture">Lecția 1: Fundamentele Businessului – Arhitectura Structurală și Legală</h1>
+        <p data-ro="Această lecție transformă o idee abstractă într-o entitate juridică vie, capabilă să semneze contracte și să angajeze oameni." data-en="This lesson transforms an abstract idea into a living legal entity, capable of signing contracts and hiring people.">Această lecție transformă o idee abstractă într-o entitate juridică vie, capabilă să semneze contracte și să angajeze oameni.</p>
+        <div class="lesson-meta">
+            <span data-ro="Nivel: Începător – Intermediar" data-en="Level: Beginner – Intermediate">Nivel: Începător – Intermediar</span> | <span data-ro="Timp estimat: 45 minute" data-en="Estimated time: 45 minutes">Timp estimat: 45 minute</span> | <span data-ro="Resurse: Legislație, case studies" data-en="Resources: Legislation, case studies">Resurse: Legislație, case studies</span>
+        </div>
+    </div>
+
+    <div class="lesson-content">
+        <a href="index.html?view=lessons" class="back-btn" data-ro="Înapoi la Lecții" data-en="Back to Lessons">Înapoi la Lecții</a>
+
+        <div class="nav-links">
+            <a href="lessons.html">Lecția 1</a>
+            <a href="lesson2.html">Lecția 2</a>
+            <a href="lesson3.html">Lecția 3</a>
+            <a href="lesson4.html">Lecția 4</a>
+        </div>
+
+        <button class="section-toggle cyan" onclick="toggleSection(this)" data-ro="I. Ontologia Formelor Juridice (Perspectiva 2026)" data-en="I. Ontology of Legal Forms (2026 Perspective)">
+            <span>I. Ontologia Formelor Juridice (Perspectiva 2026)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="În România, alegerea formei juridice nu este doar o bifă administrativă, ci o decizie de optimizare fiscală și limitare a riscului." data-en="In Romania, choosing a legal form is not just an administrative checkbox, but a decision for tax optimization and risk limitation.">În România, alegerea formei juridice nu este doar o bifă administrativă, ci o decizie de optimizare fiscală și limitare a riscului.</p>
+
+            <div class="subsection">
+                <h3><span class="badge">1</span> <span data-ro="SRL (Societatea cu Răspundere Limitată) – Legea 31/1990" data-en="LLC (Limited Liability Company) – Law 31/1990">SRL (Societatea cu Răspundere Limitată) – Legea 31/1990</span></h3>
+                <p style="font-style: italic; color: var(--accent-yellow); background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 4px;" data-ro="Este "standardul de aur". Caracteristica principală este separația patrimonială." data-en="It is the "gold standard". The main characteristic is asset separation.">Este "standardul de aur". Caracteristica principală este separația patrimonială.</p>
+
+                <h4 style="color: var(--accent-cyan);" data-ro="Caracteristica Principală: Separația Patrimonială" data-en="Main Feature: Asset Separation">Caracteristica Principală: Separația Patrimonială</h4>
+                
+                <div class="highlight-box green">
+                    <p style="margin: 0;" data-ro="Răspunderea: Patrimoniul tău personal (casa, mașina) este protejat. Răspunzi doar în limita capitalului social subscris, cu excepția situațiilor de fraudă fiscală unde se poate atrage răspunderea solidară." data-en="Liability: Your personal assets (house, car) are protected. You are liable only to the extent of your subscribed share capital, except in cases of tax fraud where joint and several liability may apply."><strong>Răspunderea:</strong> Patrimoniul tău personal (casa, mașina) este protejat. Răspunzi doar în limita capitalului social subscris, cu excepția situațiilor de fraudă fiscală unde se poate atrage răspunderea solidară.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0;" data-ro="Guvernanța: Este condusă de Adunarea Generală a Asociaților (AGA) și administrată de unul sau mai mulți Administratori. Administratorul are răspundere penală pentru gestiunea corectă a firmei." data-en="Governance: It is led by the General Assembly of Shareholders (AGA) and managed by one or more Administrators. The Administrator has criminal liability for proper company management."><strong>Guvernanța:</strong> Este condusă de Adunarea Generală a Asociaților (AGA) și administrată de unul sau mai mulți Administratori. Administratorul are răspundere penală pentru gestiunea corectă a firmei.</p>
+                </div>
+
+                <div class="highlight-box gold">
+                    <span data-ro="Insight: Pentru 95% din startups și micropîntreprinderi, SRL este cea mai bună alegere din perspectiva riscului și flexibilității." data-en="Insight: For 95% of startups and micro-enterprises, LLC is the best choice in terms of risk and flexibility."><strong>Insight:</strong> Pentru 95% din startups și micropîntreprinderi, SRL este cea mai bună alegere din perspectiva riscului și flexibilității.</span>
+                </div>
+            </div>
+
+            <div class="subsection" style="border-bottom: none; padding-bottom: 0;">
+                <h3><span class="badge">2</span> <span data-ro="PFA (Persoana Fizică Autorizată) – OUG 44/2008" data-en="SEL (Authorized Natural Person) – OUG 44/2008">PFA (Persoana Fizică Autorizată) – OUG 44/2008</span></h3>
+
+                <div class="highlight-box red">
+                    <p style="margin: 0;" data-ro="Riscuri: Nu există separație de patrimoniu. Dacă PFA-ul are datorii, creditorii pot executa silit bunurile personale ale individului." data-en="Risks: There is no asset separation. If the SEL has debts, creditors can forcibly execute the individual's personal assets."><strong>Riscuri:</strong> Nu există separație de patrimoniu. Dacă PFA-ul are datorii, creditorii pot executa silit bunurile personale ale individului.</p>
+                </div>
+
+                <div class="highlight-box orange">
+                    <p style="margin: 0;" data-ro="Fiscalitate (2026): PFA-ul a devenit mai puțin atractiv din cauza plafonării CASS (Sănătate) la venituri tot mai mici, făcând SRL-ul mai eficient din punct de vedere al costurilor totale." data-en="Taxation (2026): SEL has become less attractive due to health insurance caps on lower incomes, making LLC more cost-efficient overall."><strong>Fiscalitate (2026):</strong> PFA-ul a devenit mai puțin atractiv din cauza plafonării CASS (Sănătate) la venituri tot mai mici, făcând SRL-ul mai eficient din punct de vedere al costurilor totale.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle yellow" onclick="toggleSection(this)" data-ro="II. Procedura Tehnică de Înmatriculare (Workflow-ul la ONRC)" data-en="II. Technical Registration Procedure (ONRC Workflow)">
+            <span>II. Procedura Tehnică de Înmatriculare (Workflow-ul la ONRC)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Nu este suficient să "deschizi o firmă". Trebuie să o configurezi corect prin Codurile CAEN (Clasificarea Activităților din Economia Națională)." data-en="It is not enough to "open a company". You must configure it correctly through NACE Codes (Classification of Economic Activities).">Nu este suficient să "deschizi o firmă". Trebuie să o configurezi corect prin Codurile CAEN (Clasificarea Activităților din Economia Națională).</p>
+
+            <h4 style="color: var(--accent-yellow);" data-ro="Obiectul Principal vs. Obiecte Secundare" data-en="Main Activity vs. Secondary Activities">Obiectul Principal vs. Obiecte Secundare</h4>
+            <p data-ro="Trebuie să alegi un singur cod CAEN principal (ex: 6201 – Realizare software). Poți adăuga sute de coduri secundare, dar atenție: unele necesită autorizații speciale (ex: alimentație publică, transport, medicină)." data-en="You must choose a single main NACE code (e.g., 6201 – Software development). You can add hundreds of secondary codes, but be careful: some require special licenses (e.g., food, transport, medicine).">Trebuie să alegi un singur cod CAEN principal (ex: 6201 – Realizare software). Poți adăuga sute de coduri secundare, dar atenție: unele necesită autorizații speciale (ex: alimentație publică, transport, medicină).</p>
+
+            <h4 style="color: var(--accent-yellow);" data-ro="Actul Constitutiv" data-en="Articles of Association">Actul Constitutiv</h4>
+            <p data-ro="Este"standardul de aur". Caracteristica principală este separația patrimonială. "Constituția" firmei tale. Trebuie să includă:" data-en="It is the "Constitution" of your company. It must include:">Este Este"standardul de aur". Caracteristica principală este separația patrimonială. "Constituția" firmei tale. Trebuie să includă:</p>
+            <ul>
+                <li data-ro="Clauze de transmitere a părților sociale (ce se întâmplă dacă un asociat vrea să plece?)." data-en="Clauses for transfer of shares (what happens if a partner wants to leave?).">Clauze de transmitere a părților sociale (ce se întâmplă dacă un asociat vrea să plece?).</li>
+                <li data-ro="Modul de luare a deciziilor (unanimitate sau majoritate?)." data-en="Voting method (unanimity or majority?).">Modul de luare a deciziilor (unanimitate sau majoritate?).</li>
+                <li data-ro="Durata mandatului administratorului (recomandat: nelimitat, pentru a evita drumuri inutile la Registru la fiecare 2-4 ani)." data-en="Duration of administrator's term (recommended: unlimited to avoid unnecessary trips to the Registry every 2-4 years).">Durata mandatului administratorului (recomandat: nelimitat, pentru a evita drumuri inutile la Registru la fiecare 2-4 ani).</li>
+            </ul>
+
+            <div class="highlight-box gold">
+                <span data-ro="Sfat Practic: Plătește unui jurist 300-500 lei pentru redactarea corectă a Actului Constitutiv. O greșeală costă timp și bani mai târziu." data-en="Practical Tip: Pay a lawyer 300-500 RON for correct Articles of Association. A mistake will cost time and money later."><strong>Sfat Practic:</strong> Plătește unui jurist 300-500 lei pentru redactarea corectă a Actului Constitutiv. O greșeală costă timp și bani mai târziu.</span>
+            </div>
+        </div>
+
+        <button class="section-toggle green" onclick="toggleSection(this)" data-ro="III. Limbajul Științific al Fiscalității (Nivel Avansat)" data-en="III. Scientific Language of Taxation (Advanced Level)">
+            <span>III. Limbajul Științific al Fiscalității (Nivel Avansat)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p style="font-style: italic; color: var(--accent-yellow); background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;" data-ro="Un antreprenor care nu înțelege balanța contabilă este un pasager, nu un șofer." data-en="An entrepreneur who does not understand the accounting balance sheet is a passenger, not a driver.">Un antreprenor care nu înțelege balanța contabilă este un pasager, nu un șofer.</p>
+
+            <div style="margin-bottom: 2.5rem;">
+                <h4 style="color: var(--accent-cyan);" data-ro="1. Regimul de Impozitare" data-en="1. Taxation System">1. Regimul de Impozitare</h4>
+                
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: bold;" data-ro="Microîntreprindere (1% sau 3%)" data-en="Micro-enterprise (1% or 3%)">Microîntreprindere (1% sau 3%)</p>
+                    <p style="margin: 0;" data-ro="Se aplică la Venituri. Este un regim de excepție. Dacă ai o marjă de profit mare (ex: servicii de consultanță unde cheltuielile sunt mici), acesta este regimul ideal." data-en="Applied to Revenue. It is an exception regime. If you have high profit margins (e.g., consulting where expenses are low), this is the ideal regime.">Se aplică la Venituri. Este un regim de excepție. Dacă ai o marjă de profit mare (ex: servicii de consultanță unde cheltuielile sunt mici), acesta este regimul ideal.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: bold;" data-ro="Impozit pe Profit (16%)" data-en="Corporate Tax (16%)">Impozit pe Profit (16%)</p>
+                    <p style="margin: 0;" data-ro="Se aplică la Profit (Venituri - Cheltuieli). Este ideal pentru afaceri cu marje mici dar volum mare (ex: retail, producție), unde cheltuielile cu materia primă sunt masive." data-en="Applied to Profit (Revenue - Expenses). Ideal for businesses with thin margins but high volume (e.g., retail, manufacturing), where raw material expenses are large.">Se aplică la Profit (Venituri - Cheltuieli). Este ideal pentru afaceri cu marje mici dar volum mare (ex: retail, producție), unde cheltuielile cu materia primă sunt masive.</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2.5rem;">
+                <h4 style="color: var(--accent-cyan);" data-ro="2. Mecanismul TVA (Directiva 2006/112/CE)" data-en="2. VAT Mechanism (Directive 2006/112/EC)">2. Mecanismul TVA (Directiva 2006/112/CE)</h4>
+                
+                <p style="line-height: 1.8; background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-style: italic; color: var(--accent-yellow);" data-ro="TVA-ul nu este banul tău, tu ești doar un colector pentru stat." data-en="VAT is not your money; you are just a tax collector for the state.">TVA-ul nu este banul tău, tu ești doar un colector pentru stat.</p>
+
+                <ul style="line-height: 2; margin-bottom: 1rem;">
+                    <li data-ro="TVA Deductibil: Taxa plătită furnizorilor pentru achiziții în scopul afacerii." data-en="Deductible VAT: Tax paid to suppliers for business purchases."><strong>TVA Deductibil:</strong> Taxa plătită furnizorilor pentru achiziții în scopul afacerii.</li>
+                    <li data-ro="TVA Colectat: Taxa adăugată de tine la prețul de vânzare către clienți." data-en="Collected VAT: Tax you add to the selling price for customers."><strong>TVA Colectat:</strong> Taxa adăugată de tine la prețul de vânzare către clienți.</li>
+                    <li data-ro="Decontul de TVA: Dacă Colectat > Deductibil, plătești diferența la stat. Dacă Deductibil > Colectat, ai TVA de recuperat (poți cere rambursarea de la ANAF, declanșând adesea un control fiscal)." data-en="VAT Settlement: If Collected > Deductible, you pay the difference to the state. If Deductible > Collected, you have VAT to recover (you can request reimbursement from ANAF, often triggering a tax audit)."><strong>Decontul de TVA:</strong> Dacă Colectat > Deductibil, plătești diferența la stat. Dacă Deductibil > Colectat, ai TVA de recuperat (poți cere rambursarea de la ANAF, declanșând adesea un control fiscal).</li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="color: var(--accent-cyan);" data-ro="3. Raportarea Digitală Obligatorie" data-en="3. Mandatory Digital Reporting">3. Raportarea Digitală Obligatorie</h4>
+                
+                <div class="highlight-box red">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: bold;" data-ro="RO e-Factura" data-en="RO e-Invoice">RO e-Factura</p>
+                    <p style="margin: 0;" data-ro="Orice factură emisă către altă firmă (B2B) trebuie trimisă în format XML în sistemul național în maxim 5 zile calendaristice. Nerespectarea atrage amenzi de până la 10.000 lei." data-en="Any invoice issued to another company (B2B) must be sent in XML format to the national system within 5 calendar days. Non-compliance results in fines up to 10,000 RON.">Orice factură emisă către altă firmă (B2B) trebuie trimisă în format XML în sistemul național în maxim 5 zile calendaristice. Nerespectarea atrage amenzi de până la 10.000 lei.</p>
+                </div>
+
+                <div class="highlight-box orange">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: bold;" data-ro="RO e-Sigiliu / e-Transport" data-en="RO e-Seal / e-Transport">RO e-Sigiliu / e-Transport</p>
+                    <p style="margin: 0;" data-ro="Monitorizarea în timp real a bunurilor cu risc fiscal ridicat." data-en="Real-time monitoring of goods with high fiscal risk.">Monitorizarea în timp real a bunurilor cu risc fiscal ridicat.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle purple" onclick="toggleSection(this)" data-ro="IV. Resursele Umane și Juridice (Echipa Tehnică)" data-en="IV. Human Resources and Legal Resources (Technical Team)">
+            <span>IV. Resursele Umane și Juridice (Echipa Tehnică)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Pentru a operaționaliza structura, ai nevoie de următoarele roluri critice:" data-en="To operationalize the structure, you need the following critical roles:">Pentru a operaționaliza structura, ai nevoie de următoarele roluri critice:</p>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div style="padding: 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px;">
+                    <h4 style="color: #3b82f6; margin: 0 0 0.8rem 0;" data-ro="Expertul Contabil (Externalizat sau Intern)" data-en="Accounting Expert (Outsourced or In-house)">Expertul Contabil (Externalizat sau Intern)</h4>
+                    <p style="margin: 0 0 0.8rem 0; line-height: 1.8;" data-ro="Rol: Întocmește registrele obligatorii (Jurnal de Vânzări/Cumpărări, Registru Inventar, Registrul de Evidență Fiscală)." data-en="Role: Prepares mandatory registers (Sales/Purchase Journal, Inventory Register, Tax Record Register).">
+                        <strong data-ro="Rol:" data-en="Role:">Rol:</strong> <span data-ro="Întocmește registrele obligatorii (Jurnal de Vânzări/Cumpărări, Registru Inventar, Registrul de Evidență Fiscală)." data-en="Prepares mandatory registers (Sales/Purchase Journal, Inventory Register, Tax Record Register).">Întocmește registrele obligatorii (Jurnal de Vânzări/Cumpărări, Registru Inventar, Registrul de Evidență Fiscală).</span>
+                    </p>
+                    <p style="margin: 0; line-height: 1.8;" data-ro="Importanță: Te salvează de amenzi pentru depunerea întârziată a declarațiilor (D100, D300, D394, D112)." data-en="Importance: Saves you from fines for late submission of declarations (D100, D300, D394, D112).">
+                        <strong data-ro="Importanță:" data-en="Importance:">Importanță:</strong> <span data-ro="Te salvează de amenzi pentru depunerea întârziată a declarațiilor (D100, D300, D394, D112)." data-en="Saves you from fines for late submission of declarations (D100, D300, D394, D112).">Te salvează de amenzi pentru depunerea întârziată a declarațiilor (D100, D300, D394, D112).</span>
+                    </p>
+                </div>
+
+                <div style="padding: 1.5rem; background: rgba(16, 185, 130, 0.1); border: 1px solid rgba(16, 185, 130, 0.3); border-radius: 6px;">
+                    <h4 style="color: #10b981; margin: 0 0 0.8rem 0;" data-ro="Responsabilul GDPR (Protecția Datelor)" data-en="GDPR Officer (Data Protection)">Responsabilul GDPR (Protecția Datelor)</h4>
+                    <p style="margin: 0 0 0.8rem 0; line-height: 1.8;" data-ro="Obligație: Orice site care colectează un e-mail trebuie să respecte Regulamentul (UE) 2016/679. Ai nevoie de: Politică de Confidențialitate, Politică de Cookies și Registru de Evidență a Prelucrărilor." data-en="Obligation: Any website that collects an email must comply with Regulation (EU) 2016/679. You need: Privacy Policy, Cookie Policy, and Processing Record Registry.">
+                        <strong data-ro="Obligație:" data-en="Obligation:">Obligație:</strong> <span data-ro="Orice site care colectează un e-mail trebuie să respecte Regulamentul (UE) 2016/679. Ai nevoie de: Politică de Confidențialitate, Politică de Cookies și Registru de Evidență a Prelucrărilor." data-en="Any website that collects an email must comply with Regulation (EU) 2016/679. You need: Privacy Policy, Cookie Policy, and Processing Record Registry.">Orice site care colectează un e-mail trebuie să respecte Regulamentul (UE) 2016/679. Ai nevoie de: Politică de Confidențialitate, Politică de Cookies și Registru de Evidență a Prelucrărilor.</span>
+                    </p>
+                </div>
+
+                <div style="padding: 1.5rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px;">
+                    <h4 style="color: #f59e0b; margin: 0 0 0.8rem 0;" data-ro="Specialistul în Relații de Muncă (HR/Salarizare)" data-en="Labor Relations Specialist (HR/Payroll)">Specialistul în Relații de Muncă (HR/Salarizare)</h4>
+                    <p style="margin: 0; line-height: 1.8;" data-ro="Tehnic: Gestionează contractele individuale de muncă (CIM), înregistrarea în REVISAL (Registrul de Evidență al Salariaților) și protecția muncii (SSM & PSI)." data-en="Technical: Manages individual employment contracts (CIM), registration in REVISAL (Employee Registry), and workplace protection (OSH & PSI).">
+                        <strong data-ro="Tehnic:" data-en="Technical:">Tehnic:</strong> <span data-ro="Gestionează contractele individuale de muncă (CIM), înregistrarea în REVISAL (Registrul de Evidență al Salariaților) și protecția muncii (SSM & PSI)." data-en="Manages individual employment contracts (CIM), registration in REVISAL (Employee Registry), and workplace protection (OSH & PSI).">Gestionează contractele individuale de muncă (CIM), înregistrarea în REVISAL (Registrul de Evidență al Salariaților) și protecția muncii (SSM & PSI).</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle red" onclick="toggleSection(this)" data-ro="V. Cheltuieli și Documente Justificative" data-en="V. Expenses and Supporting Documents">
+            <span>V. Cheltuieli și Documente Justificative</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p style="font-weight: bold; color: var(--accent-yellow);" data-ro="Nu orice ieșire de bani din firmă este o cheltuială recunoscută de stat." data-en="Not every outflow of money from the company is a state-recognized expense.">Nu orice ieșire de bani din firmă este o cheltuială recunoscută de stat.</p>
+
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: #10b981; margin-bottom: 1rem;" data-ro="Cheltuieli Deductibile" data-en="Deductible Expenses">Cheltuieli Deductibile</h4>
+                <ul style="line-height: 2;">
+                    <li data-ro="Salarii" data-en="Salaries">Salarii</li>
+                    <li data-ro="Chirii" data-en="Rent">Chirii</li>
+                    <li data-ro="Utilități" data-en="Utilities">Utilități</li>
+                    <li data-ro="Materii prime" data-en="Raw materials">Materii prime</li>
+                    <li data-ro="Marketing" data-en="Marketing">Marketing</li>
+                    <li data-ro="Servicii profesionale" data-en="Professional services">Servicii profesionale</li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: #f59e0b; margin-bottom: 1rem;" data-ro="Cheltuieli cu Deductibilitate Limitată" data-en="Expenses with Limited Deductibility">Cheltuieli cu Deductibilitate Limitată</h4>
+                <ul style="line-height: 2;">
+                    <li data-ro="Protocol (în limita a 2% din profit)" data-en="Protocol (up to 2% of profit)">Protocol (în limita a 2% din profit)</li>
+                    <li data-ro="Cheltuieli cu vehiculele (50% dacă nu sunt folosite exclusiv pentru firmă)" data-en="Vehicle expenses (50% if not used exclusively for business)">Cheltuieli cu vehiculele (50% dacă nu sunt folosite exclusiv pentru firmă)</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box green">
+                <p style="margin: 0 0 0.8rem 0; font-weight: bold;" data-ro="Documente Justificative" data-en="Supporting Documents">Documente Justificative</p>
+                <p style="margin: 0;" data-ro="Pentru a înregistra o cheltuială, ai nevoie de Factură + Dovada Plății (Extras de cont sau Chitanță/Bon fiscal cu CUI)." data-en="To register an expense, you need Invoice + Proof of Payment (Bank Statement or Receipt/Tax Receipt with VAT ID).">Pentru a înregistra o cheltuială, ai nevoie de Factură + Dovada Plății (Extras de cont sau Chitanță/Bon fiscal cu CUI).</p>
+            </div>
+        </div>
+
+        <footer>
+            <div class="checklist">
+                <h4 data-ro="Checklist pentru sfârșitul acestei lecții:" data-en="Checklist for the end of this lesson:">Checklist pentru sfârșitul acestei lecții:</h4>
+                <ul>
+                    <li data-ro="Ai înțeles diferența între SRL și PFA" data-en="You understand the difference between LLC and SEL">Ai înțeles diferența între SRL și PFA</li>
+                    <li data-ro="Cunoști ce este Actul Constitutiv și de ce este important" data-en="You know what Articles of Association are and why they matter">Cunoști ce este Actul Constitutiv și de ce este important</li>
+                    <li data-ro="Înțelegi mecanismul TVA și cum funcționează deducerile" data-en="You understand the VAT mechanism and how deductions work">Înțelegi mecanismul TVA și cum funcționează deducerile</li>
+                    <li data-ro="Ai identificat rolurile critice din echipa ta (Contabil, Jurist, HR)" data-en="You have identified critical roles in your team (Accountant, Lawyer, HR)">Ai identificat rolurile critice din echipa ta (Contabil, Jurist, HR)</li>
+                    <li data-ro="Știi ce documente sunt obligatorii pentru o cheltuială" data-en="You know which documents are required for an expense">Știi ce documente sunt obligatorii pentru o cheltuială</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(0, 240, 255, 0.1); padding: 1.5rem; border-radius: 6px; margin-top: 2rem; border-left: 4px solid var(--accent-cyan); color: var(--text-primary);">
+                <strong data-ro="Următoarea lecție:" data-en="Next lesson:">Următoarea lecție:</strong> <span data-ro="Lecția 2 va acoperi Planificarea Financiară, Prognoza Veniturilor și Gestionarea Cashflow-ului." data-en="Lesson 2 will cover Financial Planning, Revenue Forecasting, and Cash Flow Management.">Lecția 2 va acoperi Planificarea Financiară, Prognoza Veniturilor și Gestionarea Cashflow-ului.</span>
+            </div>
+        </footer>
+    
+        
+    <script>
+        let currentLanguage = localStorage.getItem('lessonLanguage') || 'ro';
+
+        function toggleSection(button) {
+            const content = button.nextElementSibling;
+            button.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'ro' ? 'en' : 'ro';
+            localStorage.setItem('lessonLanguage', currentLanguage);
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+            
+            // Update all elements with data-ro and data-en attributes
+            document.querySelectorAll('[data-ro][data-en]').forEach(element => {
+                if (element.nodeType === Node.ELEMENT_NODE) {
+                    const text = currentLanguage === 'ro' ? element.getAttribute('data-ro') : element.getAttribute('data-en');
+                    
+                    // For button elements, update only the text content, preserving the toggle icon
+                    if (element.tagName === 'BUTTON') {
+                        element.querySelector('span:first-child').textContent = text;
+                    } else if (element.tagName === 'A') {
+                        element.textContent = text;
+                    } else {
+                        element.textContent = text;
+                    }
+                }
+            });
+        }
+
+        // Set initial button text based on saved language
+        window.addEventListener('load', () => {
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+        });
+    </script>
+</body>
+</html>

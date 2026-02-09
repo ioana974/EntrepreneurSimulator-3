@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecția 2 - Entrepreneur Simulator</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/sections.css">
+    <style>
+        .lesson-header {
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 240, 255, 0.1));
+            border-bottom: 2px solid var(--border-color);
+        }
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-yellow);
+            margin-bottom: 0.5rem;
+        }
+        .lesson-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .lesson-meta {
+            background: rgba(0, 240, 255, 0.1);
+            padding: 1rem;
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .lesson-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle {
+            width: 100%;
+            padding: 1.5rem;
+            background: transparent;
+            border: 2px solid;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            margin-bottom: 3rem;
+            font-family: inherit;
+        }
+
+        .section-toggle.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .section-toggle.cyan:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle.yellow {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+        .section-toggle.yellow:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .section-toggle.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        .section-toggle.green:hover {
+            background: rgba(16, 185, 130, 0.2);
+        }
+
+        .section-toggle.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: #a855f7;
+            color: #a855f7;
+        }
+        .section-toggle.purple:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .section-toggle.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .section-toggle.red:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .section-toggle.orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+        .section-toggle.orange:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .section-content {
+            display: none;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            margin-bottom: 3rem;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .section-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-content .badge {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .section-content h4 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .section-content p {
+            color: var(--text-primary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .section-content ul, .section-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-content li {
+            margin-bottom: 0.8rem;
+            line-height: 1.8;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-container th {
+            background: rgba(0, 240, 255, 0.1);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .table-container td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .table-container tr:last-child td {
+            border-bottom: none;
+        }
+
+        .highlight-box {
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            line-height: 1.8;
+        }
+
+        .highlight-box.gold {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .highlight-box.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: #10b981;
+        }
+
+        .highlight-box.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .highlight-box.orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .highlight-box.blue {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .highlight-box.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: #a855f7;
+        }
+
+        .subsection {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .subsection:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .checklist {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .checklist h4 {
+            margin-top: 0;
+        }
+
+        .checklist ul {
+            margin-left: 2rem;
+        }
+
+        .checklist li {
+            margin-bottom: 0.6rem;
+        }
+
+        footer {
+            border-top: 2px solid var(--border-color);
+            padding-top: 2rem;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toggle-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-toggle.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .nav-links {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            padding: 0.6rem 1.2rem;
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo">E</div>
+            <span class="navbar-title">EntrepreneurHub</span>
+        </div>
+        <div class="nav-menu" id="nav-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Lecții" data-en="Lessons">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Cursuri" data-en="Courses">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Teste" data-en="Tests">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Statistici" data-en="Statistics">Statistici</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Despre" data-en="About">Despre</a>
+        </div>
+        <div class="nav-controls">
+            <button class="language-switch" id="lang-btn" onclick="toggleLanguage()">EN</button>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Acasă" data-en="Home">Acasă</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Lecții" data-en="Lessons">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Cursuri" data-en="Courses">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Teste" data-en="Tests">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Statistici" data-en="Statistics">Statistici</a>
+        </div>
+    </nav>
+
+    <div class="lesson-header">
+        <h1 data-ro="Lecția 2: Inovație și Creativitate – De la Concept la Produs Validat" data-en="Lesson 2: Innovation and Creativity – From Concept to Validated Product">Lecția 2: Inovație și Creativitate – De la Concept la Produs Validat</h1>
+        <p data-ro="Inovația într-un business nu este un accident, ci un flux de lucru (workflow) care transformă o ipoteză într-un activ generat de venituri." data-en="Innovation in a business is not an accident, but a workflow that transforms a hypothesis into a revenue-generating asset.">Inovația într-un business nu este un accident, ci un flux de lucru (workflow) care transformă o ipoteză într-un activ generat de venituri.</p>
+        <div class="lesson-meta">
+            <span data-ro="Nivel: Intermediar – Avansat" data-en="Level: Intermediate – Advanced">Nivel: Intermediar – Avansat</span> | <span data-ro="Timp estimat: 60 minute" data-en="Estimated time: 60 minutes">Timp estimat: 60 minute</span> | <span data-ro="Resurse: IP Law, Design Thinking, Agile" data-en="Resources: IP Law, Design Thinking, Agile">Resurse: IP Law, Design Thinking, Agile</span>
+        </div>
+    </div>
+
+    <div class="lesson-content">
+        <a href="index.html?view=lessons" class="back-btn" data-ro="Înapoi la Lecții" data-en="Back to Lessons">Înapoi la Lecții</a>
+
+        <div class="nav-links">
+            <a href="lessons.html">Lecția 1</a>
+            <a href="lesson2.html">Lecția 2</a>
+            <a href="lesson3.html">Lecția 3</a>
+            <a href="lesson4.html">Lecția 4</a>
+        </div>
+
+        <!-- Section I: IP -->
+        <button class="section-toggle cyan" onclick="toggleSection(this)" data-ro="I. Proprietatea Intelectuală (IP) – Protejarea Activului Invizibil" data-en="I. Intellectual Property (IP) – Protecting the Invisible Asset">
+            <span>I. Proprietatea Intelectuală (IP) – Protejarea Activului Invizibil</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Într-un business modern, valoarea nu stă în birouri sau laptopuri, ci în Proprietatea Intelectuală. Fără protecție juridică, inovația ta poate fi furată legal." data-en="In a modern business, value does not lie in offices or laptops, but in Intellectual Property. Without legal protection, your innovation can be stolen legally.">Într-un business modern, valoarea nu stă în birouri sau laptopuri, ci în Proprietatea Intelectuală. Fără protecție juridică, inovația ta poate fi furată legal.</p>
+
+            <div class="subsection">
+                <h3 style="margin-top: 1.5rem;"><span class="badge">1</span> <span data-ro="Marca Înregistrată (Trademark): Protejează numele, logo-ul sau sloganul" data-en="Registered Trademark: Protects the name, logo, or slogan">Marca Înregistrată (Trademark): Protejează numele, logo-ul sau sloganul</span></h3>
+                
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.8rem 0;"><strong data-ro="Unde:" data-en="Where:">Unde:</strong> <span data-ro="La OSIM (național) sau EUIPO (la nivel european)." data-en="At OSIM (national) or EUIPO (at European level).">La OSIM (național) sau EUIPO (la nivel european).</span></p>
+                    <p style="margin: 0;"><strong data-ro="Tehnic:" data-en="Technical:">Tehnic:</strong> <span data-ro="Înregistrarea se face pe „clase NISA" (categorii de produse/servicii). Dacă înregistrezi marca pentru „Software", altcineva o poate folosi pentru „Pantofi", deci trebuie să fii strategic." data-en="Registration is done in "NISA classes" (product/service categories). If you register the trademark for "Software", someone else can use it for "Shoes", so you must be strategic.">Înregistrarea se face pe „clase NISA" (categorii de produse/servicii). Dacă înregistrezi marca pentru „Software", altcineva o poate folosi pentru „Pantofi", deci trebuie să fii strategic.</span></p>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3><span class="badge">2</span> <span data-ro="Drepturile de Autor (Copyright): Se aplică automat asupra codului sursă (software), design-ului grafic și textelor" data-en="Copyright: Applies automatically to source code, graphic design, and texts">Drepturile de Autor (Copyright): Se aplică automat asupra codului sursă (software), design-ului grafic și textelor</span></h3>
+                
+                <div class="highlight-box red">
+                    <p style="margin: 0;" data-ro="Atenție Juridică: În contractele cu angajații sau freelancerii (programatori, designeri), trebuie să existe obligatoriu o clauza de cesiune a drepturilor de autor către firmă, altfel ei rămân proprietarii muncii, chiar dacă i-ai plătit." data-en="Legal Caution: In contracts with employees or freelancers (programmers, designers), there must be a mandatory clause assigning copyright to the company, otherwise they remain the owners of the work, even if you paid them.">Atenție Juridică: În contractele cu angajații sau freelancerii (programatori, designeri), trebuie să existe obligatoriu o clauza de cesiune a drepturilor de autor către firmă, altfel ei rămân proprietarii muncii, chiar dacă i-ai plătit.</p>
+                </div>
+            </div>
+
+            <div class="subsection" style="border-bottom: none; padding-bottom: 0;">
+                <h3><span class="badge">3</span> <span data-ro="Brevetul de Invenție (Patent): Protejează o soluție tehnică nouă" data-en="Patent: Protects a new technical solution">Brevetul de Invenție (Patent): Protejează o soluție tehnică nouă</span></h3>
+                
+                <div class="highlight-box orange">
+                    <p style="margin: 0;" data-ro="Este costisitor și durează ani, dar oferă monopol asupra tehnologiei pentru 20 de ani." data-en="It is expensive and takes years, but it offers a monopoly on the technology for 20 years.">Este costisitor și durează ani, dar oferă monopol asupra tehnologiei pentru 20 de ani.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section II: Metodologii -->
+        <button class="section-toggle yellow" onclick="toggleSection(this)" data-ro="II. Metodologii de Dezvoltare: Lean Startup și Agile" data-en="II. Development Methodologies: Lean Startup and Agile">
+            <span>II. Metodologii de Dezvoltare: Lean Startup și Agile</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Un antreprenor de succes nu construiește produsul final din prima, ci îl testează prin iterații." data-en="A successful entrepreneur does not build the final product from the start, but tests it through iterations.">Un antreprenor de succes nu construiește produsul final din prima, ci îl testează prin iterații.</p>
+
+            <div class="subsection">
+                <h4 data-ro="1. Conceptul de MVP (Minimum Viable Product)" data-en="1. The MVP (Minimum Viable Product) Concept">1. Conceptul de MVP (Minimum Viable Product)</h4>
+                
+                <p data-ro="MVP-ul este cea mai simplă versiune a produsului tău care permite colectarea de date validate despre clienți, cu cel mai mic efort." data-en="MVP is the simplest version of your product that allows collecting validated customer data with minimal effort.">MVP-ul este cea mai simplă versiune a produsului tău care permite colectarea de date validate despre clienți, cu cel mai mic efort.</p>
+
+                <div class="highlight-box green">
+                    <p style="margin: 0 0 0.8rem 0;"><strong data-ro="Scop:" data-en="Goal:">Scop:</strong> <span data-ro="Să demonstreze că există o piață înainte de a cheltui 50.000 EUR pe dezvoltare completă." data-en="To demonstrate that a market exists before spending 50,000 EUR on complete development.">Să demonstreze că există o piață înainte de a cheltui 50.000 EUR pe dezvoltare completă.</span></p>
+                    <p style="margin: 0;"><strong data-ro="Exemplu:" data-en="Example:">Exemplu:</strong> <span data-ro="Dacă vrei să faci o platformă de livrare mâncare, MVP-ul poate fi un simplu formular online unde preiei comenzi manual." data-en="If you want to make a food delivery platform, the MVP can be a simple online form where you take orders manually.">Dacă vrei să faci o platformă de livrare mâncare, MVP-ul poate fi un simplu formular online unde preiei comenzi manual.</span></p>
+                </div>
+            </div>
+
+            <div class="subsection" style="border-bottom: none; padding-bottom: 0;">
+                <h4 data-ro="2. Ciclul Build-Measure-Learn (Construiește-Măsoară-Învață)" data-en="2. Build-Measure-Learn Cycle">2. Ciclul Build-Measure-Learn (Construiește-Măsoară-Învață)</h4>
+                
+                <p data-ro="Acesta este motorul inovației:" data-en="This is the engine of innovation:">Acesta este motorul inovației:</p>
+
+                <ul style="margin-left: 2rem; margin-bottom: 1.5rem;">
+                    <li data-ro="Idee: Ipoteza că oamenii vor X." data-en="Idea: Hypothesis that people will want X."><strong>Idee:</strong> Ipoteza că oamenii vor X.</li>
+                    <li data-ro="Construcție: Creezi un prototip rapid." data-en="Build: You create a quick prototype."><strong>Construcție:</strong> Creezi un prototip rapid.</li>
+                    <li data-ro="Măsurare: Analizezi datele (Câți au dat click? Câți au plătit?)." data-en="Measure: You analyze the data (How many clicked? How many paid?)."><strong>Măsurare:</strong> Analizezi datele (Câți au dat click? Câți au plătit?).</li>
+                    <li data-ro="Învățare: Pivotăm (schimbăm strategia) sau perseverăm?" data-en="Learn: Do we pivot (change strategy) or persevere?"><strong>Învățare:</strong> Pivotăm (schimbăm strategia) sau perseverăm?</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section III: Echipa -->
+        <button class="section-toggle green" onclick="toggleSection(this)" data-ro="III. Echipa Creativă și Tehnică: Roluri și Competențe" data-en="III. Creative and Technical Team: Roles and Competencies">
+            <span>III. Echipa Creativă și Tehnică: Roluri și Competențe</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Pentru a transforma ideea în realitate, ai nevoie de o structură umană specializată:" data-en="To turn the idea into reality, you need a specialized human structure:">Pentru a transforma ideea în realitate, ai nevoie de o structură umană specializată:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-ro="Rol" data-en="Role">Rol</th>
+                            <th data-ro="Responsabilitate Tehnică" data-en="Technical Responsibility">Responsabilitate Tehnică</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-ro="Product Manager (PM)" data-en="Product Manager (PM)">Product Manager (PM)</td>
+                            <td data-ro="Definește "De ce-ul" și "Ce-ul" produsului. Face legătura între business și tech." data-en="Defines the "why" and "what" of the product. Links business and tech.">Definește "De ce-ul" și "Ce-ul" produsului. Face legătura între business și tech.</td>
+                        </tr>
+                        <tr>
+                            <td data-ro="UX/UI Designer" data-en="UX/UI Designer">UX/UI Designer</td>
+                            <td data-ro="UX (User Experience): Cum funcționează produsul. UI (User Interface): Cum arată." data-en="UX (User Experience): How the product works. UI (User Interface): How it looks.">UX (User Experience): Cum funcționează produsul. UI (User Interface): Cum arată.</td>
+                        </tr>
+                        <tr>
+                            <td data-ro="CTO (Chief Technology Officer)" data-en="CTO (Chief Technology Officer)">CTO (Chief Technology Officer)</td>
+                            <td data-ro="Decide arhitectura software, bazele de date și securitatea cibernetică." data-en="Decides software architecture, databases and cybersecurity.">Decide arhitectura software, bazele de date și securitatea cibernetică.</td>
+                        </tr>
+                        <tr>
+                            <td data-ro="QA Engineer (Tester)" data-en="QA Engineer (Tester)">QA Engineer (Tester)</td>
+                            <td data-ro="Verifică dacă produsul are erori (bug-uri) înainte de lansare." data-en="Checks if the product has errors (bugs) before launch.">Verifică dacă produsul are erori (bug-uri) înainte de lansare.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section IV: Design Thinking -->
+        <button class="section-toggle purple" onclick="toggleSection(this)" data-ro="IV. Cadrul Științific: Design Thinking" data-en="IV. Scientific Framework: Design Thinking">
+            <span>IV. Cadrul Științific: Design Thinking</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Design Thinking este un proces de rezolvare a problemelor bazat pe soluții, nu pe obstacole. Are 5 faze critice:" data-en="Design Thinking is a problem-solving process based on solutions, not obstacles. It has 5 critical phases:">Design Thinking este un proces de rezolvare a problemelor bazat pe soluții, nu pe obstacole. Are 5 faze critice:</p>
+
+            <ol style="margin-left: 2rem; margin-bottom: 1.5rem;">
+                <li style="margin-bottom: 1rem;">
+                    <strong data-ro="Empathize (Empatizează):" data-en="Empathize:">Empathize (Empatizează):</strong> <span data-ro="Cercetare pentru a înțelege nevoile reale ale utilizatorilor (interviuri, observație)." data-en="Research to understand the real needs of users (interviews, observation).">Cercetare pentru a înțelege nevoile reale ale utilizatorilor (interviuri, observație).</span>
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong data-ro="Define (Definește):" data-en="Define:">Define (Definește):</strong> <span data-ro="Enunțarea clară a problemei. „Utilizatorii au nevoie de o modalitate de a X, pentru că Y."" data-en='Clear problem statement. "Users need a way to X, because Y."'>Enunțarea clară a problemei. „Utilizatorii au nevoie de o modalitate de a X, pentru că Y."</span>
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong data-ro="Ideate (Idează):" data-en="Ideate:">Ideate (Idează):</strong> <span data-ro="Generarea de idei fără judecată (Brainstorming)." data-en="Judgment-free idea generation (Brainstorming).">Generarea de idei fără judecată (Brainstorming).</span>
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong data-ro="Prototype (Prototipare):" data-en="Prototype:">Prototype (Prototipare):</strong> <span data-ro="Realizarea unei versiuni ieftine a soluției (wireframes, machete)." data-en="Creating a cheap version of the solution (wireframes, mockups).">Realizarea unei versiuni ieftine a soluției (wireframes, machete).</span>
+                </li>
+                <li>
+                    <strong data-ro="Test (Testare):" data-en="Test:">Test (Testare):</strong> <span data-ro="Verificarea prototipului cu utilizatori reali." data-en="Testing the prototype with real users.">Verificarea prototipului cu utilizatori reali.</span>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Section V: Limbaj Tehnic -->
+        <button class="section-toggle red" onclick="toggleSection(this)" data-ro="V. Limbaj Tehnic de Specialitate" data-en="V. Technical Specialty Language">
+            <span>V. Limbaj Tehnic de Specialitate</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Scalabilitate:" data-en="Scalability:">Scalabilitate:</p>
+                    <p style="margin: 0;" data-ro="Capacitatea unui sistem/business de a gestiona o creștere a volumului de muncă fără a compromite performanța sau a crește costurile proporțional." data-en="The ability of a system/business to handle an increase in workload without compromising performance or proportionally increasing costs.">Capacitatea unui sistem/business de a gestiona o creștere a volumului de muncă fără a compromite performanța sau a crește costurile proporțional.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Pivotare:" data-en="Pivot:">Pivotare:</p>
+                    <p style="margin: 0;" data-ro="Schimbarea fundamentală a direcției de business după ce testele au arătat că ideea inițială nu funcționează." data-en="Fundamental change in business direction after tests showed the initial idea doesn't work.">Schimbarea fundamentală a direcției de business după ce testele au arătat că ideea inițială nu funcționează.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Product-Market Fit (PMF):" data-en="Product-Market Fit (PMF):">Product-Market Fit (PMF):</p>
+                    <p style="margin: 0;" data-ro="Momentul în care ai un produs care satisface o nevoie reală pe o piață mare (punctul în care începe creșterea exponențială)." data-en="The moment when you have a product that satisfies a real need in a large market (the point where exponential growth begins).">Momentul în care ai un produs care satisface o nevoie reală pe o piață mare (punctul în care începe creșterea exponențială).</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Disruptive Innovation:" data-en="Disruptive Innovation:">Disruptive Innovation:</p>
+                    <p style="margin: 0;" data-ro="O inovație care creează o nouă piață și rețele de valoare, înlocuind liderii de piață existenți (ex: Netflix vs Blockbuster)." data-en="An innovation that creates a new market and value networks, replacing existing market leaders (e.g., Netflix vs Blockbuster).">O inovație care creează o nouă piață și rețele de valoare, înlocuind liderii de piață existenți (ex: Netflix vs Blockbuster).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section VI: Documente și Unelte -->
+        <button class="section-toggle orange" onclick="toggleSection(this)" data-ro="VI. Documente și Unelte Necesare" data-en="VI. Required Documents and Tools">
+            <span>VI. Documente și Unelte Necesare</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <ul style="margin-left: 2rem;">
+                <li style="margin-bottom: 1rem;">
+                    <strong data-ro="NDA (Non-Disclosure Agreement):" data-en="NDA (Non-Disclosure Agreement):">NDA (Non-Disclosure Agreement):</strong> <span data-ro="Acord de confidențialitate pe care îl semnezi cu oricine îi povestești detaliile tehnice ale inovației tale." data-en="Confidentiality agreement you sign with anyone you tell about your innovation's technical details.">Acord de confidențialitate pe care îl semnezi cu oricine îi povestești detaliile tehnice ale inovației tale.</span>
+                </li>
+                <li style="margin-bottom: 1rem;">
+                    <strong data-ro="Backlog de Produs:" data-en="Product Backlog:">Backlog de Produs:</strong> <span data-ro="O listă prioritară de funcționalități pe care echipa tehnică trebuie să le construiască." data-en="A prioritized list of features that the technical team needs to build.">O listă prioritară de funcționalități pe care echipa tehnică trebuie să le construiască.</span>
+                </li>
+                <li>
+                    <strong data-ro="Figma/Adobe XD:" data-en="Figma/Adobe XD:">Figma/Adobe XD:</strong> <span data-ro="Unelte pentru prototiparea vizuală." data-en="Tools for visual prototyping.">Unelte pentru prototiparea vizuală.</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section VII: GDPR și Securitate -->
+        <button class="section-toggle cyan" onclick="toggleSection(this)" data-ro="VII. Protecția Datelor și Securitatea prin Design" data-en="VII. Data Protection and Security by Design">
+            <span>VII. Protecția Datelor și Securitatea prin Design</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Într-un mediu digitalizat (2026), inovația nu poate exista fără conformitate tehnică." data-en="In a digitalized environment (2026), innovation cannot exist without technical compliance.">Într-un mediu digitalizat (2026), inovația nu poate exista fără conformitate tehnică.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div class="highlight-box red">
+                    <p style="margin: 0 0 0.6rem 0; font-weight: bold;" data-ro="GDPR (Regulamentul UE 2016/679):" data-en="GDPR (EU Regulation 2016/679):">GDPR (Regulamentul UE 2016/679):</p>
+                    <p style="margin: 0;" data-ro="Nu este doar un text pe site. Tehnic, trebuie să implementezi „Minimizarea datelor" – colectezi doar ce e strict necesar pentru funcționarea produsului." data-en="It is not just text on a website. Technically, you must implement 'Data Minimization' – collect only what is strictly necessary for the product to function.">Nu este doar un text pe site. Tehnic, trebuie să implementezi „Minimizarea datelor" – colectezi doar ce e strict necesar pentru funcționarea produsului.</p>
+                </div>
+
+                <div class="highlight-box orange">
+                    <p style="margin: 0 0 0.6rem 0; font-weight: bold;" data-ro="Securitatea Cibernetică (Directiva NIS2):" data-en="Cybersecurity (NIS2 Directive):">Securitatea Cibernetică (Directiva NIS2):</p>
+                    <p style="margin: 0;" data-ro="Dacă inovația ta vizează sectoare critice (energie, transporturi, sănătate, infrastructură digitală), ești obligat prin lege să implementezi măsuri stricte de securitate și să raportezi incidentele în 24 de ore." data-en="If your innovation targets critical sectors (energy, transport, health, digital infrastructure), you are legally required to implement strict security measures and report incidents within 24 hours.">Dacă inovația ta vizează sectoare critice (energie, transporturi, sănătate, infrastructură digitală), ești obligat prin lege să implementezi măsuri stricte de securitate și să raportezi incidentele în 24 de ore.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.6rem 0; font-weight: bold;" data-ro="Auditarea Codului:" data-en="Code Auditing:">Auditarea Codului:</p>
+                    <p style="margin: 0;" data-ro="Dacă dezvolți software, ai nevoie de teste de penetrare (Pentests) pentru a dovedi partenerilor sau investitorilor că produsul nu este vulnerabil." data-en="If you develop software, you need penetration tests (Pentests) to prove to partners or investors that your product is not vulnerable.">Dacă dezvolți software, ai nevoie de teste de penetrare (Pentests) pentru a dovedi partenerilor sau investitorilor că produsul nu este vulnerabil.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section VIII: Scrum -->
+        <button class="section-toggle green" onclick="toggleSection(this)" data-ro="VIII. Managementul de Proiect: Framework-ul Scrum" data-en="VIII. Project Management: Scrum Framework">
+            <span>VIII. Managementul de Proiect: Framework-ul Scrum</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Inovația are nevoie de o structură de execuție. Majoritatea produselor de succes folosesc Scrum (un subset al Agile)." data-en="Innovation needs an execution structure. Most successful products use Scrum (a subset of Agile).">Inovația are nevoie de o structură de execuție. Majoritatea produselor de succes folosesc Scrum (un subset al Agile).</p>
+
+            <div class="highlight-box purple">
+                <p style="margin: 0 0 0.8rem 0; font-weight: bold;" data-ro="Sprint-ul:" data-en="The Sprint:">Sprint-ul:</p>
+                <p style="margin: 0;" data-ro="O perioadă de lucru (de obicei 2 săptămâni) la finalul căreia trebuie să ai un increment de produs funcțional." data-en="A work period (usually 2 weeks) at the end of which you must have a functional product increment.">O perioadă de lucru (de obicei 2 săptămâni) la finalul căreia trebuie să ai un increment de produs funcțional.</p>
+            </div>
+
+            <h4 data-ro="Ceremonii Scrum:" data-en="Scrum Ceremonies:">Ceremonii Scrum:</h4>
+            <ul style="margin-left: 2rem;">
+                <li style="margin-bottom: 0.8rem;" data-ro="Daily Stand-up: 15 minute zilnice pentru alinierea echipei." data-en="Daily Stand-up: 15 minutes daily for team alignment."><strong>Daily Stand-up:</strong> <span data-ro="15 minute zilnice pentru alinierea echipei." data-en="15 minutes daily for team alignment.">15 minute zilnice pentru alinierea echipei.</span></li>
+                <li style="margin-bottom: 0.8rem;" data-ro="Sprint Planning: Definirea obiectivelor pentru următoarele 2 săptămâni." data-en="Sprint Planning: Setting goals for the next 2 weeks."><strong>Sprint Planning:</strong> <span data-ro="Definirea obiectivelor pentru următoarele 2 săptămâni." data-en="Setting goals for the next 2 weeks.">Definirea obiectivelor pentru următoarele 2 săptămâni.</span></li>
+                <li data-ro="Sprint Review & Retrospective: Analiza a ce s-a construit și cum poate fi îmbunătățit procesul de lucru." data-en="Sprint Review & Retrospective: Analysis of what was built and how the work process can be improved."><strong>Sprint Review & Retrospective:</strong> <span data-ro="Analiza a ce s-a construit și cum poate fi îmbunătățit procesul de lucru." data-en="Analysis of what was built and how the work process can be improved.">Analiza a ce s-a construit și cum poate fi îmbunătățit procesul de lucru.</span></li>
+            </ul>
+        </div>
+
+        <!-- Section IX: Echipa - Contract -->
+        <button class="section-toggle yellow" onclick="toggleSection(this)" data-ro="IX. Structura Echipei: Aspecte Contractuale și Tehnice" data-en="IX. Team Structure: Contractual and Technical Aspects">
+            <span>IX. Structura Echipei: Aspecte Contractuale și Tehnice</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Oamenii de care ai nevoie nu trebuie doar angajați, ci integrați juridic corect:" data-en="The people you need must not only be employed, but legally integrated correctly:">Oamenii de care ai nevoie nu trebuie doar angajați, ci integrați juridic corect:</p>
+
+            <div style="margin-bottom: 2rem;">
+                <h4 data-ro="Contractele cu Freelancerii (B2B):" data-en="Contracts with Freelancers (B2B):">Contractele cu Freelancerii (B2B):</h4>
+                <ul style="margin-left: 2rem;">
+                    <li style="margin-bottom: 0.8rem;" data-ro="Clauza de Non-Concurență: Esențială pentru a preveni ca un programator să plece cu ideea ta la un competitor a doua zi." data-en="Non-Competition Clause: Essential to prevent a programmer from taking your idea to a competitor the next day."><strong>Clauza de Non-Concurență:</strong> <span data-ro="Esențială pentru a preveni ca un programator să plece cu ideea ta la un competitor a doua zi." data-en="Essential to prevent a programmer from taking your idea to a competitor the next day.">Esențială pentru a preveni ca un programator să plece cu ideea ta la un competitor a doua zi.</span></li>
+                    <li data-ro="SLA (Service Level Agreement): Dacă externalizezi dezvoltarea, ai nevoie de un acord care să specifice timpul de răspuns în caz de erori (ex: „Bug-urile critice se rezolvă în 4 ore")." data-en="SLA (Service Level Agreement): If you outsource development, you need an agreement specifying response time for errors (e.g., 'Critical bugs are fixed in 4 hours')."><strong>SLA (Service Level Agreement):</strong> <span data-ro="Dacă externalizezi dezvoltarea, ai nevoie de un acord care să specifice timpul de răspuns în caz de erori (ex: „Bug-urile critice se rezolvă în 4 ore")." data-en="If you outsource development, you need an agreement specifying response time for errors (e.g., 'Critical bugs are fixed in 4 hours').">Dacă externalizezi dezvoltarea, ai nevoie de un acord care să specifice timpul de răspuns în caz de erori (ex: „Bug-urile critice se rezolvă în 4 ore").</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 data-ro="Angajații Interni:" data-en="Internal Employees:">Angajații Interni:</h4>
+                <ul style="margin-left: 2rem;">
+                    <li style="margin-bottom: 0.8rem;" data-ro="Fișa Postului: Trebuie să fie extrem de specifică pentru a putea evalua performanța (KPIs)." data-en="Job Description: Must be very specific to evaluate performance (KPIs)."><strong>Fișa Postului:</strong> <span data-ro="Trebuie să fie extrem de specifică pentru a putea evalua performanța (KPIs)." data-en="Must be very specific to evaluate performance (KPIs).">Trebuie să fie extrem de specifică pentru a putea evalua performanța (KPIs).</span></li>
+                    <li data-ro="Echipamentele: Toate dispozitivele (laptopuri, servere) trebuie să fie proprietatea firmei și securizate cu sisteme de MDM (Mobile Device Management)." data-en="Equipment: All devices (laptops, servers) must be company property and secured with MDM (Mobile Device Management) systems."><strong>Echipamentele:</strong> <span data-ro="Toate dispozitivele (laptopuri, servere) trebuie să fie proprietatea firmei și securizate cu sisteme de MDM (Mobile Device Management)." data-en="All devices (laptops, servers) must be company property and secured with MDM (Mobile Device Management) systems.">Toate dispozitivele (laptopuri, servere) trebuie să fie proprietatea firmei și securizate cu sisteme de MDM (Mobile Device Management).</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section X: ISO & Calitate -->
+        <button class="section-toggle red" onclick="toggleSection(this)" data-ro="X. Standarde de Calitate și Certificări (ISO)" data-en="X. Quality Standards and Certifications (ISO)">
+            <span>X. Standarde de Calitate și Certificări (ISO)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Pentru ca inovația ta să fie acceptată pe piețele internaționale sau de către corporații mari, ai nevoie de „limbajul calității":" data-en="For your innovation to be accepted in international markets or by large corporations, you need the 'language of quality':">Pentru ca inovația ta să fie acceptată pe piețele internaționale sau de către corporații mari, ai nevoie de „limbajul calității":</p>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="ISO 9001:" data-en="ISO 9001:">ISO 9001:</p>
+                    <p style="margin: 0;" data-ro="Managementul calității (demonstrează că ai procese repetitive, nu lucrezi „după ureche")." data-en="Quality management (demonstrates you have repetitive processes, not working 'by ear').">Managementul calității (demonstrează că ai procese repetitive, nu lucrezi „după ureche").</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="ISO 27001:" data-en="ISO 27001:">ISO 27001:</p>
+                    <p style="margin: 0;" data-ro="Standardul pentru managementul securității informației (vital pentru orice produs SaaS/Cloud)." data-en="The standard for information security management (vital for any SaaS/Cloud product).">Standardul pentru managementul securității informației (vital pentru orice produs SaaS/Cloud).</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Marcajul CE:" data-en="CE Mark:">Marcajul CE:</p>
+                    <p style="margin: 0;" data-ro="Obligatoriu dacă inovația ta este un produs fizic (hardware, jucării, echipamente electrice). Fără el, nu poți vinde legal în Uniunea Europeană." data-en="Mandatory if your innovation is a physical product (hardware, toys, electrical equipment). Without it, you cannot legally sell in the European Union.">Obligatoriu dacă inovația ta este un produs fizic (hardware, jucării, echipamente electrice). Fără el, nu poți vinde legal în Uniunea Europeană.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section XI: Documentație -->
+        <button class="section-toggle yellow" onclick="toggleSection(this)" data-ro="XI. Documentația Tehnică și de Afaceri" data-en="XI. Technical and Business Documentation">
+            <span>XI. Documentația Tehnică și de Afaceri</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Un produs fără documentație nu are valoare la o eventuală vânzare a firmei (Exit)." data-en="A product without documentation has no value at a potential company sale (Exit).">Un produs fără documentație nu are valoare la o eventuală vânzare a firmei (Exit).</p>
+
+            <ul style="margin-left: 2rem;">
+                <li style="margin-bottom: 1rem;" data-ro="Documentația API: Dacă produsul tău comunică cu alte sisteme." data-en="API Documentation: If your product communicates with other systems."><strong>Documentația API:</strong> <span data-ro="Dacă produsul tău comunică cu alte sisteme." data-en="If your product communicates with other systems.">Dacă produsul tău comunică cu alte sisteme.</span></li>
+                <li style="margin-bottom: 1rem;" data-ro="Arhitectura de Sistem: Schema tehnică a serverelor și fluxului de date." data-en="System Architecture: Technical diagram of servers and data flow."><strong>Arhitectura de Sistem:</strong> <span data-ro="Schema tehnică a serverelor și fluxului de date." data-en="Technical diagram of servers and data flow.">Schema tehnică a serverelor și fluxului de date.</span></li>
+                <li data-ro="Business Model Canvas: O reprezentare vizuală a modului în care afacerea creează, livrează și capturează valoare (Parteneri cheie, Activități cheie, Resurse, Propunere de valoare, Relația cu clienții, Canale, Segmente de clienți, Structura costurilor și Fluxuri de venituri)." data-en="Business Model Canvas: A visual representation of how the business creates, delivers and captures value (Key Partners, Key Activities, Resources, Value Proposition, Customer Relationships, Channels, Customer Segments, Cost Structure and Revenue Streams)."><strong>Business Model Canvas:</strong> <span data-ro="O reprezentare vizuală a modului în care afacerea creează, livrează și capturează valoare (Parteneri cheie, Activități cheie, Resurse, Propunere de valoare, Relația cu clienții, Canale, Segmente de clienți, Structura costurilor și Fluxuri de venituri)." data-en="A visual representation of how the business creates, delivers and captures value (Key Partners, Key Activities, Resources, Value Proposition, Customer Relationships, Channels, Customer Segments, Cost Structure and Revenue Streams).">O reprezentare vizuală a modului în care afacerea creează, livrează și capturează valoare (Parteneri cheie, Activități cheie, Resurse, Propunere de valoare, Relația cu clienții, Canale, Segmente de clienți, Structura costurilor și Fluxuri de venituri).</span></li>
+            </ul>
+        </div>
+
+        <!-- Section XII: Glosar -->
+        <button class="section-toggle orange" onclick="toggleSection(this)" data-ro="XII. Glosar Științific Adăugat" data-en="XII. Added Scientific Glossary">
+            <span>XII. Glosar Științific Adăugat</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div class="highlight-box purple">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Interoperabilitate:" data-en="Interoperability:">Interoperabilitate:</p>
+                    <p style="margin: 0;" data-ro="Capacitatea produsului tău de a funcționa și de a schimba date cu alte produse sau sisteme existente." data-en="The ability of your product to function and exchange data with other existing products or systems.">Capacitatea produsului tău de a funcționa și de a schimba date cu alte produse sau sisteme existente.</p>
+                </div>
+
+                <div class="highlight-box purple">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Datorie Tehnică (Technical Debt):" data-en="Technical Debt:">Datorie Tehnică (Technical Debt):</p>
+                    <p style="margin: 0;" data-ro="Costul implicit al alegerii unei soluții rapide (și proaste) în prezent, în locul unei abordări mai bune care ar dura mai mult." data-en="The implicit cost of choosing a quick (and poor) solution now instead of a better approach that would take longer.">Costul implicit al alegerii unei soluții rapide (și proaste) în prezent, în locul unei abordări mai bune care ar dura mai mult.</p>
+                </div>
+
+                <div class="highlight-box purple">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;" data-ro="Unit Economics:" data-en="Unit Economics:">Unit Economics:</p>
+                    <p style="margin: 0;" data-ro="Verificarea rentabilității la nivel de o singură unitate de produs (ex: „Cât mă costă să fac un burger și cu cât îl vând?" vs „Cât mă costă serverul pentru un singur utilizator?")." data-en="Checking profitability at the level of a single product unit (e.g., 'How much does it cost me to make a burger and how much do I sell it for?' vs 'How much does the server cost for a single user?').">Verificarea rentabilității la nivel de o singură unitate de produs (ex: „Cât mă costă să fac un burger și cu cât îl vând?" vs „Cât mă costă serverul pentru un singur utilizator?").</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="checklist">
+                <h4 data-ro="Checklist pentru sfârșitul acestei lecții:" data-en="Checklist for the end of this lesson:">Checklist pentru sfârșitul acestei lecții:</h4>
+                <ul>
+                    <li data-ro="Înțelegi importanța protecției IP-ului și diferența între Trademark, Copyright și Patent" data-en="You understand the importance of IP protection and the difference between Trademark, Copyright and Patent">Înțelegi importanța protecției IP-ului și diferența între Trademark, Copyright și Patent</li>
+                    <li data-ro="Cunoști ciclul Build-Measure-Learn și conceptul de MVP" data-en="You know the Build-Measure-Learn cycle and the MVP concept">Cunoști ciclul Build-Measure-Learn și conceptul de MVP</li>
+                    <li data-ro="Ai identificat rolurile cheie din echipa de produs (PM, Designer, CTO, QA)" data-en="You have identified the key roles in the product team (PM, Designer, CTO, QA)">Ai identificat rolurile cheie din echipa de produs (PM, Designer, CTO, QA)</li>
+                    <li data-ro="Cunoști cele 5 faze ale Design Thinking" data-en="You know the 5 phases of Design Thinking">Cunoști cele 5 faze ale Design Thinking</li>
+                    <li data-ro="Înțelegi importanța documentației și a standardelor de calitate (ISO)" data-en="You understand the importance of documentation and quality standards (ISO)">Înțelegi importanța documentației și a standardelor de calitate (ISO)</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(0, 240, 255, 0.1); padding: 1.5rem; border-radius: 6px; margin-top: 2rem; border-left: 4px solid var(--accent-cyan); color: var(--text-primary);">
+                <strong data-ro="Următoarea lecție:" data-en="Next lesson:">Următoarea lecție:</strong> <span data-ro="Lecția 3 va acoperi Finanțarea, Pitch-ul investitorilor și Strategic Planning." data-en="Lesson 3 will cover Financing, Investor Pitch, and Strategic Planning.">Lecția 3 va acoperi Finanțarea, Pitch-ul investitorilor și Strategic Planning.</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentLanguage = localStorage.getItem('lessonLanguage') || 'ro';
+
+        function toggleSection(button) {
+            const content = button.nextElementSibling;
+            button.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'ro' ? 'en' : 'ro';
+            localStorage.setItem('lessonLanguage', currentLanguage);
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+            
+            document.querySelectorAll('[data-ro][data-en]').forEach(element => {
+                if (element.nodeType === Node.ELEMENT_NODE) {
+                    const text = currentLanguage === 'ro' ? element.getAttribute('data-ro') : element.getAttribute('data-en');
+                    
+                    if (element.tagName === 'BUTTON') {
+                        element.querySelector('span:first-child').textContent = text;
+                    } else if (element.tagName === 'A') {
+                        element.textContent = text;
+                    } else if (element.tagName === 'TH' || element.tagName === 'TD') {
+                        element.textContent = text;
+                    } else {
+                        element.textContent = text;
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('load', () => {
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+        });
+    </script>
+</body>
+</html>

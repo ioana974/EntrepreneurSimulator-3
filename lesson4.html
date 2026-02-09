@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecția 4 - Entrepreneur Simulator</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/sections.css">
+    <style>
+        .lesson-header {
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 240, 255, 0.1));
+            border-bottom: 2px solid var(--border-color);
+        }
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-yellow);
+            margin-bottom: 0.5rem;
+        }
+        .lesson-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .lesson-meta {
+            background: rgba(0, 240, 255, 0.1);
+            padding: 1rem;
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .lesson-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle {
+            width: 100%;
+            padding: 1.5rem;
+            background: transparent;
+            border: 2px solid;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            margin-bottom: 3rem;
+            font-family: inherit;
+        }
+
+        .section-toggle.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .section-toggle.cyan:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle.yellow {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+        .section-toggle.yellow:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .section-toggle.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        .section-toggle.green:hover {
+            background: rgba(16, 185, 130, 0.2);
+        }
+
+        .section-toggle.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: #a855f7;
+            color: #a855f7;
+        }
+        .section-toggle.purple:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .section-toggle.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .section-toggle.red:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .section-content {
+            display: none;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            margin-bottom: 3rem;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .section-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-content .badge {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .section-content h4 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .section-content p {
+            color: var(--text-primary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .section-content ul, .section-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-content li {
+            margin-bottom: 0.8rem;
+            line-height: 1.8;
+        }
+
+        .highlight-box {
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            line-height: 1.8;
+        }
+
+        .highlight-box.gold {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .highlight-box.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: #10b981;
+        }
+
+        .highlight-box.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .highlight-box.orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .highlight-box.blue {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .subsection {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .subsection:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .checklist {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .checklist h4 {
+            margin-top: 0;
+        }
+
+        .checklist ul {
+            margin-left: 2rem;
+        }
+
+        .checklist li {
+            margin-bottom: 0.6rem;
+        }
+
+        footer {
+            border-top: 2px solid var(--border-color);
+            padding-top: 2rem;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toggle-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-toggle.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .nav-links {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            padding: 0.6rem 1.2rem;
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo">E</div>
+            <span class="navbar-title">EntrepreneurHub</span>
+        </div>
+        <div class="nav-menu" id="nav-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='lessons.html'" data-ro="Lecții" data-en="Lessons">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Cursuri" data-en="Courses">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Teste" data-en="Tests">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Statistici" data-en="Statistics">Statistici</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Despre" data-en="About">Despre</a>
+        </div>
+        <div class="nav-controls">
+            <button class="language-switch" id="lang-btn" onclick="toggleLanguage()">EN</button>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Acasă" data-en="Home">Acasă</a>
+            <a href="javascript:void(0)" onclick="window.location.href='lessons.html'" data-ro="Lecții" data-en="Lessons">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Cursuri" data-en="Courses">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Teste" data-en="Tests">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'" data-ro="Statistici" data-en="Statistics">Statistici</a>
+        </div>
+    </nav>
+
+    <div class="lesson-header">
+        <h1 data-ro="Lecția 4: Strategia de Marketing – Ingineria Achiziției și Știința Conversiei" data-en="Lesson 4: Marketing Strategy – Engineering Acquisition and Science of Conversion">Lecția 4: Strategia de Marketing – Ingineria Achiziției și Știința Conversiei</h1>
+        <p data-ro="Această lecție transformă marketingul dintr-o cheltuială într-o investiție măsurabilă. Vom diseca modul în care un sistem de marketing generează predictibil clienți, respectând normele de etică și confidențialitate." data-en="This lesson transforms marketing from an expense into a measurable investment. We will dissect how a marketing system predictably generates customers while respecting ethics and privacy standards.">Această lecție transformă marketingul dintr-o cheltuială într-o investiție măsurabilă. Vom diseca modul în care un sistem de marketing generează predictibil clienți, respectând normele de etică și confidențialitate.</p>
+        <div class="lesson-meta">
+            <span data-ro="Nivel: Intermediar – Avansat" data-en="Level: Intermediate – Advanced">Nivel: Intermediar – Avansat</span> | <span data-ro="Timp estimat: 90 minute" data-en="Estimated time: 90 minutes">Timp estimat: 90 minute</span> | <span data-ro="Resurse: Analiză de date, Psihologie aplicată, Legislație UE 2026" data-en="Resources: Data Analysis, Applied Psychology, EU 2026 Legislation">Resurse: Analiză de date, Psihologie aplicată, Legislație UE 2026</span>
+        </div>
+    </div>
+
+    <div class="lesson-content">
+        <a href="index.html?view=lessons" class="back-btn" data-ro="Înapoi la Lecții" data-en="Back to Lessons">Înapoi la Lecții</a>
+
+        <div class="nav-links">
+            <a href="lessons.html">Lecția 1</a>
+            <a href="lesson2.html">Lecția 2</a>
+            <a href="lesson3.html">Lecția 3</a>
+            <a href="lesson4.html">Lecția 4</a>
+        </div>
+
+        <button class="section-toggle cyan" onclick="toggleSection(this)" data-ro="I. Arhitectura de Date: LTV, CAC și Economia Unității" data-en="I. Data Architecture: LTV, CAC and Unit Economics">
+            <span>I. Arhitectura de Date: LTV, CAC și Economia Unității</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="În 2026, nu mai vorbim de „număr de like-uri", ci de indicatori de profitabilitate per client. Marketingul modern este 80% analiză de date și 20% creativitate psihologică." data-en="In 2026, we no longer talk about 'number of likes', but about profitability indicators per customer. Modern marketing is 80% data analysis and 20% psychological creativity.">În 2026, nu mai vorbim de „număr de like-uri", ci de indicatori de profitabilitate per client. Marketingul modern este 80% analiză de date și 20% creativitate psihologică.</p>
+
+            <div class="subsection">
+                <h3><span class="badge">1</span> <span data-ro="Modelarea LTV (Customer Lifetime Value) vs. CAC (Customer Acquisition Cost)" data-en="Modeling LTV (Customer Lifetime Value) vs. CAC (Customer Acquisition Cost)">Modelarea LTV vs. CAC</span></h3>
+                
+                <p style="font-style: italic; color: var(--accent-yellow); background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 4px;" data-ro="Un business este sustenabil doar dacă valoarea generată de un client pe parcursul întregii relații cu firma este semnificativ mai mare decât costul de a-l convinge să cumpere." data-en="A business is sustainable only if the value generated by a customer during the entire relationship with the company is significantly greater than the cost to convince them to buy.">Un business este sustenabil doar dacă valoarea generată de un client pe parcursul întregii relații cu firma este semnificativ mai mare decât costul de a-l convinge să cumpere.</p>
+
+                <h4 style="color: var(--accent-cyan);" data-ro="LTV (Lifetime Value)" data-en="LTV (Lifetime Value)">LTV (Lifetime Value)</h4>
+                <p data-ro="Formula: LTV = Venit mediu per tranzacție × Frecvența de cumpărare × Durata medie a relației (în luni/ani). Pentru un serviciu de abonament cu retenție bună, LTV poate fi de 10-100x CAC." data-en="Formula: LTV = Average revenue per transaction × Purchase frequency × Average relationship duration. For subscription services with good retention, LTV can be 10-100x CAC.">Formula: LTV = Venit mediu per tranzacție × Frecvența de cumpărare × Durata medie a relației (în luni/ani). Pentru un serviciu de abonament cu retenție bună, LTV poate fi de 10-100x CAC.</p>
+
+                <h4 style="color: var(--accent-cyan);" data-ro="CAC (Customer Acquisition Cost)" data-en="CAC (Customer Acquisition Cost)">CAC (Customer Acquisition Cost)</h4>
+                <p data-ro="Formula: CAC = Total Marketing Spend / Numărul de clienți noi achiziționați. Trebuie să incluzi TOATE costurile: reclame, salariu specialist marketing, software de Analytics, etc." data-en="Formula: CAC = Total Marketing Spend / Number of new customers acquired. Must include ALL costs: ads, marketing specialist salary, analytics software, etc.">Formula: CAC = Total Marketing Spend / Numărul de clienți noi achiziționați. Trebuie să incluzi TOATE costurile: reclame, salariu specialist marketing, software de Analytics, etc.</p>
+
+                <div class="highlight-box gold">
+                    <p style="margin: 0 0 0.8rem 0; font-weight: bold;" data-ro="Raportul Critic (LTV:CAC)" data-en="Critical Ratio (LTV:CAC)">Raportul Critic (LTV:CAC)</p>
+                    <ul style="margin: 0; line-height: 1.8;">
+                        <li data-ro="3:1 = Benchmark industrial – afacere sănătoasă." data-en="3:1 = Industrial benchmark – healthy business.">3:1 = Benchmark industrial – afacere sănătoasă.</li>
+                        <li data-ro="1:1 = Afacerea moare lent, pierzând bani la fiecare vânzare." data-en="1:1 = Business is dying slowly, losing money on every sale.">1:1 = Afacerea moare lent, pierzând bani la fiecare vânzare.</li>
+                        <li data-ro="5:1 sau mai mare = Investești prea puțin și lași piața concurenței." data-en="5:1 or higher = You're underinvesting and leaving market share to competitors.">5:1 sau mai mare = Investești prea puțin și lași piața concurenței.</li>
+                    </ul>
+                </div>
+
+                <h4 style="color: var(--accent-cyan);" data-ro="Payback Period" data-en="Payback Period">Payback Period</h4>
+                <p data-ro="Timpul necesar (ex: 3 luni) pentru ca profitul de la un client nou să acopere costul marketingului pentru acel client. Un payback period scurt = lichiditate bună și risipă minoră a capitalului." data-en="Time required (e.g., 3 months) for profit from a new customer to cover the marketing cost for that customer. Short payback = good liquidity and minimal capital waste.">Timpul necesar (ex: 3 luni) pentru ca profitul de la un client nou să acoperi costul marketingului pentru acel client. Un payback period scurt = lichiditate bună și risipă minoră a capitalului.</p>
+            </div>
+
+            <div class="subsection" style="border-bottom: none; padding-bottom: 0;">
+                <h3><span class="badge">2</span> <span data-ro="Atribuirea Data-Driven (Post-Cookie Era)" data-en="Data-Driven Attribution (Post-Cookie Era)">Atribuirea Data-Driven</span></h3>
+
+                <p data-ro="În contextul eliminării cookie-urilor de monitorizare (end of 3rd-party cookies în 2024), folosim Server-Side Tracking și Marketing Mix Modeling (MMM) pentru a înțelege care canal (Google, Meta, Email, Direct) a contribuit real la vânzare, evitând dubla raportare." data-en="In the context of tracking cookie elimination, we use Server-Side Tracking and Marketing Mix Modeling to understand which channel truly contributed to the sale, avoiding double-reporting.">În contextul eliminării cookie-urilor de monitorizare, folosim Server-Side Tracking și Marketing Mix Modeling (MMM) pentru a înțelege care canal (Google, Meta, Email, Direct) a contribuit real la vânzare, evitând dubla raportare.</p>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: bold;" data-ro="Server-Side Tracking (1st Party Data)" data-en="Server-Side Tracking (1st Party Data)">Server-Side Tracking (1st Party Data)</p>
+                    <p style="margin: 0;" data-ro="Datele de conversie sunt colectate direct pe serverul tău, nu prin cookie-uri din browser. Este compliant cu GDPR și 100% acurat." data-en="Conversion data is collected directly on your server, not through browser cookies. It is GDPR compliant and 100% accurate.">Datele de conversie sunt colectate direct pe serverul tău, nu prin cookie-uri din browser. Este compliant cu GDPR și 100% acurat.</p>
+                </div>
+
+                <div class="highlight-box orange">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: bold;" data-ro="Marketing Mix Modeling (MMM)" data-en="Marketing Mix Modeling (MMM)">Marketing Mix Modeling (MMM)</p>
+                    <p style="margin: 0;" data-ro="Analiză statistică care modelează impactul fiecărui canal de marketing asupra vânzărilor totale. Permite cuantificarea contribuției offline (TV, radio, outdoor) și online în aceeași ecuație." data-en="Statistical analysis that models the impact of each marketing channel on total sales. Allows quantifying offline and online contribution in the same equation.">Analiză statistică care modelează impactul fiecărui canal de marketing asupra vânzărilor totale. Permite cuantificarea contribuției offline și online în aceeași ecuație.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle yellow" onclick="toggleSection(this)" data-ro="II. Psihologia Conversiei și Cadrul Strategic" data-en="II. Psychology of Conversion and Strategic Framework">
+            <span>II. Psihologia Conversiei și Cadrul Strategic</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Marketingul eficient se bazează pe înțelegerea barierelor cognitive ale cumpărătorului. Un copywriter care nu cunoaște psihologia este doar o tipă care scrie imagini frumoase." data-en="Effective marketing is based on understanding the cognitive barriers of the buyer. A copywriter who doesn't understand psychology is just someone writing pretty pictures.">Marketingul eficient se bazează pe înțelegerea barierelor cognitive ale cumpărătorului.</p>
+
+            <div class="subsection">
+                <h3><span class="badge">1</span> <span data-ro="Modelul de Comportament Fogg (B=MAP)" data-en="Fogg Behavior Model (B=MAP)">Modelul Fogg (B=MAP)</span></h3>
+
+                <p style="font-style: italic; color: var(--accent-yellow); background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;" data-ro="Pentru ca o conversie (vânzare) să aibă loc, trebuie să existe simultan trei elemente: Motivație, Abilitate și Prompt." data-en="For a conversion to occur, three elements must exist simultaneously: Motivation, Ability, and Prompt.">Pentru ca o conversie (vânzare) să aibă loc, trebuie să existe simultan trei elemente: Motivație, Abilitate și Prompt.</p>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="padding: 1.5rem; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 6px;">
+                        <h4 style="color: #3b82f6; margin: 0 0 0.8rem 0;" data-ro="M (Motivation) – Motivația" data-en="M (Motivation)">M (Motivation) – Motivația</h4>
+                        <p style="margin: 0; line-height: 1.8;" data-ro="Dorința clientului de a rezolva o problemă specifică. Fără motivație, nimic nu se întâmplă. Jobul tău în marketing este să articuli clar ce problemă solve produsul tău și de ce trebuie să le paseze clientului." data-en="The customer's desire to solve a specific problem. Without motivation, nothing happens. Your job in marketing is to clearly articulate what problem your product solves.">Dorința clientului de a rezolva o problemă specifică. Fără motivație, nimic nu se întâmplă. Jobul tău în marketing este să articuli clar ce problemă solve produsul tău și de ce trebuie să le paseze clientului.</p>
+                    </div>
+
+                    <div style="padding: 1.5rem; background: rgba(16, 185, 130, 0.1); border: 1px solid rgba(16, 185, 130, 0.3); border-radius: 6px;">
+                        <h4 style="color: #10b981; margin: 0 0 0.8rem 0;" data-ro="A (Ability) – Abilitate" data-en="A (Ability)">A (Ability) – Abilitate</h4>
+                        <p style="margin: 0; line-height: 1.8;" data-ro="Cât de ușor este pentru client să cumpere. Aceasta include: procesul de checkout (3 pagini vs. 1?), prețul, disponibilitatea metodelor de plată, cât timp durează livrarea?" data-en="How easy is it for the customer to buy? This includes: checkout process, price, payment methods availability, delivery time?">Cât de ușor este pentru client să cumpere. Aceasta include: procesul de checkout (3 pagini vs. 1?), prețul, disponibilitatea metodelor de plată, cât timp durează livrarea?</p>
+                    </div>
+
+                    <div style="padding: 1.5rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px;">
+                        <h4 style="color: #f59e0b; margin: 0 0 0.8rem 0;" data-ro="P (Prompt) – Îndemnul" data-en="P (Prompt)">P (Prompt) – Îndemnul la Acțiune</h4>
+                        <p style="margin: 0; line-height: 1.8;" data-ro="Semnalul care declanșează acțiunea. Este butonul „Cumpără acum", o ofertă limitată în timp (scarcity), o mențiune de urgență „Doar 5 produse rămase". Fără prompt explicit, chiar motivația și abilitatea nu sunt suficiente." data-en="The signal that triggers action. It's the 'Buy Now' button, a time-limited offer (scarcity), an urgency mention 'Only 5 items left'. Without explicit prompt, motivation and ability aren't enough.">Semnalul care declanșează acțiunea. Este butonul „Cumpără acum", o ofertă limitată în timp (scarcity), o mențiune de urgență „Doar 5 produse rămase". Fără prompt explicit, chiar motivația și abilitatea nu sunt suficiente.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection" style="border-bottom: none; padding-bottom: 0;">
+                <h3><span class="badge">2</span> <span data-ro="Pâlnia de Conversie (Full-Funnel Marketing)" data-en="Conversion Funnel (Full-Funnel Marketing)">Pâlnia de Conversie</span></h3>
+
+                <p data-ro="Clientul nu sare direct de la a nu cunoaște marca la a cumpăra. Există o progresie logică (funnel) prin care treci pentru a-l convinge." data-en="The customer doesn't jump directly from not knowing the brand to buying. There's a logical progression through which you move them.">Clientul nu sare direct de la a nu cunoaște marca la a cumpăra. Există o progresie logică (funnel) prin care treci pentru a-l convinge.</p>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                    <div style="padding: 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px;">
+                        <h4 style="color: #3b82f6; margin: 0 0 0.8rem 0;">TOFU (Top of Funnel)</h4>
+                        <p style="margin: 0; line-height: 1.8;" data-ro="Generare de Awareness (conștientizarea problemei). Folosești SEO, Social Media, PR pentru a ajunge la oameni care nici nu știu că au o problemă. Metrica: Reach și Impressions." data-en="Awareness generation. You use SEO, Social Media, PR to reach people who don't know they have a problem. Metric: Reach and Impressions.">Generare de Awareness (conștientizarea problemei). Folosești SEO, Social Media, PR pentru a ajunge la oameni care nici nu știu că au o problemă. Metrica: Reach și Impressions.</p>
+                    </div>
+
+                    <div style="padding: 1.5rem; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 6px;">
+                        <h4 style="color: #a855f7; margin: 0 0 0.8rem 0;">MOFU (Middle of Funnel)</h4>
+                        <p style="margin: 0; line-height: 1.8;" data-ro="Educație și Considerare (compararea soluțiilor). Publici webinare, white papers, case studies. Clientul se gândește: „Da, am problema asta. Cum o rezolv?" Metrica: Engagement și Lead Quality." data-en="Education and Consideration. You publish webinars, white papers, case studies. Metric: Engagement and Lead Quality.">Educație și Considerare (compararea soluțiilor). Publici webinare, white papers, case studies. Clientul se gândește: „Da, am problema asta. Cum o rezolv?" Metrica: Engagement și Lead Quality.</p>
+                    </div>
+
+                    <div style="padding: 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px;">
+                        <h4 style="color: #ef4444; margin: 0 0 0.8rem 0;">BOFU (Bottom of Funnel)</h4>
+                        <p style="margin: 0; line-height: 1.8;" data-ro="Decizie și Conversie (oferta finală). Folosești retargeting ads, email cu oferte speciale, demo calls. Clientul este gata să cumpere, dar are o ultimă îndoială. Metrica: Conversion Rate și ROI." data-en="Decision and Conversion. You use retargeting ads, special offer emails, demo calls. Metric: Conversion Rate and ROI.">Decizie și Conversie (oferta finală). Folosești retargeting ads, email cu oferte speciale, demo calls. Clientul este gata să cumpere, dar are o ultimă îndoială. Metrica: Conversion Rate și ROI.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle green" onclick="toggleSection(this)" data-ro="III. Reglementări Legale și Etică (Directivele UE 2026)" data-en="III. Legal Regulations and Ethics (EU 2026 Directives)">
+            <span>III. Reglementări Legale și Etică (Directivele UE 2026)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p style="font-weight: bold; color: var(--accent-yellow); background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;" data-ro="Marketingul tău trebuie să fie „Legal by Design". Orice campanie care încalcă legislația poate duce la amenzi de până la 4% din cifra de afaceri globale." data-en="Your marketing must be 'Legal by Design'. Any campaign that violates legislation can result in fines up to 4% of global revenue.">Marketingul tău trebuie să fie „Legal by Design". Orice campanie care încalcă legislația poate duce la amenzi de până la 4% din cifra de afaceri globale.</p>
+
+            <div class="subsection">
+                <h3><span class="badge">1</span> <span data-ro="Directiva Omnibus (Transparența Prețurilor)" data-en="Omnibus Directive (Price Transparency)">Directiva Omnibus</span></h3>
+
+                <div class="highlight-box red">
+                    <p style="margin: 0;" data-ro="Conform Directiva (UE) 2019/2161 (Omnibus), orice reducere de preț afișată pe site trebuie să se raporteze la cel mai mic preț practicat în ultimele 30 de zile. Este interzisă umflarea prețurilor înainte de Black Friday sau alte campanii de reduceri. Amendă: Până la 4% din cifra de afaceri." data-en="According to Directive (EU) 2019/2161, any price reduction must reference the lowest price in the last 30 days. Price inflation before discounts is prohibited. Fine: Up to 4% of revenue."><strong>Regulă crucială:</strong> Orice reducere de preț trebuie să se raporteze la cel mai mic preț practicat în ultimele 30 de zile. Este interzisă umflarea prețurilor înainte de campanii de reduceri. Amendă: Până la 4% din cifra de afaceri.</p>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3><span class="badge">2</span> <span data-ro="Regulamentul AI Act (Transparența Algoritmilor)" data-en="AI Act Regulation (Algorithm Transparency)">AI Act – Transparența Algoritmilor</span></h3>
+
+                <div class="highlight-box orange">
+                    <p style="margin: 0 0 0.8rem 0; font-weight: bold;" data-ro="Obligații Legale:" data-en="Legal Obligations:">Obligații Legale:</p>
+                    <ul style="margin: 0; line-height: 1.8;">
+                        <li data-ro="Dacă folosești AI pentru a genera imagini, texte sau pentru a personaliza prețurile în mod dinamic pentru fiecare utilizator, ești obligat să informezi utilizatorul că interacționează cu un sistem automatizat." data-en="If you use AI to generate images, texts, or dynamically personalize prices, you must inform users they're interacting with an automated system.">Dacă folosești AI pentru a genera imagini, texte sau pentru a personaliza prețurile, trebuie să avertizezi utilizatorul.</li>
+                        <li data-ro="Profilarea automatică pentru scop de discriminare (ex: prețuri mai mari pentru grupuri demografice specifice) este interzisă." data-en="Automated profiling for discrimination (e.g., higher prices for specific demographics) is prohibited.">Profilarea automatică pentru scop de discriminare este interzisă.</li>
+                        <li data-ro="Recomandări de produse trebuie să fie explicate ușor (ex: „Ți-am recomandat asta pentru că s-a vândut bine" este mai bun decât algoritm opac)." data-en="Product recommendations must be easily explained to users.">Explicarea recomandărilor de produse ar trebui să fie ușoară.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="subsection" style="border-bottom: none; padding-bottom: 0;">
+                <h3><span class="badge">3</span> <span data-ro="GDPR și Digital Fairness Act" data-en="GDPR and Digital Fairness Act">GDPR și Digital Fairness Act</span></h3>
+
+                <div class="highlight-box red" style="margin-bottom: 1rem;">
+                    <p style="margin: 0 0 0.8rem 0; font-weight: bold;" data-ro="Dark Patterns (Interzise)" data-en="Dark Patterns (Prohibited)">Dark Patterns (Interzise)</p>
+                    <p style="margin: 0;" data-ro="Este ilegal să folosești design manipulativ cum ar fi: ferestre de tip pop-up imposibil de închis ușor, bifarea automată a unor servicii extra, ascunderea butonului de dezabonare, text cu culori care se confundă cu background-ul. Amendă: Până la 50 milioane EUR." data-en="It is illegal to use manipulative design such as: pop-ups hard to close, auto-checked extra services, hidden unsubscribe buttons. Fine: Up to 50 million EUR.">Este ilegal să folosești design manipulativ (pop-up-uri greu de închis, servicii auto-bifate, buton de dezabonare ascuns). Amendă: Până la 50 milioane EUR.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.8rem 0; font-weight: bold;" data-ro="E-mail Marketing – Opt-In Obligatoriu" data-en="Email Marketing – Mandatory Opt-In">E-mail Marketing – Opt-In Obligatoriu</p>
+                    <p style="margin: 0;" data-ro="Legea 506/2004 interzice trimiterea de mesaje comerciale fără consimțământul prealabil, explicit și informat. Folosirea cookie-urilor pentru a colecta e-mail-uri trebuie confirmată de utilizator ÎNAINTE de a se trimite emailuri comerciale. Amendă: Până la 500.000 RON per incidentă." data-en="Law 506/2004 prohibits sending commercial messages without explicit prior consent. Fine: Up to 500,000 RON per incident.">Trimiterea de emailuri comerciale fără consimțământ explicit este interzisă. Amendă: Până la 500.000 RON per incidentă.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle purple" onclick="toggleSection(this)" data-ro="IV. Canale Tehnice de Achiziție" data-en="IV. Technical Acquisition Channels">
+            <span>IV. Canale Tehnice de Achiziție</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p data-ro="Fiecare canal are propriul lifecycle, metrice și optimizări specifice. Alegerea canalului greșit și depunerea efortului în mod neinteligent este cea mai rapidă cale spre faliment marketing." data-en="Each channel has its own lifecycle, metrics, and specific optimizations. Choosing the wrong channel is the fastest path to marketing bankruptcy.">Fiecare canal are propriul lifecycle, metrice și optimizări specifice.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div style="padding: 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px;">
+                    <h4 style="color: #3b82f6; margin: 0 0 0.8rem 0;" data-ro="SEO (Search Engine Optimization)" data-en="SEO (Search Engine Optimization)">SEO (Search Engine Optimization)</h4>
+                    <p style="margin: 0 0 0.8rem 0; line-height: 1.8;" data-ro="Nu mai este despre cuvinte cheie, ci despre E-E-A-T: Experience, Expertise, Authoritativeness, Trustworthiness. Google penalizează în 2026 conținutul generat de AI fără valoare adăugată umană. Sfat: Creează conținut original, cu date și studii de caz, scris de experți cu cv-ul vizibil." data-en="It's about E-E-A-T: Experience, Expertise, Authoritativeness, Trustworthiness. AI-generated content without human value is penalized. Tip: Create original content with data and case studies, written by visible experts.">Google penalizează conținutul generat de AI fără valoare adăugată umană. ROI: 300-400% pe termen lung dacă e bine executat.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px;">
+                    <h4 style="color: #f59e0b; margin: 0 0 0.8rem 0;" data-ro="Performance Marketing (PPC)" data-en="Performance Marketing (PPC)">Performance Marketing (PPC)</h4>
+                    <p style="margin: 0 0 0.8rem 0; line-height: 1.8;" data-ro="Licitații în timp real (RTB - Real Time Bidding) pe Google Ads, Meta, TikTok. Platforma folosește algoritmi de predicție a intenției de cumpărare. Avantaj: Plătești doar pentru rezultate măsurabile (click, conversie). Dezavantaj: Costurile cresc rapid pe piețe competitive." data-en="Real-time bidding on Google Ads, Meta, TikTok. You pay only for measurable results. Advantage: Instant ROI measurement. Disadvantage: Rising costs on competitive markets.">Plătești doar pentru rezultate măsurabile. Avantaj: ROI instant. Dezavantaj: Costuri crescânde pe piețe competitive.</p>
+                </div>
+
+                <div style="padding: 1.5rem; background: rgba(16, 185, 130, 0.1); border: 1px solid rgba(16, 185, 130, 0.3); border-radius: 6px;">
+                    <h4 style="color: #10b981; margin: 0 0 0.8rem 0;" data-ro="CRM & Marketing Automation" data-en="CRM & Marketing Automation">CRM & Marketing Automation</h4>
+                    <p style="margin: 0 0 0.8rem 0; line-height: 1.8;" data-ro="Utilizarea datelor proprii (First-party data) pentru a crește Rata de Retenție. Retenția unui client existent este de 5-7 ori mai ieftină decât achiziția unuia nou. Exemplu: Segmentare clienți → Email personalizat → Ofertă specifică grupului. ROI: 400-500% pe emailuri dacă sunt bine segmentate." data-en="Using your own data (First-party data) to increase retention. Retaining an existing customer is 5-7x cheaper than acquiring a new one. ROI: 400-500% on well-segmented emails.">Retenția unui client existent este 5-7x mai ieftină decât achiziția. ROI: 400-500% pe emailuri dacă sunt bine segmentate.</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="section-toggle red" onclick="toggleSection(this)" data-ro="V. Glosar de Termeni Tehnici (Limbaj Științific)" data-en="V. Technical Glossary (Scientific Language)">
+            <span>V. Glosar de Termeni Tehnici (Limbaj Științific)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <ul style="line-height: 1.8;">
+                <li><strong>CTR (Click-Through Rate)</strong>: <span data-ro="Eficiența vizuală a unei reclame. Formula: (Numărul de click-uri / Numărul de impresii) × 100. Benchmark: Google Ads 2026 = 2-3% pe search, 0.5-1% pe display." data-en="Visual efficiency of an ad. Formula: (Clicks/Impressions) × 100. Benchmark: 2-3% on search, 0.5-1% on display.">Eficiența vizuală a unei reclame. Benchmark: 2-3% pe search, 0.5-1% pe display.</span></li>
+                <li><strong data-ro="Conversion Rate (CR)" data-en="Conversion Rate (CR)">Conversion Rate (CR)</strong>: <span data-ro="Procentul de vizitatori care efectuează o acțiune dorită (cumpărătură, signup, download). Formula: (Conversii / Vizitatori unici) × 100. Benchmark industrial: 1-5% pe e-commerce." data-en="Percentage of visitors who perform a desired action. Benchmark: 1-5% on e-commerce.">Procentul de vizitatori care cumpără. Benchmark: 1-5% pe e-commerce.</span></li>
+                <li><strong>CRO (Conversion Rate Optimisation)</strong>: <span data-ro="Știința de a face site-ul mai convingător fără a mări bugetul de reclame. Teste A/B, heatmaps, session recordings." data-en="Science of making your site more convincing without increasing ad budget. A/B testing, heatmaps, session recordings.">Știința de a face site-ul mai convingător. Teste A/B, heatmaps, session recordings.</span></li>
+                <li><strong>Churn Rate</strong>: <span data-ro="Procentul de clienți care renunță la serviciile tale într-o lună. Vital pentru modelele de abonament. Formula: (Clienți pierduți / Total clienți la început de lună) × 100. O churn mică (2-5%) = business sustenabil." data-en="Percentage of customers who cancel in a month. Formula: (Lost customers / Total at month start) × 100. Low churn (2-5%) = sustainable business.">Procentul de clienți care anulează. Churn mic (2-5%) = business sustenabil.</span></li>
+                <li><strong data-ro="Native Advertising" data-en="Native Advertising">Native Advertising</strong>: <span data-ro="Reclame care se integrează organic în conținutul editorial, reducând "oboseala reclamelor". Exemplu: Un articol sponsorizat pe o publicație care nu arată ca o reclamă tradițională. Avantaj: CTR și engagement mai mari. Dezavantaj: Cost mai ridicat per impresie." data-en="Ads that integrate organically into editorial content. Higher engagement, higher cost per impression.">Reclame care se integrează organic în conținut editorial. Engagement mai mare, cost mai ridicat.</span></li>
+            </ul>
+        </div>
+
+        <footer>
+            <div class="checklist">
+                <h4 data-ro="Checklist pentru sfârșitul acestei lecții:" data-en="Checklist for the end of this lesson:">Checklist pentru sfârșitul acestei lecții:</h4>
+                <ul>
+                    <li data-ro="Ai calculat LTV și CAC pentru modelul tău de business și știi raportul dintre ele" data-en="You have calculated LTV and CAC for your business model">Ai calculat LTV și CAC pentru modelul tău de business</li>
+                    <li data-ro="Înțelegi cum funcționează modelul Fogg și cum aplici M-A-P în campaniile tale" data-en="You understand Fogg's model and how to apply it">Înțelegi cum funcționează modelul Fogg</li>
+                    <li data-ro="Cunoști diferența dintre TOFU, MOFU și BOFU și care sunt metricile pentru fiecare" data-en="You know the difference between TOFU, MOFU, BOFU">Cunoști diferența dintre TOFU, MOFU și BOFU</li>
+                    <li data-ro="Ești conștient de regulile legale privind prețurile, AI și e-mailul și cum să le aplici" data-en="You are aware of legal rules regarding prices, AI, and email">Ești conștient de regulile legale (Omnibus, AI Act, GDPR)</li>
+                    <li data-ro="Ai identificat canalele de achiziție care sunt relevante pentru afacerea ta (SEO, PPC, CRM)" data-en="You have identified relevant acquisition channels for your business">Ai identificat canalele de achiziție relevante pentru tine</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(0, 240, 255, 0.1); padding: 1.5rem; border-radius: 6px; margin-top: 2rem; border-left: 4px solid var(--accent-cyan); color: var(--text-primary);">
+                <strong data-ro="Note finală:" data-en="Final note:">Note finală:</strong> <span data-ro="Marketingul fără măsurare este doar speranță. Fiecare metric pe care o urmărești trebuie să se conecteze la un KPI (Key Performance Indicator) care afectează direct profitabilitatea firmei tale. Succes!" data-en="Marketing without measurement is just hope. Every metric you track must connect to a KPI that directly affects your company's profitability. Success!">Marketingul fără măsurare este doar speranță. Fiecare metric trebuie să se conecteze la profitabilitate. Succes!</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentLanguage = localStorage.getItem('lessonLanguage') || 'ro';
+
+        function toggleSection(button) {
+            const content = button.nextElementSibling;
+            button.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'ro' ? 'en' : 'ro';
+            localStorage.setItem('lessonLanguage', currentLanguage);
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+            
+            // Update all elements with data-ro and data-en attributes
+            document.querySelectorAll('[data-ro][data-en]').forEach(element => {
+                if (element.nodeType === Node.ELEMENT_NODE) {
+                    const text = currentLanguage === 'ro' ? element.getAttribute('data-ro') : element.getAttribute('data-en');
+                    
+                    // For button elements, update only the text content, preserving the toggle icon
+                    if (element.tagName === 'BUTTON') {
+                        element.querySelector('span:first-child').textContent = text;
+                    } else if (element.tagName === 'A') {
+                        element.textContent = text;
+                    } else {
+                        element.textContent = text;
+                    }
+                }
+            });
+        }
+
+        // Set initial button text based on saved language
+        window.addEventListener('load', () => {
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+        });
+    </script>
+</body>
+</html>

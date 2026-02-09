@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Leaderboard - Entrepreneur Simulator</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style> .leaderboard { max-width:900px; margin:3rem auto; } .entry { display:flex; justify-content:space-between; padding:.75rem; border:1px solid #eee; border-radius:6px; margin-bottom:.5rem; } </style>
+</head>
+<body>
+  <header style="padding:1rem; display:flex; justify-content:space-between; align-items:center;">
+    <h2 id="title">Top Rezultate</h2>
+    <div>
+      <button id="toggle-lang" class="btn btn-secondary">EN</button>
+      <a href="index.html" class="btn btn-primary">Acasă</a>
+    </div>
+  </header>
+
+  <main class="leaderboard">
+    <div id="content">Încărcare...</div>
+  </main>
+
+  <script>
+    const translations = {
+      ro: { leaderboard_title: 'Top Rezultate', player: 'Jucător', budget: 'Buget', back: 'Acasă', loading: 'Încărcare...' },
+      en: { leaderboard_title: 'Top Results', player: 'Player', budget: 'Budget', back: 'Home', loading: 'Loading...' }
+    };
+    let lang = 'ro';
+    function t(k){ return translations[lang][k] || k }
+    document.getElementById('toggle-lang').addEventListener('click', () => { lang = lang === 'ro' ? 'en' : 'ro'; render(); });
+
+    async function render(){
+      document.getElementById('title').textContent = t('leaderboard_title');
+      document.getElementById('toggle-lang').textContent = lang === 'ro' ? 'EN' : 'RO';
+      const c = document.getElementById('content');
+      c.textContent = t('loading');
+      try{
+        const r = await fetch('/api/game/leaderboard');
+        const data = await r.json();
+        if (!data.success){ c.textContent = 'Error'; return; }
+        if (!data.leaderboard || data.leaderboard.length === 0){ c.innerHTML = '<p>—</p>'; return; }
+        c.innerHTML = data.leaderboard.map((l, i) => `<div class="entry"><div><strong>${i+1}. ${l.playerName || l.state?.playerName || 'Anonim'}</strong><div style="color:#666">${l.scenarioId || ''}</div></div><div>${t('budget')}: $${l.state?.budget?.toLocaleString?.() ?? l.state?.budget ?? ''}</div></div>`).join('');
+      }catch(err){ c.textContent = 'Error loading leaderboard'; }
+    }
+    render();
+  </script>
+</body>
+</html>

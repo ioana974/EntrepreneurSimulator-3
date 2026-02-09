@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecția 3 - Entrepreneur Simulator</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/sections.css">
+    <style>
+        .lesson-header {
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 240, 255, 0.1));
+            border-bottom: 2px solid var(--border-color);
+        }
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-yellow);
+            margin-bottom: 0.5rem;
+        }
+        .lesson-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .lesson-meta {
+            background: rgba(0, 240, 255, 0.1);
+            padding: 1rem;
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .lesson-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle {
+            width: 100%;
+            padding: 1.5rem;
+            background: transparent;
+            border: 2px solid;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            margin-bottom: 3rem;
+            font-family: inherit;
+        }
+
+        .section-toggle.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .section-toggle.cyan:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .section-toggle.yellow {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+        .section-toggle.yellow:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .section-toggle.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        .section-toggle.green:hover {
+            background: rgba(16, 185, 130, 0.2);
+        }
+
+        .section-toggle.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: #a855f7;
+            color: #a855f7;
+        }
+        .section-toggle.purple:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .section-toggle.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .section-toggle.red:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .section-toggle.orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+        .section-toggle.orange:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .section-content {
+            display: none;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            margin-bottom: 3rem;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .section-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .badge {
+            background: rgba(0, 240, 255, 0.2);
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            margin-right: 0.8rem;
+            font-size: 0.9rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-container th {
+            background: rgba(0, 240, 255, 0.1);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .table-container td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .table-container tr:last-child td {
+            border-bottom: none;
+        }
+
+        .highlight-box {
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            line-height: 1.8;
+        }
+
+        .highlight-box.gold {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .highlight-box.green {
+            background: rgba(16, 185, 130, 0.1);
+            border-color: #10b981;
+        }
+
+        .highlight-box.red {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .highlight-box.orange {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .highlight-box.blue {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .highlight-box.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: #a855f7;
+        }
+
+        .subsection {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .subsection:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .checklist {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .checklist h4 {
+            margin-top: 0;
+        }
+
+        .checklist ul {
+            margin-left: 2rem;
+        }
+
+        .checklist li {
+            margin-bottom: 0.6rem;
+        }
+
+        footer {
+            border-top: 2px solid var(--border-color);
+            padding-top: 2rem;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toggle-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .section-toggle.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .nav-links {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            padding: 0.6rem 1.2rem;
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: var(--accent-yellow);
+            color: var(--bg-primary);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo">E</div>
+            <span class="navbar-title">EntrepreneurHub</span>
+        </div>
+        <div class="nav-menu" id="nav-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Statistici</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Despre</a>
+        </div>
+        <div class="nav-controls">
+            <button class="language-switch" id="lang-btn" onclick="toggleLanguage()">EN</button>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Acasă</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Lecții</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Cursuri</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Teste</a>
+            <a href="javascript:void(0)" onclick="window.location.href='index.html'">Statistici</a>
+        </div>
+    </nav>
+
+    <div class="lesson-header">
+        <h1>Lecția 3: Managementul Financiar – Pilotarea Afacerii prin Cifre și Indicatori</h1>
+        <p>Această lecție te învață să citești „semnele vitale" ale firmei tale. Într-un business, profitul este o părere, dar numerarul (cash-ul) este realitatea dură.</p>
+        <div class="lesson-meta">
+            <span>Nivel: Intermediar – Avansat</span> | <span>Timp estimat: 75 minute</span> | <span>Resurse: Studii de caz, modele financiare, Excel</span>
+        </div>
+    </div>
+
+    <div class="lesson-content">
+        <a href="index.html?view=lessons" class="back-btn">Înapoi la Lecții</a>
+
+        <div class="nav-links">
+            <a href="lessons.html">Lecția 1</a>
+            <a href="lesson2.html">Lecția 2</a>
+            <a href="lesson3.html">Lecția 3</a>
+            <a href="lesson4.html">Lecția 4</a>
+        </div>
+
+        <!-- I. Gestiunea Trezoreriei și Ciclul de Conversie -->
+        <button class="section-toggle cyan" onclick="toggleSection(this)">
+            <span>I. Gestiunea Trezoreriei (Cash Management) și Ciclul de Conversie</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p>Numerarul este sângele în venele oricărei afaceri. Deși profitul pe hârtie arată bine, dacă ai deficit de lichiditate, compania moare.</p>
+
+            <div class="subsection">
+                <h3 style="margin-top: 1.5rem;"><span class="badge">1</span> Ciclul de Conversie a Numerarului (Cash Conversion Cycle - CCC)</h3>
+                
+                <p><strong>Formula:</strong></p>
+                <div class="highlight-box gold">
+                    <p style="margin: 0;"><strong>CCC = DIO (Zile Stoc) + DSO (Zile Încasare Creanțe) - DPO (Zile Plată Furnizori)</strong></p>
+                </div>
+
+                <p><strong>Interpretare:</strong></p>
+                <ul>
+                    <li><strong>DIO (Days Inventory Outstanding):</strong> Câte zile ține marfa în stoc înainte de vânzare.</li>
+                    <li><strong>DSO (Days Sales Outstanding):</strong> Câte zile după vânzare până încasezi banii de la clienți.</li>
+                    <li><strong>DPO (Days Payable Outstanding):</strong> Câte zile poți ține liber banii înainte de a plăti furnizorilor.</li>
+                </ul>
+
+                <p><strong>Exemplu practic:</strong> Compania ta vinde bunuri în 45 zile livrare (DIO), clienții plătesc în 30 zile (DSO), iar tu plătești furnizorului în 20 zile (DPO):</p>
+                <div class="highlight-box blue">
+                    <p style="margin: 0;"><strong>CCC = 45 + 30 - 20 = 55 zile</strong></p>
+                    <p style="margin-top: 0.5rem;">Trebuie să finanțezi 55 de zile de operații înainte de a vedea din nou bani.</p>
+                </div>
+
+                <p><strong>Optimizare CCC:</strong></p>
+                <ul>
+                    <li>Reduc DIO: Managementul stocurilor (JIT - Just in Time)</li>
+                    <li>Reduc DSO: Încasări mai rapide (pre-plată, factoring)</li>
+                    <li>Cresc DPO: Negociez termene mai lungi cu furnizorii</li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><span class="badge">2</span> Burn Rate și Runway</h3>
+                
+                <p><strong>Burn Rate:</strong> Suma lunară pe care o "arde" compania (cheltuieli minus venituri).</p>
+                <div class="highlight-box orange">
+                    <p style="margin: 0;"><strong>Burn Rate = (Cheltuielile Lunare) - (Veniturile Lunare)</strong></p>
+                    <p style="margin-top: 0.5rem;">Exemplu: Dacă cheltuiești 50.000 lei/lună și încasezi 20.000 lei/lună, burn rate = 30.000 lei/lună</p>
+                </div>
+
+                <p><strong>Runway (Autonomie Financiară):</strong> Câte luni ai rămâne cu bani la rata actuală de consum.</p>
+                <div class="highlight-box gold">
+                    <p style="margin: 0;"><strong>Runway (luni) = Bani în Bancă / Burn Rate Lunar</strong></p>
+                    <p style="margin-top: 0.5rem;">Exemplu: 300.000 lei în bancă / 30.000 lei burn = 10 luni de autonomie</p>
+                </div>
+
+                <p><strong>Regula de Aur:</strong> Dacă Runway < 6 luni, trebuie acțiuni de urgență: Cost Cutting, creștere venituri, sau nouă finanțare (investitori, împrumut).</p>
+            </div>
+        </div>
+
+        <!-- II. Analiza de Profitabilitate și Structura de Costuri -->
+        <button class="section-toggle yellow" onclick="toggleSection(this)">
+            <span>II. Analiza de Profitabilitate și Structura de Costuri</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p>Profitul pe hârtie nu-ți plătește salariile. Marginile de profit arată dacă business-ul tău este sănătos.</p>
+
+            <div class="subsection">
+                <h3 style="margin-top: 1.5rem;"><span class="badge">1</span> Marginile de Profit - Piramida Profitabilității</h3>
+                
+                <p><strong>Marja Brută (Gross Margin):</strong></p>
+                <div class="highlight-box gold">
+                    <p style="margin: 0;"><strong>Gross Margin = (Revenue - COGS) / Revenue × 100%</strong></p>
+                    <p style="margin-top: 0.5rem;">Exemplu: Vânzi 100.000 lei mărfuri, costurile directe sunt 40.000 lei → Gross Margin = 60% (bun!)</p>
+                </div>
+
+                <p><strong>EBITDA (Earnings Before Interest, Taxes, Depreciation, Amortization):</strong></p>
+                <div class="highlight-box blue">
+                    <p style="margin: 0;"><strong>EBITDA = Gross Profit - Operating Expenses (salarii, chirie, utilități)</strong></p>
+                    <p style="margin-top: 0.5rem;">Aceasta este metrica pe care o privesc investitorii. Dacă EBITDA este negativ = burn-out rapid</p>
+                </div>
+
+                <p><strong>Marja Netă (Net Margin):</strong></p>
+                <div class="highlight-box gold">
+                    <p style="margin: 0;"><strong>Net Margin = Net Profit / Revenue × 100%</strong></p>
+                    <p style="margin-top: 0.5rem;">După toți costurile, taxe, dobânzi. O marjă netă de 10-15% pentru retail este performantă. Pentru Tech, 20%+ este normal.</p>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3><span class="badge">2</span> Analiza de Senzitivitate - "What If?"</h3>
+                
+                <p><strong>Ce este:</strong> Testezi ce se întâmplă dacă o variabilă se schimbă. Exemplu:</p>
+                <ul>
+                    <li>"Dacă furnizor crește prețul cu 10%, cu cât trebuie să cresc prețul produsului?" → Calculezi noul Net Margin</li>
+                    <li>"Dacă pierd 20% din clienți, pling capabil să-mi plătesc salariile?" → Calculezi noul Runway</li>
+                    <li>"Dacă închiriez biroul la jumătate din preț, cât scade Burn Rate?" → Identifici leverage-ul cost-cutting</li>
+                </ul>
+
+                <p><strong>Instrument:</strong> Excel cu formule legate. Schimbai o celulă și vezi cascada de impact pe EBITDA, Cash Flow, Runway.</p>
+            </div>
+        </div>
+
+        <!-- III. Arhitectura Fiscală și Optimizare (Codul Fiscal 2026) -->
+        <button class="section-toggle green" onclick="toggleSection(this)">
+            <span>III. Arhitectura Fiscală și Optimizare (Codul Fiscal 2026)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p>Profiturile nu-ți aparțin până nu plătești taxele. Arhitectura fiscală corectă poate diferența între shutdown și creștere exponențială.</p>
+
+            <div class="subsection">
+                <h3 style="margin-top: 1.5rem;"><span class="badge">1</span> Reinvestirea Profitului vs. Distribuirea de Dividende</h3>
+                
+                <p><strong>Scenariul 1: Reinvesteți Profiturile în Tech/Software</strong></p>
+                <div class="highlight-box green">
+                    <p style="margin: 0;"><strong>Deducție de 100%</strong> din profit pentru investiții în IT/digitalizare. Taxa = 0% pe acea parte.</p>
+                </div>
+
+                <p><strong>Scenariul 2: Distribuiți Dividende</strong></p>
+                <div class="highlight-box red">
+                    <p style="margin: 0;"><strong>Impozit pe Dividende = 16%</strong> (din 1 ianuarie 2026)</p>
+                    <p style="margin-top: 0.5rem;">Exemplu: 100.000 lei profit, distribui dividend → 16 taxă = 84.000 lei ajung la tine</p>
+                </div>
+
+                <p><strong>Regula de Aur Financiară:</strong> Reinvesteți în creștere până Runway > 12 luni. După aceea, poți distribui dividende liniștit.</p>
+            </div>
+
+            <div class="subsection">
+                <h3><span class="badge">2</span> Managementul Creanțelor și Riscul de Neîncasare</h3>
+                
+                <p><strong>Provizioane pentru Creanțe Neîncasate:</strong></p>
+                <ul>
+                    <li>Creanță cuprinsă în bilanț > 90 zile neîncasată → Poți face Provizion (deductibil fiscal)</li>
+                    <li>Scad venit brut, scad taxes (până ajung taxele)</li>
+                </ul>
+
+                <p><strong>Factoring (Vânzare Facturi):</strong></p>
+                <div class="highlight-box blue">
+                    <p style="margin: 0;">Când ai urgent lichiditate: Vânzi facturi neîncasate unui factor cu 85-90% din valoare, primești cash imediat, factor-ul încasează de la client.</p>
+                </div>
+
+                <p><strong>Impactul pe Cash Conversion Cycle:</strong> Factoring reduce drastically DSO (Days Sales Outstanding), scade CCC, îmbunătățește Runway.</p>
+            </div>
+        </div>
+
+        <!-- IV. Controlul Intern și Raportarea Digitală (Deep Tech) -->
+        <button class="section-toggle purple" onclick="toggleSection(this)">
+            <span>IV. Controlul Intern și Raportarea Digitală (Deep Tech)</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <p>În 2026, conformitatea nu mai este opțională, ci automatizată. Soft-urile de contabilitate sunt conectate direct cu ANAF.</p>
+
+            <div class="subsection">
+                <h3 style="margin-top: 1.5rem;"><span class="badge">1</span> SAF-T (Fișierul Standard de Control Fiscal - Declarația D406)</h3>
+                
+                <p>Este un export complex al întregii baze de date contabile către ANAF. Orice neconcordanță între stocuri, facturi și plăți este detectată instantaneu de algoritmii ANAF.</p>
+                
+                <p><strong>Implicații practice:</strong></p>
+                <ul>
+                    <li>Nu poți ascunde cheltuielile sau veniturile - sistemul detectează automată</li>
+                    <li>Fii disciplinat cu documentele: Fiecare factură, chitanță, și operație contabilă trebuie documentată corect</li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3><span class="badge">2</span> Politica de Semnătură - Praguri de Aprobare</h3>
+                
+                <p>Stabilești limite decizionale pe role/persoane:</p>
+                <ul>
+                    <li><strong>Admin:</strong> Orice decizie > 5.000 EUR</li>
+                    <li><strong>Manager Financiar:</strong> Decizii între 1.000 - 5.000 EUR</li>
+                    <li><strong>Coordonatori:</strong> < 1.000 EUR</li>
+                </ul>
+
+                <p><strong>De ce conteaza:</strong> Descentralizare cu control reduc bottleneck-urile și scad riscul de fraude.</p>
+            </div>
+        </div>
+
+        <!-- V. Glosar de Termeni Științifici -->
+        <button class="section-toggle red" onclick="toggleSection(this)">
+            <span>V. Glosar de Termeni Științifici</span>
+            <span class="toggle-icon">▶</span>
+        </button>
+        <div class="section-content">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;">CAPEX (Capital Expenditures):</p>
+                    <p style="margin: 0;">Investiții în active pe termen lung (utilaje, software, echipamente). Se amortizează pe mai mulți ani.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;">OPEX (Operating Expenditures):</p>
+                    <p style="margin: 0;">Cheltuieli operaționale curente (salarii, chirie, utilități). Se deduc integral pe exercițiul curent.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;">WACC (Weighted Average Cost of Capital):</p>
+                    <p style="margin: 0;">Costul mediu ponderat al capitalului. Pragul minim de rentabilitate sub care un proiect distruge valoare.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;">Solvabilitate:</p>
+                    <p style="margin: 0;">Capacitatea de a plăti datoriile pe termen lung.</p>
+                </div>
+
+                <div class="highlight-box blue">
+                    <p style="margin: 0 0 0.4rem 0; font-weight: bold;">Lichiditate:</p>
+                    <p style="margin: 0;">Capacitatea de a plăti datoriile mâine. (Cash, conturi curente, investiții pe termen scurt)</p>
+                </div>
+            </div>
+
+            <div class="subsection" style="margin-top: 2rem;">
+                <h3 style="margin-top: 1.5rem;"><span class="badge">Exercițiu Practic</span> Scenariul "Deficit de Lichiditate"</h3>
+                
+                <p><strong>Situație:</strong> Compania ta are:</p>
+                <ul>
+                    <li>50.000 lei în bancă (joi)</li>
+                    <li>Furnizor trebuie plătit: 30.000 lei (luni viitoare)</li>
+                    <li>Vânzări așteptate: 60.000 lei (peste 4 săptămâni)</li>
+                    <li>Salarii de plătit: 25.000 lei (în 10 zile)</li>
+                </ul>
+
+                <p><strong>Analiza:</strong></p>
+                <div class="highlight-box orange">
+                    <p style="margin: 0;"><strong>Deficit imediat = 50.000 - 25.000 (salarii) = 25.000 lei după 10 zile</strong></p>
+                    <p style="margin-top: 0.5rem;">În 11 zile: 25.000 - 30.000 (furnizor) = -5.000 lei (🔴 DEFICIT)</p>
+                    <p style="margin-top: 0.5rem;">Soluții: Factoring, Credit rapid, Negociere termene furnizor, ou plată salarii parțiale</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="checklist">
+                <h4>Checklist pentru această lecție:</h4>
+                <ul>
+                    <li>Înțelegi CCC și cum să-l optimizezi prin management stocuri/creanțe/datorii</li>
+                    <li>Calculezi Burn Rate și Runway, și știi când să suni clopoțelul de alarmă (< 6 luni)</li>
+                    <li>Cunoști diferența dintre Gross Margin, EBITDA, și Net Margin</li>
+                    <li>Aplicați Analiza de Senzitivitate pentru scenarii "What If?"</li>
+                    <li>Stabilești politici de reinvestire vs. dividende bazate pe Runway</li>
+                    <li>Cunosc reguli de Provizioane și Factoring pentru creanțe neîncasate</li>
+                    <li>Cunoști elementele de Control Intern (Politica Semnătură, Praguri Aprobare)</li>
+                    <li>Rezolvi scenarii practice de deficit de lichiditate</li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentLanguage = localStorage.getItem('lessonLanguage') || 'ro';
+
+        function toggleSection(button) {
+            const content = button.nextElementSibling;
+            button.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'ro' ? 'en' : 'ro';
+            localStorage.setItem('lessonLanguage', currentLanguage);
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+        }
+
+        window.addEventListener('load', () => {
+            document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+        });
+    </script>
+</body>
+</html>

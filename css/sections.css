@@ -1,0 +1,306 @@
+/* === SECTIUNI PAGINI === */
+
+/* Lessons Section */
+.lesson-section {
+  background: linear-gradient(135deg, rgba(10, 22, 40, 0.95) 0%, rgba(26, 35, 50, 0.95) 100%);
+  border-top: 2px solid var(--accent-cyan);
+  border-bottom: 2px solid var(--accent-yellow);
+}
+
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+/* Courses Section */
+.courses-section {
+  background: linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(10, 22, 40, 0.95) 100%);
+  border-top: 2px solid var(--accent-yellow);
+  border-bottom: 2px solid var(--accent-cyan);
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* Tests Section */
+.tests-section {
+  background: linear-gradient(135deg, rgba(10, 22, 40, 0.95) 0%, rgba(26, 35, 50, 0.95) 100%);
+  border-top: 2px solid var(--accent-purple);
+  border-bottom: 2px solid var(--accent-yellow);
+}
+
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+/* Stories Section */
+.stories-section {
+  background: linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(10, 22, 40, 0.95) 100%);
+  border-top: 2px solid var(--accent-cyan);
+  border-bottom: 2px solid var(--accent-purple);
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Footer */
+.footer {
+  background: var(--primary-dark);
+  border-top: 2px solid var(--accent-cyan);
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+
+@media (max-width: 1024px) {
+  .lessons-grid,
+  .courses-grid,
+  .tests-grid,
+  .stories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  section {
+    padding: 3rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .lessons-grid,
+  .courses-grid,
+  .tests-grid,
+  .stories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+  }
+
+  section {
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+
+  .menu-item {
+    min-width: 90%;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  section {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .navbar-title {
+    font-size: 1.2rem;
+  }
+
+  .logo {
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
+  }
+}
+
+/* === GAME STYLES === */
+
+.game-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 215, 0, 0.1));
+  border: 2px solid var(--accent-cyan);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  border-color: var(--accent-yellow);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  transform: translateY(-5px);
+}
+
+.dashboard-card-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-card-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-card-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent-yellow);
+}
+
+/* === TEST STYLES === */
+
+.test-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.test-card {
+  background: linear-gradient(135deg, rgba(26, 35, 50, 0.8), rgba(42, 55, 75, 0.8));
+  border: 1px solid var(--accent-cyan);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.test-question {
+  font-size: 1.3rem;
+  color: var(--accent-cyan);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.test-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.test-option-btn {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--accent-cyan);
+  border-radius: 8px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.test-option-btn:hover {
+  background: var(--accent-cyan);
+  color: var(--primary-dark);
+  border-color: var(--accent-yellow);
+}
+
+.test-option-btn.correct {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.test-option-btn.incorrect {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
+/* === PROGRESS BAR === */
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: var(--primary-gray);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid var(--accent-cyan);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-yellow));
+  transition: width 0.3s ease;
+  border-radius: 10px;
+}
+
+.progress-text {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* === ACHIEVEMENT BADGES === */
+
+.achievement-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(0, 240, 255, 0.2));
+  border: 1px solid var(--accent-yellow);
+  border-radius: 20px;
+  color: var(--accent-yellow);
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin: 0.25rem;
+}
+
+.achievement-badge.gold {
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+.achievement-badge.silver {
+  border-color: #c0c0c0;
+  color: #c0c0c0;
+}
+
+.achievement-badge.bronze {
+  border-color: #cd7f32;
+  color: #cd7f32;
+}
