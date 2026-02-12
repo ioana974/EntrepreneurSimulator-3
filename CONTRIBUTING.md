@@ -134,7 +134,7 @@ css/
 
 ### JavaScript/React
 ```javascript
-// ✅ Good
+// Good
 const MyComponent = () => {
   return (
     <div className="container">
@@ -143,21 +143,21 @@ const MyComponent = () => {
   );
 };
 
-// ❌ Bad
+// Bad
 const myComponent=()=>{return <div><h1>Title</h1></div>}
 
 // Use const, not var
-const variable = 'value'; // ✅
-var variable = 'value';  // ❌
+const variable = 'value'; // Good
+var variable = 'value';  // Bad
 
 // Use arrow functions
-const handleClick = () => {};  // ✅
-function handleClick() {}      // ❌ (for components)
+const handleClick = () => {};  // Good
+function handleClick() {}      // Bad (for components)
 ```
 
 ### CSS
 ```css
-/* ✅ Good */
+/* Good */
 .button {
   padding: 1rem 2rem;
   background: var(--accent-cyan);
@@ -169,7 +169,7 @@ function handleClick() {}      // ❌ (for components)
   background: var(--accent-yellow);
 }
 
-/* ❌ Bad */
+/* Bad */
 .button {
   padding: 16px 32px;
   background: #00f0ff;
@@ -272,12 +272,12 @@ Alte feature-uri conexe
 - [ ] Performance impact e minim
 
 ### Approval Process
-1. ✅ Minimum 1 approval
-2. ✅ Toate checks trebuie să treacă
-3. ✅ No requested changes
-4. ✅ Ready to merge!
+1. Minimum 1 approval
+2. Toate checks trebuie să treacă
+3. No requested changes
+4. Ready to merge!
 
-## 🎯 Priority Issues
+## Priority Issues
 
 Căută issues etichetate cu:
 - `good-first-issue` - Pentru contribuitori noi

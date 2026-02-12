@@ -9,7 +9,7 @@ function About() {
       <section style={{ maxWidth: '900px', margin: '3rem auto' }}>
         <div className="card animate-slideInUp" style={{ padding: '2rem' }}>
           <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--accent-cyan)' }}>
-            🎯 Misiunea Noastră
+            Misiunea Noastră
           </h2>
           <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: 'var(--text-secondary)' }}>
             EntrepreneurHub a fost creat cu o singură misiune clară: să democratizeze educația entrepreneurială 
@@ -29,32 +29,32 @@ function About() {
           gap: '2rem'
         }}>
           <Feature 
-            icon="📚" 
+            icon="" 
             title="Lecții Interactive"
             desc="Conținut structurat bazat pe experiența antreprenorilor reali"
           />
           <Feature 
-            icon="🎮" 
+            icon="" 
             title="Simulator Interactiv"
             desc="Lucrează cu bugete virtuale și ia decizii strategice"
           />
           <Feature 
-            icon="👨‍🏫" 
+            icon="" 
             title="Cursuri Online"
             desc="Învață direct de la specialiști și mentori experimentați"
           />
           <Feature 
-            icon="🧪" 
+            icon="" 
             title="Teste Multi-Nivel"
             desc="Evaluează progresul cu teste de la ușor la expert"
           />
           <Feature 
-            icon="🤖" 
+            icon="" 
             title="AI Assistant"
             desc="Corectare automată de răspunsuri cu feedback personalizat"
           />
           <Feature 
-            icon="🌍" 
+            icon="" 
             title="Traduceri Multilingve"
             desc="Disponibil în română și engleză pentru accesibilitate globală"
           />
@@ -63,7 +63,7 @@ function About() {
 
       {/* Team Section */}
       <section style={{ maxWidth: '1200px', margin: '3rem auto' }}>
-        <h2 className="section-title">👥 Echipa Noastră</h2>
+        <h2 className="section-title">Echipa Noastră</h2>
         <p className="section-subtitle">Profesioniști dedicați pasionați de educație entrepreneurială</p>
         <div style={{
           display: 'grid',
@@ -107,21 +107,21 @@ function About() {
       <section style={{ maxWidth: '1200px', margin: '3rem auto' }}>
         <div className="card" style={{ padding: '2rem' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--accent-yellow)' }}>
-            🔧 Stack Tehnologic
+            Stack Tehnologic
           </h2>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
             gap: '1.5rem'
           }}>
-            <TechBadge name="React" icon="⚛️" />
-            <TechBadge name="JavaScript" icon="📜" />
-            <TechBadge name="HTML/CSS" icon="🎨" />
-            <TechBadge name="Node.js" icon="🟢" />
-            <TechBadge name="Express" icon="🚂" />
-            <TechBadge name="MongoDB" icon="🍃" />
-            <TechBadge name="OpenAI API" icon="🤖" />
-            <TechBadge name="Redux" icon="🔴" />
+            <TechBadge name="React" icon="" />
+            <TechBadge name="JavaScript" icon="" />
+            <TechBadge name="HTML/CSS" icon="" />
+            <TechBadge name="Node.js" icon="" />
+            <TechBadge name="Express" icon="" />
+            <TechBadge name="MongoDB" icon="" />
+            <TechBadge name="OpenAI API" icon="" />
+            <TechBadge name="Redux" icon="" />
           </div>
         </div>
       </section>
@@ -161,7 +161,7 @@ function About() {
         marginTop: '3rem',
         borderTop: '1px solid var(--border-color)'
       }}>
-        <p>&copy; 2026 EntrepreneurHub. Built with ❤️ for aspiring entrepreneurs. All rights reserved.</p>
+        <p>&copy; 2026 EntrepreneurHub. Built with passion for aspiring entrepreneurs. All rights reserved.</p>
       </footer>
     </div>
   );

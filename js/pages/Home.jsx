@@ -116,25 +116,25 @@ function Home() {
           <StatCard 
             number="2,500+" 
             label="Antreprenori Instruiți"
-            icon="👥"
+            icon=""
             color="#00f0ff"
           />
           <StatCard 
             number="500M+" 
             label="Valoare Generată"
-            icon="💰"
+            icon=""
             color="#ffd700"
           />
           <StatCard 
             number="89%" 
             label="Rata de Succes"
-            icon="🎯"
+            icon=""
             color="#10b981"
           />
           <StatCard 
             number="45+" 
             label="Țări Acoperite"
-            icon="🌍"
+            icon=""
             color="#a78bfa"
           />
         </div>
@@ -151,7 +151,7 @@ function Home() {
         <p className="section-subtitle animate-slideInUp">{t('lessonsDesc')}</p>
         <div className="lessons-grid">
           <LessonCard 
-            icon="📚" 
+            icon="" 
             title="Fundamentele Businessului"
             desc="Învață conceptele de bază ale antreprenoriatului modern"
             content={{
@@ -180,7 +180,7 @@ function Home() {
             }}
           />
           <LessonCard 
-            icon="💡" 
+            icon="" 
             title="Inovație și Creativitate"
             desc="Descoperă cum să-ți dezvolți ideile în produse de succes"
             content={{
@@ -208,7 +208,7 @@ function Home() {
             }}
           />
           <LessonCard 
-            icon="💰" 
+            icon="" 
             title="Managementul Financiar"
             desc="Stăpânește gestiunea bugetului și finanțelor businessului"
             content={{
@@ -246,7 +246,7 @@ function Home() {
             }}
           />
           <LessonCard 
-            icon="🎯" 
+            icon="" 
             title="Strategia de Marketing"
             desc="Creează campanii eficiente și atrage clienți"
             content={{
@@ -429,10 +429,10 @@ function CourseCard({ title, instructor, duration, level }) {
         {title}
       </h3>
       <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-        👨‍🏫 <strong>{instructor}</strong>
+        <strong>{instructor}</strong>
       </p>
       <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-        ⏱️ {duration}
+        {duration}
       </p>
       <div style={{ 
         display: 'inline-block',
@@ -466,10 +466,10 @@ function TestCard({ name, questions, time, level }) {
         {name}
       </h3>
       <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-        📋 {questions}
+        {questions}
       </p>
       <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-        ⏱️ {time}
+        {time}
       </p>
       <div style={{ 
         display: 'inline-block',

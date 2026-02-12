@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
+import { testQuestions } from '../testData.js';
 
 function TestsPage() {
   const [selectedTest, setSelectedTest] = useState(null);
@@ -8,78 +9,7 @@ function TestsPage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const { t } = useLanguage();
 
-  const tests = [
-    {
-      id: 1,
-      name: "Assessment Inițial",
-      description: "Test introductiv pentru a evalua nivelul tău actual de cunoștințe",
-      duration: "30 minute",
-      questions: "25 întrebări",
-      level: "Ușor",
-      questions: [
-        {
-          q: "Ce este entrepreneurshipul?",
-          options: [
-            "Procesul de creere a unei noi afaceri",
-            "Investiția în bursă",
-            "Lucrul la o companie",
-            "Tranzacții financiare"
-          ],
-          correct: 0
-        },
-        {
-          q: "Care sunt trei caracteristici principale ale unui antreprenor?",
-          options: [
-            "Fearless, Impatient, Lazy",
-            "Risk-taker, Innovative, Persistent",
-            "Rich, Connected, Lucky",
-            "Young, Educated, Famous"
-          ],
-          correct: 1
-        },
-        {
-          q: "Ce este un MVP (Minimum Viable Product)?",
-          options: [
-            "Maximum Value Product",
-            "Cel mai simplu produs ce poate fi oferit pentru a testa piața",
-            "Multi-Vendor Platform",
-            "Manager Value Position"
-          ],
-          correct: 1
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: "Cunoștințe Fundamentale",
-      description: "Test intermediar cu probleme mai complexe",
-      duration: "60 minute",
-      questions: "50 întrebări",
-      level: "Mediu",
-      questions: [
-        {
-          q: "Cum ar trebui să abordezi identificarea pieței țintă?",
-          options: [
-            "Presupune că toată lumea va cumpăra produsul tău",
-            "Studiază demografica, comportamentul consumatorului și nevoile",
-            "Copiază concurența",
-            "Fă reclame la întâmplare"
-          ],
-          correct: 1
-        },
-        {
-          q: "Ce este pivoting în context de startup?",
-          options: [
-            "O mișcare de dans",
-            "Schimbarea strategiei atunci când datele indică că direcția actuală nu funcționează",
-            "O îndoire în structura organizației",
-            "Rotirea stocului"
-          ],
-          correct: 1
-        }
-      ]
-    }
-  ];
+  const tests = testQuestions;
 
   if (!selectedTest) {
     return (
@@ -120,7 +50,7 @@ function TestsPage() {
                   color: 'var(--accent-cyan)',
                   fontSize: '0.9rem'
                 }}>
-                  📋 {test.questions}
+                  {test.questionCount} {test.questionCount === 1 ? 'întrebare' : 'întrebări'}
                 </span>
                 <span style={{ 
                   padding: '0.5rem 1rem', 
@@ -129,7 +59,7 @@ function TestsPage() {
                   color: 'var(--accent-yellow)',
                   fontSize: '0.9rem'
                 }}>
-                  ⏱️ {test.duration}
+                  {test.duration}
                 </span>
               </div>
               <button className="btn btn-primary" style={{ width: '100%' }}>
@@ -143,7 +73,7 @@ function TestsPage() {
   }
 
   const test = tests.find(t => t.id === selectedTest);
-  const isTestCompleted = currentQuestion >= test.questions.length;
+  const isTestCompleted = currentQuestion >= test.questionsList.length;
 
   if (isTestCompleted) {
     const percentage = Math.round((score / test.questions.length) * 100);
@@ -162,7 +92,7 @@ function TestsPage() {
             fontSize: '5rem',
             marginBottom: '1rem'
           }}>
-            {percentage >= 70 ? '✅' : percentage >= 50 ? '⚠️' : '❌'}
+            {percentage >= 70 ? 'Pass' : percentage >= 50 ? 'Warning' : 'Fail'}
           </div>
           <p style={{
             fontSize: '2rem',
@@ -177,7 +107,7 @@ function TestsPage() {
             color: 'var(--text-secondary)',
             marginBottom: '2rem'
           }}>
-            Ai răspuns corect la {score} din {test.questions.length} întrebări
+            Ai răspuns corect la {score} din {test.questionsList.length} întrebări
           </p>
           <button 
             className="btn btn-primary"
@@ -204,7 +134,7 @@ function TestsPage() {
     );
   }
 
-  const question = test.questions[currentQuestion];
+  const question = test.questionsList[currentQuestion];
 
   return (
     <div style={{ minHeight: '100vh', padding: '2rem', paddingTop: '100px' }}>
@@ -220,12 +150,12 @@ function TestsPage() {
           <div style={{
             background: 'linear-gradient(90deg, var(--accent-cyan), var(--accent-yellow))',
             height: '100%',
-            width: `${((currentQuestion + 1) / test.questions.length) * 100}%`,
-            transition: 'width 0.3s ease'
-          }}></div>
+          width: `${((currentQuestion + 1) / test.questionsList.length) * 100}%`,
+          transition: 'width 0.3s ease'
+        }}></div>
         </div>
         <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-          Întrebarea {currentQuestion + 1} din {test.questions.length}
+          Întrebarea {currentQuestion + 1} din {test.questionsList.length}
         </p>
       </div>
 

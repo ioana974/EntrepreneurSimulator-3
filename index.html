@@ -86,7 +86,7 @@
     </div>
     <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 500; padding: 2rem; overflow-y: auto;">
       <div style="background: var(--primary-dark); max-width: 600px; margin: 2rem auto; border-radius: 10px; padding: 2rem; color: var(--text-primary);">
-        <button onclick="closeTestModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">✕</button>
+      <button onclick="closeTestModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">&times;</button>
         <div id="test-modal-content" style="clear: both;"></div>
       </div>
     </div>
@@ -107,14 +107,26 @@
   <!-- Enrollment Modal -->
   <div id="enrollment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 600; padding: 2rem; overflow-y: auto; align-items: center; justify-content: center;">
     <div style="background: var(--primary-dark); max-width: 500px; margin: auto; border-radius: 10px; padding: 2rem; color: var(--text-primary);">
-      <button onclick="closeEnrollmentModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">✕</button>
+      <button onclick="closeEnrollmentModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">&times;</button>
       <div id="enrollment-content" style="clear: both;"></div>
     </div>
   </div>
 
+  <!-- Admin Panel -->
+  <section id="admin-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title" id="admin-title">Admin Panel</h2>
+    <div style="margin-bottom: 2rem;">
+      <button onclick="downloadEnrollments('json')" style="margin-right: 1rem; padding: 0.8rem 1.5rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Enrollments (JSON)</button>
+      <button onclick="downloadEnrollments('csv')" style="margin-right: 1rem; padding: 0.8rem 1.5rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Enrollments (CSV)</button>
+      <button onclick="downloadGameResults('json')" style="margin-right: 1rem; padding: 0.8rem 1.5rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Game Results (JSON)</button>
+      <button onclick="downloadGameResults('csv')" style="padding: 0.8rem 1.5rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Game Results (CSV)</button>
+    </div>
+    <div id="admin-content"></div>
+  </section>
+
   <!-- Footer -->
   <footer style="text-align: center; padding: 2rem; color: var(--text-secondary); margin-top: 3rem; border-top: 1px solid var(--border-color);">
-    <p>&copy; 2026 EntrepreneurHub. Built with passion for entrepreneurs.</p>
+    <p>&copy; 2026 EntrepreneurHub. Built with passion for entrepreneurs. <a href="javascript:openAdminPanel()" style="color: var(--accent-cyan); text-decoration: none; cursor: pointer;">Admin</a></p>
   </footer>
 
   <!-- Scripts -->
@@ -293,52 +305,111 @@
 
     const testQuestions = {
       initial: [
-        { 
-          q_ro: 'Care este definiția unui startup?', 
-          q_en: 'What is the definition of a startup?',
-          options_ro: ['O companie nouă', 'O companie mică', 'O companie cu risc'],
-          options_en: ['A new company', 'A small company', 'A company with risk'],
-          correct: 0 
-        },
-        { 
-          q_ro: 'Ce este un MVP?', 
-          q_en: 'What is an MVP?',
-          options_ro: ['Produs Minim Viabil', 'Produs Maxim Valuabil', 'Manager de Vânzări'],
-          options_en: ['Minimum Viable Product', 'Maximum Valuable Product', 'Manager of Sales'],
-          correct: 0 
-        },
-        { 
-          q_ro: 'Care este cel mai important pentru un antreprenor?', 
-          q_en: 'What is most important for an entrepreneur?',
-          options_ro: ['Bani', 'Idee bună', 'Viziune clară'],
-          options_en: ['Money', 'Good idea', 'Clear vision'],
-          correct: 2 
-        }
+        {q_ro:'Ce este separația patrimonială în SRL?',q_en:'What is asset separation in LLC?',options_ro:['Divorțul între asociați','Protecție patrimoniu personal','Separarea conturilor'],options_en:['Partner divorce','Personal asset protection','Account separation'],correct:1},
+        {q_ro:'Care este forma juridică recomandată pentru startup?',q_en:'Which legal form is recommended for startups?',options_ro:['PFA','SRL','SA'],options_en:['SEL','LLC','Corp'],correct:1},
+        {q_ro:'Ce este TVA Colectat?',q_en:'What is Collected VAT?',options_ro:['Taxa plătită furnizorilor','Taxa adăugată la vânzări','Taxa pe profit'],options_en:['Tax paid to suppliers','Tax added to sales','Tax on profit'],correct:1},
+        {q_ro:'Care regim fiscal are rate de 1-3%?',q_en:'Which tax regime has 1-3% rates?',options_ro:['Microîntreprindere','Impozit profit','SRL'],options_en:['Micro-business','Profit tax','LLC'],correct:0},
+        {q_ro:'Ce sunt codurile CAEN?',q_en:'What are NACE codes?',options_ro:['Coduri secrete','Clasificare activități economice','Coduri bancari'],options_en:['Secret codes','Classification of activities','Bank codes'],correct:1},
+        {q_ro:'Unde se înregistrează marcele în România?',q_en:'Where are trademarks registered in Romania?',options_ro:['La OSIM','La Notariat','La Primărie'],options_en:['At OSIM','At Notary','At City Hall'],correct:0},
+        {q_ro:'Ce este un MVP?',q_en:'What is an MVP?',options_ro:['Produs perfect','Produs minim viabil','Manager de vânzări'],options_en:['Perfect product','Minimum viable product','Sales manager'],correct:1},
+        {q_ro:'Care sunt fazele Design Thinking?',q_en:'What are Design Thinking phases?',options_ro:['3 faze','5 faze','10 faze'],options_en:['3 phases','5 phases','10 phases'],correct:1},
+        {q_ro:'Ce sunt clase NISA la mărci?',q_en:'What are NISA classes for trademarks?',options_ro:['Clase sociale','Categorii de produse/servicii','Nivele dificultate'],options_en:['Social classes','Product/service categories','Difficulty levels'],correct:1},
+        {q_ro:'Care e importanța prototipării rapide?',q_en:'Why is rapid prototyping important?',options_ro:['Costuri mici','Testare rapidă cu feedback','Marketing'],options_en:['Low costs','Quick testing with feedback','Marketing'],correct:1},
+        {q_ro:'Ce este Ciclul de Conversie (CCC)?',q_en:'What is Cash Conversion Cycle?',options_ro:['DIO+DSO-DPO','DIO×DSO/DPO','DSO-DIO'],options_en:['DIO+DSO-DPO','DIO×DSO/DPO','DSO-DIO'],correct:0},
+        {q_ro:'Ce este Burn Rate?',q_en:'What is Burn Rate?',options_ro:['Rata creșterii','Cheltuieli minus venituri','Profit'],options_en:['Growth rate','Expenses minus revenue','Profit'],correct:1},
+        {q_ro:'Care e formula pentru Marja Brută?',q_en:'What is Gross Margin formula?',options_ro:['(Revenue-COGS)/Revenue','Revenue/COGS','COGS/Revenue'],options_en:['(Rev-COGS)/Rev','Rev/COGS','COGS/Rev'],correct:0},
+        {q_ro:'Ce este EBITDA?',q_en:'What is EBITDA?',options_ro:['Venit din dobânzi','Profit operațional','Cost vânzări'],options_en:['Interest income','Operating profit','Cost of sales'],correct:1},
+        {q_ro:'Dacă ai 300K în bancă și burn 30K/lună, care e runway-ul?',q_en:'If you have 300K bank and burn 30K/month, what is runway?',options_ro:['5 luni','10 luni','15 luni'],options_en:['5 months','10 months','15 months'],correct:1},
+        {q_ro:'Ce este LTV?',q_en:'What is LTV?',options_ro:['Cost achiziție client','Valoare client pe viață','Venit mediu'],options_en:['Customer acquisition cost','Customer lifetime value','Average revenue'],correct:1},
+        {q_ro:'Ce este CAC?',q_en:'What is CAC?',options_ro:['Cost of All Commodities','Costul achiziției client','Customer Annual Charge'],options_en:['Cost of All Commodities','Customer acquisition cost','Customer Annual Charge'],correct:1},
+        {q_ro:'Care e raportul ideal LTV/CAC?',q_en:'What is ideal LTV/CAC ratio?',options_ro:['1:1','3:1','10:1'],options_en:['1:1','3:1','10:1'],correct:1},
+        {q_ro:'Ce este funnel de conversie?',q_en:'What is conversion funnel?',options_ro:['Aparat laborator','Etape Awareness→Conversion','Reducere preț'],options_en:['Lab device','Stages Awareness→Conversion','Price discount'],correct:1},
+        {q_ro:'Ce prescripție GDPR trebuie respectată?',q_en:'What GDPR requirement must be followed?',options_ro:['Nicio restricție','Informed Consent + Privacy Policy','Doar pentru EU'],options_en:['No restriction','Informed Consent + Privacy Policy','Only for EU'],correct:1},
+        {q_ro:'Ce este un plan de afaceri?',q_en:'What is a business plan?',options_ro:['Hartă birou','Document cu strategie și finanțe','Contract bancă'],options_en:['Office map','Strategy & finance document','Bank contract'],correct:1},
+        {q_ro:'Care caracteristici au antreprenorii de succes?',q_en:'What traits do successful entrepreneurs have?',options_ro:['Bogați','Gândire disruptivă, persistență','Norocos'],options_en:['Rich','Disruptive thinking, persistence','Lucky'],correct:1},
+        {q_ro:'Ce este pivoting?',q_en:'What is pivoting?',options_ro:['Mișcare dans','Schimbare strategie pe date reale','Rotire stoc'],options_en:['Dance move','Strategy change on real data','Stock rotation'],correct:1},
+        {q_ro:'Ce este networking-ul?',q_en:'What is networking?',options_ro:['Internet','Relații cu oameni relevanți','Sistem calcul'],options_en:['Internet','Relations with relevant people','Computer system'],correct:1},
+        {q_ro:'De ce este importantă etapa MVP?',q_en:'Why is MVP stage important?',options_ro:['Costă puțin','Validează rapid ideea pe piață','E obligatorie'],options_en:['Low cost','Quickly validates idea on market','Mandatory'],correct:1}
       ],
       fundamentals: [
-        { 
-          q_ro: 'Ce este un model de afaceri?', 
-          q_en: 'What is a business model?',
-          options_ro: ['Modul cum faci bani', 'Cum lucrează compania', 'Locul unde lucrezi'],
-          options_en: ['How you make money', 'How the company works', 'Where you work'],
-          correct: 1 
-        },
-        { 
-          q_ro: 'Care sunt stakeholderii?', 
-          q_en: 'Who are stakeholders?',
-          options_ro: ['Oamenii investiți în companie', 'Doar angajații', 'Doar clienții'],
-          options_en: ['People invested in the company', 'Only employees', 'Only clients'],
-          correct: 0 
-        }
+        {q_ro:'Ce este separația patrimonială în SRL?',q_en:'What is asset separation in LLC?',options_ro:['Divorțul între asociați','Protecție patrimoniu personal','Separarea conturilor'],options_en:['Partner divorce','Personal asset protection','Account separation'],correct:1},
+        {q_ro:'Care este forma juridică recomandată pentru startup?',q_en:'Which legal form is recommended for startups?',options_ro:['PFA','SRL','SA'],options_en:['SEL','LLC','Corp'],correct:1},
+        {q_ro:'Ce este TVA Colectat?',q_en:'What is Collected VAT?',options_ro:['Taxa plătită furnizorilor','Taxa adăugată la vânzări','Taxa pe profit'],options_en:['Tax paid to suppliers','Tax added to sales','Tax on profit'],correct:1},
+        {q_ro:'Care regim fiscal are rate de 1-3%?',q_en:'Which tax regime has 1-3% rates?',options_ro:['Microîntreprindere','Impozit profit','SRL'],options_en:['Micro-business','Profit tax','LLC'],correct:0},
+        {q_ro:'Ce sunt codurile CAEN?',q_en:'What are NACE codes?',options_ro:['Coduri secrete','Clasificare activități economice','Coduri bancari'],options_en:['Secret codes','Classification of activities','Bank codes'],correct:1},
+        {q_ro:'Ce se întâmplă dacă TVA Deductibil > TVA Colectat?',q_en:'What if Deductible VAT > Collected VAT?',options_ro:['Plătești diferența','Ai TVA de recuperat','Nicio problemă'],options_en:['Pay difference','Have VAT to recover','No problem'],correct:1},
+        {q_ro:'Ce este REVISAL?',q_en:'What is REVISAL?',options_ro:['Software contabilitate','Registru Evidență Salariați','Bază date globală'],options_en:['Accounting software','Employees Registry','Global database'],correct:1},
+        {q_ro:'Care diferență SRL vs PFA la risc?',q_en:'What is LLC vs SEL risk difference?',options_ro:['Nu sunt diferite','SRL are protecție patrimonială','PFA are protecție'],options_en:['No difference','LLC has asset protection','SEL has protection'],correct:1},
+        {q_ro:'Cum se calculează DIO (Days Inventory)?',q_en:'How to calculate DIO?',options_ro:['Zile până vânzare','Zile după vânzare','Zile plată furnizor'],options_en:['Days to sell','Days after sale','Days to pay supplier'],correct:0},
+        {q_ro:'Ce este Runway-ul?',q_en:'What is Runway?',options_ro:['Pistă avion','Luni de funcționare cu cash','Perioadă proiecție'],options_en:['Airport runway','Months operating on cash','Projection period'],correct:1},
+        {q_ro:'Ce sunt cheltuielile deductibile?',q_en:'What are deductible expenses?',options_ro:['Cheltuieli personale','Salarii, chirii, materii prime','Doar utils'],options_en:['Personal expenses','Salaries, rent, raw materials','Only utilities'],correct:1},
+        {q_ro:'Unde se depun documente constituire SRL?',q_en:'Where to file LLC documents?',options_ro:['Primărie','Notariat și ONRC','Banca'],options_en:['City Hall','Notary and Commerce Registry','Bank'],correct:1},
+        {q_ro:'Ce e răspundere solidară?',q_en:'What is joint liability?',options_ro:['Răspundere împreună','Răspundere separată','Fără răspundere'],options_en:['Joint liability','Separate liability','No liability'],correct:0},
+        {q_ro:'Care e cost normal SRL?',q_en:'What is typical LLC setup cost?',options_ro:['100 lei','1000-2000 lei','10000 lei'],options_en:['100 lei','1000-2000 lei','10000 lei'],correct:1},
+        {q_ro:'De ce e important actul constitutiv?',q_en:'Why is Articles of Association important?',options_ro:['Legislație','Protecție și structură governance','Marketing'],options_en:['Legislation','Protection and governance structure','Marketing'],correct:1},
+        {q_ro:'Ce se întâmplă dacă Gross Margin scade?',q_en:'What if Gross Margin drops?',options_ro:['E bun','Problemă cu costuri directe','Nu contează'],options_en:['Good','Problem with direct costs','Doesnt matter'],correct:1},
+        {q_ro:'Când trebuie să acționezi dacă Runway < 6 luni?',q_en:'When to act if Runway < 6 months?',options_ro:['Niciodată','Urgent: Cost Cutting sau finanțare','După 3 luni'],options_en:['Never','Urgent: Cost cutting or funding','After 3 months'],correct:1},
+        {q_ro:'Ce e Sensitivity Analysis?',q_en:'What is Sensitivity Analysis?',options_ro:['Psihologie','Model What-If pentru impact','Marketing'],options_en:['Psychology','What-If model for impact','Marketing'],correct:1},
+        {q_ro:'Cum se calculează Net Margin?',q_en:'How to calculate Net Margin?',options_ro:['Net Profit/Revenue','Gross Margin minus tax','Revenue/Cost'],options_en:['Net Profit/Revenue','Gross minus tax','Revenue/Cost'],correct:0},
+        {q_ro:'Ce sunt Dividendele?',q_en:'What are Dividends?',options_ro:['Salariu angajați','Profit distribuit acționarilor','Taxă'],options_en:['Employee salary','Profit distributed to shareholders','Tax'],correct:1},
+        {q_ro:'Ce e Factoring?',q_en:'What is Factoring?',options_ro:['Gestionare butik','Vânzare facturi cu discount','Serviciu contabil'],options_en:['Boutique management','Invoice sale with discount','Accounting service'],correct:1},
+        {q_ro:'Care e importanța protecției IP?',q_en:'Why is IP protection important?',options_ro:['Cosmetic','Protejează valoare companie','Doar pentru mari'],options_en:['Cosmetic','Protects company value','Only for big'],correct:1},
+        {q_ro:'Ce sunt clase NISA?',q_en:'What are NISA classes?',options_ro:['Clase școlare','Categorii prod/servicii mărci','Nivele preț'],options_en:['School grades','Product/service categories for marks','Price levels'],correct:1},
+        {q_ro:'Ce e Cost of Sales (COGS)?',q_en:'What is Cost of Goods Sold?',options_ro:['Costuri indirecte','Costuri directe produse vândute','Salarii'],options_en:['Indirect costs','Direct costs of goods sold','Salaries'],correct:1},
+        {q_ro:'De ce sunt importanți stakeholder-ii?',q_en:'Why are stakeholders important?',options_ro:['Nu sunt','Influențează strategie și decizii','Doar investitori'],options_en:['Not important','Influence strategy and decisions','Only investors'],correct:1},
+        {q_ro:'Care este forma juridică recomandată?',q_en:'What legal form is recommended?',options_ro:['PFA','SRL','SA'],options_en:['SEL','LLC','Corp'],correct:1},
+        {q_ro:'Ce sunt codurile NACE?',q_en:'What are NACE codes?',options_ro:['Coduri securitate','Clasificare économice','Coduri intern'],options_en:['Security codes','Economic classification','Internal codes'],correct:1},
+        {q_ro:'Unde se plătesc impozitele în România?',q_en:'Where are taxes paid in Romania?',options_ro:['La bancă','ANAF','La primărie'],options_en:['At bank','ANAF','At city hall'],correct:1},
+        {q_ro:'Ce este capitalizarea?',q_en:'What is capitalization?',options_ro:['Salvare capital','Transformare profit în capital','Impozit'],options_en:['Capital saving','Convert profit to capital','Tax'],correct:1},
+        {q_ro:'Care sunt obligațiile unui antreprenor?',q_en:'What are entrepreneur obligations?',options_ro:['Doar legale','Contabile, fiscale, de angajare','Doar fiscale'],options_en:['Only legal','Accounting, tax, hiring','Only tax'],correct:1},
+        {q_ro:'Ce este contractul de parteneriat?',q_en:'What is partnership agreement?',options_ro:['Opțional','Obligatoriu și protector','Doar tax'],options_en:['Optional','Mandatory and protective','Only tax'],correct:1},
+        {q_ro:'Cum se editează statutul SRL?',q_en:'How to modify LLC bylaws?',options_ro:['Ușor','Necesită acord asociați și notariat','Automat'],options_en:['Easy','Needs agreement and notary','Automatic'],correct:1},
+        {q_ro:'Ce sunt provizioanele?',q_en:'What are provisions?',options_ro:['Reduceri','Riscuri potențiale în conturi','Impozite'],options_en:['Discounts','Potential risks in accounts','Taxes'],correct:1},
+        {q_ro:'Ce este amortizarea?',q_en:'What is depreciation?',options_ro:['Reducere preț','Scadere valoare active în timp','Taxă'],options_en:['Price reduction','Asset value decrease over time','Tax'],correct:1},
+        {q_ro:'Care sunt drepturi unui acționar?',q_en:'What are shareholder rights?',options_ro:['Doar profit','Vot, profit, informații','Doar vot'],options_en:['Only profits','Vote, profits, information','Only vote'],correct:1},
+        {q_ro:'Ce este board-ul?',q_en:'What is the board?',options_ro:['Random grupo','Corp governance și decizii','HR team'],options_en:['Random group','Corp governance and decisions','HR team'],correct:1}
       ],
       professional: [
-        { 
-          q_ro: 'Ce este scalabilitatea?', 
-          q_en: 'What is scalability?',
-          options_ro: ['Creșterea fără costuri duble', 'Reducerea costurilor', 'Schimbarea modelului'],
-          options_en: ['Growth without doubling costs', 'Reducing costs', 'Changing the model'],
-          correct: 0 
-        }
+        {q_ro:'Calculează CCC pentru DIO=45, DSO=30, DPO=20?',q_en:'Calculate CCC with DIO=45, DSO=30, DPO=20?',options_ro:['25 zile','55 zile','95 zile'],options_en:['25 days','55 days','95 days'],correct:1},
+        {q_ro:'Ce e diferența Profit contabil vs fiscal?',q_en:'Accounting vs Tax Profit difference?',options_ro:['Nu e diferență','Contabil pe IFRS, Fiscal pe ANAF','Sunt opuse'],options_en:['No difference','Accounting on IFRS, Tax on ANAF','Opposite'],correct:1},
+        {q_ro:'Cum influențează Elasticity of Demand pricing?',q_en:'How does Elasticity affect pricing?',options_ro:['Deloc','Elastic=preț scade','Mereu pozitiv'],options_en:['Not at all','Elastic=price down','Always positive'],correct:1},
+        {q_ro:'Ce sunt Provizioane pentru Creanțe?',q_en:'What are Allowances for Receivables?',options_ro:['Taxe directe','Riscuri creanțe neîncasate','Reduceri'],options_en:['Direct taxes','Risks for uncollected','Discounts'],correct:1},
+        {q_ro:'Care e raportul EBITDA/Revenue ideal?',q_en:'What is ideal EBITDA/Revenue?',options_ro:['10%','30-40%','90%'],options_en:['10%','30-40%','90%'],correct:1},
+        {q_ro:'Ce sunt Patent claims?',q_en:'What are Patent claims?',options_ro:['Prospecte','Definiții invenție protejate','Drepturi proprietar'],options_en:['Brochures','Invention definitions','Owner rights'],correct:1},
+        {q_ro:'Cum se calculează Revenue Multiple?',q_en:'How to calculate Revenue Multiple?',options_ro:['Valuation/Revenue','Revenue/Valuation','Revenue×2'],options_en:['Valuation/Revenue','Revenue/Valuation','Revenue×2'],correct:0},
+        {q_ro:'Ce e Comparable Companies Analysis?',q_en:'What is Comps Analysis?',options_ro:['Analiză concurență','Valuation prin comparare similare','Survey'],options_en:['Competitor analysis','Valuation by comparing','Market survey'],correct:1},
+        {q_ro:'Ce sunt scenarios în Financial Modeling?',q_en:'What are scenarios in Fin. Modeling?',options_ro:['Povești','Base/Bull/Bear projections','Setări'],options_en:['Stories','Base/Bull/Bear projections','Settings'],correct:1},
+        {q_ro:'Cum se calculează Blended Discount Rate?',q_en:'How to calculate WACC?',options_ro:['Medie simplă','WACC=pondere debit+equity','Dobândă bancă'],options_en:['Simple average','WACC=weight debt+equity','Bank interest'],correct:1},
+        {q_ro:'Ce e Product-Market Fit?',q_en:'What is Product-Market Fit?',options_ro:['Vânzări OK','Clienți angajați, growth, NPS>50','Niciodată'],options_en:['OK sales','Engaged, growth, NPS>50','Never'],correct:1},
+        {q_ro:'Care sunt indicatori Viral Coefficient?',q_en:'What indicates Viral Coefficient?',options_ro:['Random','(Invited)×(Conv)>1=exponențial','Mereu 0'],options_en:['Random','(Inv)×(Conv)>1=exponential','Always 0'],correct:1},
+        {q_ro:'Ce e Positioning Strategy?',q_en:'What is Positioning Strategy?',options_ro:['Loc office','Definiție valoare vs competitors','Adresă'],options_en:['Office location','Unique value vs competitors','Address'],correct:1},
+        {q_ro:'Cum se structurează Cap Table?',q_en:'How to structure Cap Table?',options_ro:['Aleatoriu','Founders 70%, Investors 20%, Pool 10%','Egal'],options_en:['Random','Founders 70%, Investors 20%, Pool 10%','Equal'],correct:1},
+        {q_ro:'Ce sunt Attribution Models?',q_en:'What are Attribution Models?',options_ro:['Culori brand','Alocație credit pe touchpoint','Nume'],options_en:['Brand colors','Allocate credit per touchpoint','Names'],correct:1},
+        {q_ro:'De ce e important A/B Testing?',q_en:'Why is A/B Testing important?',options_ro:['Rar','Validare optimizări statistic','Marketing'],options_en:['Rarely','Validate optimizations stat','Marketing'],correct:1},
+        {q_ro:'Ce e Dynamic Pricing?',q_en:'What is Dynamic Pricing?',options_ro:['Preț fix','Preț adaptat demand/supply','Reducere'],options_en:['Fixed price','Price to demand/supply','Discount'],correct:1},
+        {q_ro:'Cum calculezi CAC Payback Period?',q_en:'How to calculate CAC Payback?',options_ro:['CAC/Monthly Rev','Luni recuperare CAC','Random'],options_en:['CAC/Monthly Rev','Months recover CAC','Random'],correct:1},
+        {q_ro:'Ce sunt Cohort Analysis?',q_en:'What is Cohort Analysis?',options_ro:['Analiza vârstă','Grup users behavior în timp','Survey'],options_en:['Age analysis','Group users over time','Survey'],correct:1},
+        {q_ro:'De ce e important Unit Economics?',q_en:'Why Unit Economics?',options_ro:['Cosmetic','Profitabilitate per customer','Taxe'],options_en:['Cosmetic','Profitability per customer','Taxes'],correct:1},
+        {q_ro:'Ce este Break-even Point?',q_en:'What is Break-even Point?',options_ro:['Start afaceri','Revenue=Total Cost','Stop afaceri'],options_en:['Start business','Revenue=Total Cost','Stop business'],correct:1},
+        {q_ro:'Cum se calculează Customer Acquisition Cost?',q_en:'How to calculate CAC?',options_ro:['Random','Marketing Spend / Customers','Revenue/Cost'],options_en:['Random','Marketing Spend / Customers','Revenue/Cost'],correct:1},
+        {q_ro:'Ce sunt Retention Metrics?',q_en:'What are Retention Metrics?',options_ro:['Noi clienți','Clienți care rămân','Cost marketing'],options_en:['New customers','Customers retained','Marketing cost'],correct:1},
+        {q_ro:'Ce este Churn Rate?',q_en:'What is Churn Rate?',options_ro:['Creștere','% clienți care pleacă','Profit margin'],options_en:['Growth','% customers leaving','Profit margin'],correct:1},
+        {q_ro:'Cum se calculează MRR?',q_en:'How to calculate MRR?',options_ro:['Revenue anual','Revenue recurent lunar','Cost mediu'],options_en:['Annual revenue','Monthly recurring revenue','Average cost'],correct:1},
+        {q_ro:'Ce sunt Growth Hacks?',q_en:'What are Growth Hacks?',options_ro:['Gaming','Tehnici creative creștere rapid','Marketing standard'],options_en:['Gaming','Creative rapid growth techniques','Standard marketing'],correct:1},
+        {q_ro:'Ce este Funnel Optimization?',q_en:'What is Funnel Optimization?',options_ro:['Design','Îmbunătățire fiecare etapă conversie','Hardware'],options_en:['Design','Improve each conversion stage','Hardware'],correct:1},
+        {q_ro:'Cum influențează Network Effects valoarea?',q_en:'How do Network Effects add value?',options_ro:['Negativ','Valoare crește cu utilizatori','Static'],options_en:['Negative','Value grows with users','Static'],correct:1},
+        {q_ro:'Ce este Lifetime Value (LTV)?',q_en:'What is Lifetime Value?',options_ro:['Sales o dată','Total profit din relație client','Venit mediu'],options_en:['One-time sales','Total profit from customer','Average revenue'],correct:1},
+        {q_ro:'De ce competitor analysis?',q_en:'Why analyze competitors?',options_ro:['Deloc important','Înțeler piață și oportunități','Inutilă'],options_en:['Not important','Understand market and opportunities','Useless'],correct:1},
+        {q_ro:'Ce sunt Stakeholder interests?',q_en:'What are stakeholder interests?',options_ro:['Doar proprietari','Proprietari+angajati+clienți+furnizori','Doar clienți'],options_en:['Only owners','Owners+employees+clients+suppliers','Only clients'],correct:1},
+        {q_ro:'Cum maximizezi profitabilitate?',q_en:'How to maximize profitability?',options_ro:['Preț mare','Optimizare cost+pricing+volume','Volume mare'],options_en:['High price','Optimize cost+pricing+volume','High volume'],correct:1},
+        {q_ro:'Ce este Market Segmentation?',q_en:'What is Market Segmentation?',options_ro:['Piață unu','Împărțire piață în grupuri target','Random'],options_en:['One market','Divide market into target groups','Random'],correct:1},
+        {q_ro:'Ce sunt KPIs?',q_en:'What are KPIs?',options_ro:['Chei SRL','Indicatori cheie performanță','Taxe'],options_en:['LLC keys','Key performance indicators','Taxes'],correct:1},
+        {q_ro:'De ce Dashboard Analytics?',q_en:'Why use Analytics Dashboard?',options_ro:['Design','Track metrics critici real-time','Cosmetic'],options_en:['Design','Track critical metrics live','Cosmetic'],correct:1},
+        {q_ro:'Ce este Sales Forecast?',q_en:'What is Sales Forecast?',options_ro:['Vânzări reale','Proiecție vânzări viitoare','Cost vânzare'],options_en:['Real sales','Future sales projection','Sales cost'],correct:1},
+        {q_ro:'Cum se calculează CAGR?',q_en:'How to calculate CAGR?',options_ro:['Medie vânzări','(Ending/Beginning)^(1/years)-1','Sum vânzări'],options_en:['Average sales','(Ending/Beginning)^(1/y)-1','Sum sales'],correct:1},
+        {q_ro:'Ce sunt Valuation Multiples?',q_en:'What are Valuation Multiples?',options_ro:['Preț fix','Revenue/EBITDA/Profit multipliers','Random'],options_en:['Fixed price','Revenue/EBITDA/Profit multipliers','Random'],correct:1},
+        {q_ro:'De ce focus pe customer experience?',q_en:'Why focus on customer experience?',options_ro:['Cosmetic','Retention+advocacy+growth','Inutilă'],options_en:['Cosmetic','Retention+advocacy+growth','Useless'],correct:1},
+        {q_ro:'Ce este Supplier Relationship?',q_en:'What is Supplier Relationship?',options_ro:['Compra casual','Partnership strategic pe calitate+preț','Random'],options_en:['Casual buying','Strategic partnership on quality+price','Random'],correct:1}
       ]
     };
 
@@ -408,7 +479,7 @@
     }
 
     function renderPage() {
-      const sections = ['home', 'lessons-section', 'courses-section', 'tests-section', 'about-section', 'stats-section'];
+      const sections = ['home', 'lessons-section', 'courses-section', 'tests-section', 'about-section', 'stats-section', 'admin-section'];
       sections.forEach(s => document.getElementById(s).style.display = 'none');
 
       switch(currentPage) {
@@ -434,6 +505,9 @@
         case 'stats':
           renderStatistics();
           document.getElementById('stats-section').style.display = 'block';
+          break;
+        case 'admin':
+          document.getElementById('admin-section').style.display = 'block';
           break;
       }
     }
@@ -472,11 +546,6 @@
     window.addEventListener('load', () => { 
       adjustHeroToNavbar();
       initUserTracking();
-      // Check if there's a view parameter in URL
-      const params = new URLSearchParams(window.location.search);
-      if (params.has('view')) {
-        navigateTo(params.get('view'));
-      }
     });
 
     function renderLessons() {
@@ -535,8 +604,8 @@
     function renderTests() {
       const tests = [
         { key: 'initial', title: t('initial_assess'), questions: 25, time: 30 },
-        { key: 'fundamentals', title: t('fundamentals_test'), questions: 50, time: 60 },
-        { key: 'professional', title: t('professional'), questions: 100, time: 120 }
+        { key: 'fundamentals', title: t('fundamentals_test'), questions: 35, time: 45 },
+        { key: 'professional', title: t('professional'), questions: 50, time: 60 }
       ];
 
       document.getElementById('tests-title').textContent = t('tests_title');
@@ -545,8 +614,8 @@
       const content = tests.map(test => `
         <div class="card" style="padding: 2rem;">
           <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--accent-cyan);">${test.title}</h3>
-          <p style="margin-bottom: 0.5rem; color: var(--text-secondary);">📋 ${test.questions} ${t('questions')}</p>
-          <p style="margin-bottom: 1rem; color: var(--text-secondary);">⏱️ ${test.time} ${t('minutes')}</p>
+          <p style="margin-bottom: 0.5rem; color: var(--text-secondary)"> ${test.questions} ${t('questions')}</p>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);"> ${test.time} ${t('minutes')}</p>
           <button onclick="startTest('${test.key}')" style="width: 100%; padding: 0.8rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
             ${t('take_test')}
           </button>
@@ -559,7 +628,8 @@
       currentTest = key;
       currentQuestion = 0;
       testScore = 0;
-      testTimeLeft = 60;
+      const timeMap = { initial: 30 * 60, fundamentals: 45 * 60, professional: 60 * 60 };
+      testTimeLeft = timeMap[key] || 60;
       renderTestModal();
       document.getElementById('test-modal').style.display = 'block';
       
@@ -574,7 +644,7 @@
           if (modal && modal.querySelector('div')) {
             const timerEl = modal.querySelector('div');
             const timerDiv = timerEl.querySelector('div:last-child');
-            if (timerDiv) timerDiv.textContent = '⏱️ ' + testTimeLeft + 's';
+            if (timerDiv) timerDiv.textContent = ' ' + testTimeLeft + 's';
           }
         }
       }, 1000);
@@ -597,7 +667,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <p style="color: var(--text-secondary);">${t('question')} ${currentQuestion + 1}/${total}</p>
           <div style="background: var(--primary-gray); padding: 0.5rem 1rem; border-radius: 5px; border: 2px solid var(--accent-yellow); color: var(--accent-yellow); font-weight: bold;">
-            ⏱️ ${testTimeLeft}s
+            ${testTimeLeft}s
           </div>
         </div>
         <div style="height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden; margin-bottom: 2rem;">
@@ -804,9 +874,9 @@
       document.getElementById('about-title').textContent = t('about_title');
 
       const team = [
-        { name: t('founder'), role: t('founder_role'), bio: t('founder_bio'), icon: '👨‍💼' },
-        { name: t('dev_lead'), role: t('dev_role'), bio: t('dev_bio'), icon: '👨‍💻' },
-        { name: t('content'), role: t('content_role'), bio: t('content_bio'), icon: '👨‍🔬' }
+        { name: t('founder'), role: t('founder_role'), bio: t('founder_bio') },
+        { name: t('dev_lead'), role: t('dev_role'), bio: t('dev_bio') },
+        { name: t('content'), role: t('content_role'), bio: t('content_bio') }
       ];
 
       let html = `
@@ -821,7 +891,7 @@
       team.forEach(member => {
         html += `
           <div class="card" style="text-align: center; padding: 2rem;">
-            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-yellow)); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">${member.icon}</div>
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-yellow)); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">${member.name.charAt(0)}</div>
             <h4 style="font-size: 1.1rem; margin-bottom: 0.3rem; color: var(--accent-cyan);">${member.name}</h4>
             <p style="font-size: 0.9rem; color: var(--accent-yellow); margin-bottom: 1rem;">${member.role}</p>
             <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">${member.bio}</p>
@@ -888,6 +958,12 @@
 
     // Initialize
     function initializePage() {
+      // Check if there's a view parameter in URL - navigate to it FIRST
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('view')) {
+        currentPage = params.get('view');
+      }
+
       // Set language button
       document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
       
@@ -914,6 +990,183 @@
       document.getElementById('start-sim-btn').textContent = t('start_simulator');
       
       renderPage();
+    }
+    
+    // === ADMIN PANEL FUNCTIONS ===
+    function openAdminPanel() {
+      const password = prompt('Enter admin password:');
+      const correctPassword = btoa('admin123'); // 'admin123' encoded - change this!
+      if (btoa(password || '') === correctPassword) {
+        renderAdminPanel();
+        navigateTo('admin');
+      } else {
+        alert('Invalid password');
+      }
+    }
+
+    function renderAdminPanel() {
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      
+      let html = '<div style="margin-bottom: 3rem;"><h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Course Enrollments (' + enrollments.length + ')</h3>';
+      
+      if (enrollments.length === 0) {
+        html += '<p style="color: var(--text-secondary);">No enrollments yet</p>';
+      } else {
+        html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; color: var(--text-primary);">';
+        html += '<thead style="background: var(--primary-gray);"><tr style="border-bottom: 2px solid var(--accent-yellow);">';
+        html += '<th style="padding: 0.8rem; text-align: left;">Course</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">First Name</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Last Name</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Birth Year</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">City</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">County</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Date</th>';
+        html += '</tr></thead><tbody>';
+        
+        enrollments.forEach((e, i) => {
+          html += '<tr style="border-bottom: 1px solid var(--border-color); ' + (i % 2 === 0 ? 'background: rgba(0,240,255,0.05);' : '') + '">';
+          html += '<td style="padding: 0.8rem;">' + (e.courseName || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.firstName || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.lastName || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.birthYear || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.city || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.county || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + new Date(e.enrollmentDate).toLocaleString() + '</td>';
+          html += '</tr>';
+        });
+        
+        html += '</tbody></table></div>';
+      }
+      
+      html += '</div><div style="margin-bottom: 3rem;"><h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Game Results (' + gameResults.length + ')</h3>';
+      
+      if (gameResults.length === 0) {
+        html += '<p style="color: var(--text-secondary);">No game results yet</p>';
+      } else {
+        html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; color: var(--text-primary);">';
+        html += '<thead style="background: var(--primary-gray);"><tr style="border-bottom: 2px solid var(--accent-yellow);">';
+        html += '<th style="padding: 0.8rem; text-align: left;">Player Name</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Email</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Scenario</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Final Budget</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Reputation</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Employees</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Duration</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Date</th>';
+        html += '</tr></thead><tbody>';
+        
+        gameResults.forEach((g, i) => {
+          const state = g.state || {};
+          html += '<tr style="border-bottom: 1px solid var(--border-color); ' + (i % 2 === 0 ? 'background: rgba(0,240,255,0.05);' : '') + '">';
+          html += '<td style="padding: 0.8rem;">' + (g.playerName || 'Anonymous') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (g.playerEmail || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (g.scenarioId || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">$' + (state.budget || 0) + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (state.reputation || 0) + '%</td>';
+          html += '<td style="padding: 0.8rem;">' + (state.employees || 0) + '</td>';
+          html += '<td style="padding: 0.8rem;">Year ' + (state.year || 1) + ', Month ' + (state.month || 1) + '</td>';
+          html += '<td style="padding: 0.8rem;">' + new Date(g.submissionDate).toLocaleString() + '</td>';
+          html += '</tr>';
+        });
+        
+        html += '</tbody></table></div>';
+      }
+      
+      document.getElementById('admin-content').innerHTML = html;
+    }
+
+    function downloadEnrollments(format) {
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      if (enrollments.length === 0) {
+        alert('No enrollments to download');
+        return;
+      }
+
+      let content, filename, type;
+
+      if (format === 'json') {
+        content = JSON.stringify(enrollments, null, 2);
+        filename = 'enrollments_' + new Date().toISOString().split('T')[0] + '.json';
+        type = 'application/json';
+      } else if (format === 'csv') {
+        const headers = ['Course', 'First Name', 'Last Name', 'Birth Year', 'City', 'County', 'Date'];
+        const rows = enrollments.map(e => [
+          e.courseName || '',
+          e.firstName || '',
+          e.lastName || '',
+          e.birthYear || '',
+          e.city || '',
+          e.county || '',
+          new Date(e.enrollmentDate).toLocaleString()
+        ]);
+        
+        content = [headers, ...rows].map(row => 
+          row.map(cell => '"' + (cell + '').replace(/"/g, '""') + '"').join(',')
+        ).join('\n');
+        
+        filename = 'enrollments_' + new Date().toISOString().split('T')[0] + '.csv';
+        type = 'text/csv';
+      }
+
+      const blob = new Blob([content], { type: type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadGameResults(format) {
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      if (gameResults.length === 0) {
+        alert('No game results to download');
+        return;
+      }
+
+      let content, filename, type;
+
+      if (format === 'json') {
+        content = JSON.stringify(gameResults, null, 2);
+        filename = 'game_results_' + new Date().toISOString().split('T')[0] + '.json';
+        type = 'application/json';
+      } else if (format === 'csv') {
+        const headers = ['Player Name', 'Email', 'Scenario', 'Final Budget', 'Reputation', 'Employees', 'Year', 'Month', 'Date'];
+        const rows = gameResults.map(g => {
+          const state = g.state || {};
+          return [
+            g.playerName || 'Anonymous',
+            g.playerEmail || '',
+            g.scenarioId || '',
+            state.budget || 0,
+            state.reputation || 0,
+            state.employees || 0,
+            state.year || 1,
+            state.month || 1,
+            new Date(g.submissionDate).toLocaleString()
+          ];
+        });
+        
+        content = [headers, ...rows].map(row => 
+          row.map(cell => '"' + (cell + '').replace(/"/g, '""') + '"').join(',')
+        ).join('\n');
+        
+        filename = 'game_results_' + new Date().toISOString().split('T')[0] + '.csv';
+        type = 'text/csv';
+      }
+
+      const blob = new Blob([content], { type: type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
     
     initializePage();

@@ -350,22 +350,11 @@ function GameDashboard() {
   useEffect(() => {
     if (autoStart && playerName && scenario && !gameStarted) {
       const doAutoStart = async () => {
-        try {
-          const reg = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: playerName, email: playerEmail || '' })
-          });
-          const regData = await reg.json();
-          if (regData && regData.token) {
-            localStorage.setItem('entrepreneur_token', regData.token);
-            localStorage.setItem('entrepreneur_userId', regData.userId);
-          } else if (regData && regData.userId) {
-            localStorage.setItem('entrepreneur_userId', regData.userId);
-          }
-        } catch (err) {
-          console.warn('Registration failed:', err.message || err);
-        }
+        // Generate user ID and save to localStorage (no backend needed)
+        const userId = 'user_' + Date.now();
+        localStorage.setItem('entrepreneur_userId', userId);
+        localStorage.setItem('entrepreneur_playerName', playerName);
+        localStorage.setItem('entrepreneur_playerEmail', playerEmail || '');
 
         setBudget(scenario.startBudget);
         setEmployees(generateEmployees(scenario));
@@ -375,16 +364,6 @@ function GameDashboard() {
         setCurrentQuestion(0);
         setGameStarted(true);
         setCompetitors(generateCompetitors(scenario));
-
-        try {
-          await fetch('/api/game/start', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerName, playerEmail: playerEmail || '', scenarioId: scenario.id })
-          });
-        } catch (err) {
-          console.warn('Could not notify server:', err.message || err);
-        }
       };
       doAutoStart();
     }
@@ -425,22 +404,11 @@ function GameDashboard() {
       return;
     }
 
-    try {
-      const reg = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName, email: playerEmail })
-      });
-      const regData = await reg.json();
-      if (regData && regData.token) {
-        localStorage.setItem('entrepreneur_token', regData.token);
-        localStorage.setItem('entrepreneur_userId', regData.userId);
-      } else if (regData && regData.userId) {
-        localStorage.setItem('entrepreneur_userId', regData.userId);
-      }
-    } catch (err) {
-      console.warn('Registration failed:', err.message || err);
-    }
+    // Generate user ID and save to localStorage (no backend needed)
+    const userId = 'user_' + Date.now();
+    localStorage.setItem('entrepreneur_userId', userId);
+    localStorage.setItem('entrepreneur_playerName', playerName);
+    localStorage.setItem('entrepreneur_playerEmail', playerEmail || '');
 
     setScenario(selectedScenario);
     setBudget(selectedScenario.startBudget);
@@ -451,16 +419,6 @@ function GameDashboard() {
     setCurrentQuestion(0);
     setGameStarted(true);
     setCompetitors(generateCompetitors(selectedScenario));
-
-    try {
-      await fetch('/api/game/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName, playerEmail, scenarioId: selectedScenario.id })
-      });
-    } catch (err) {
-      console.warn('Could not notify server:', err.message || err);
-    }
   };
 
   // --- Apply choice & advance ---
@@ -619,26 +577,27 @@ function GameDashboard() {
   // --- Submit results ---
   const submitResults = async (targetEmail) => {
     try {
-      const userId = localStorage.getItem('entrepreneur_userId');
+      const userId = localStorage.getItem('entrepreneur_userId') || 'user_' + Date.now();
+      if (!localStorage.getItem('entrepreneur_userId')) {
+        localStorage.setItem('entrepreneur_userId', userId);
+      }
+      
       const payload = {
         playerName,
         playerEmail: targetEmail,
         scenarioId: scenario?.id,
         state: { budget, reputation, employees: employees.length, year, month },
-        userId
+        userId,
+        submissionDate: new Date().toISOString()
       };
-      const res = await fetch('/api/game/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data && data.success) {
-        setResultsSent(true);
-        alert(t('report_sent'));
-      } else {
-        alert(t('send_failed'));
-      }
+      
+      // Save game results to localStorage (no backend needed)
+      let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      gameResults.push(payload);
+      localStorage.setItem('gameResults', JSON.stringify(gameResults));
+      
+      setResultsSent(true);
+      alert(t('report_sent'));
     } catch (err) {
       console.error(err);
       alert(t('email_error'));
@@ -785,7 +744,7 @@ function GameDashboard() {
             <div key={emp.id} style={{ padding: '.8rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem', marginBottom: '.5rem', background: 'rgba(0,240,255,0.05)', borderRadius: '4px' }}>
               <div style={{ fontWeight: 'bold', color: 'var(--accent-cyan)' }}>{emp.name}</div>
               <div style={{ color: 'var(--text-secondary)', marginTop: '.3rem', fontSize: '0.8rem' }}>
-                <div>🎯 {emp.position}</div>
+                <div>{emp.position}</div>
                 <div>📅 Vârstă: {emp.age} | Vechime: {emp.seniority} ani</div>
                 <div>💰 Salariu: ${emp.salary}/lună</div>
               </div>
@@ -840,6 +799,9 @@ function GameDashboard() {
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               An 2: <strong style={{ color: projProfit2 >= 0 ? '#10b981' : '#ff6b6b' }}>{projProfit2 >= 0 ? '+' : ''}${projProfit2.toLocaleString()}</strong>
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              An 3: <strong style={{ color: projProfit3 >= 0 ? '#10b981' : '#ff6b6b' }}>{projProfit3 >= 0 ? '+' : ''}${projProfit3.toLocaleString()}</strong>
             </div>
           </div>
         </div>
@@ -963,15 +925,15 @@ function GameDashboard() {
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <button className="btn btn-primary" onClick={() => submitResults(playerEmail)}>📧 Trimite email</button>
-              <button className="btn btn-secondary" onClick={downloadFinalResults}>📥 Download JSON</button>
-              <button className="btn btn-secondary" onClick={restartSimulation}>🔄 Din nou</button>
-              <button className="btn btn-secondary" onClick={() => setGameEnded(false)}>❌ Închide</button>
+              <button className="btn btn-primary" onClick={() => submitResults(playerEmail)}>Trimite email</button>
+              <button className="btn btn-secondary" onClick={downloadFinalResults}>Download JSON</button>
+              <button className="btn btn-secondary" onClick={restartSimulation}>Din nou</button>
+              <button className="btn btn-secondary" onClick={() => setGameEnded(false)}>Închide</button>
             </div>
 
             {leaderboard && leaderboard.length > 0 && (
               <div>
-                <h3>🏆 Top 5 Leaderboard</h3>
+                <h3>Top 5 Leaderboard</h3>
                 {leaderboard.slice(0, 5).map((l, i) => (
                   <div key={i} style={{ padding: '0.6rem', borderBottom: '1px solid var(--border-color)' }}>
                     <strong>#{i+1}</strong> {l.playerName || 'Anonim'} - ${l.state?.budget?.toLocaleString() || 'N/A'}

@@ -129,50 +129,50 @@
 ```
 entrepreneur-simulator/
 ├──  HTML Files
-│   ├── index.html           ✅ Home page
-│   ├── game.html            ✅ Game page
-│   ├── stats.html           ✅ Statistics page
-│   └── about.html           ✅ About page
+│   ├── index.html           Home page
+│   ├── game.html            Game page
+│   ├── stats.html           Statistics page
+│   └── about.html           About page
 │
 ├──  CSS Files
 │   └── css/
-│       ├── theme.css        ✅ Culori & tema
-│       ├── style.css        ✅ Stiluri principale
-│       ├── animations.css   ✅ 15+ animații
-│       └── sections.css     ✅ Secțiuni specifice
+│       ├── theme.css        Culori & tema
+│       ├── style.css        Stiluri principale
+│       ├── animations.css   15+ animații
+│       └── sections.css     Secțiuni specifice
 │
 ├──  React Components
 │   └── js/
-│       ├── main.jsx         ✅ App principal
-│       ├── game.jsx         ✅ Game app
-│       ├── stats.jsx        ✅ Stats app
-│       ├── about.jsx        ✅ About app
+│       ├── main.jsx         App principal
+│       ├── game.jsx         Game app
+│       ├── stats.jsx        Stats app
+│       ├── about.jsx        About app
 │       ├── components/
-│       │   ├── Navbar.jsx           ✅
-│       │   ├── Loader.jsx           ✅
-│       │   └── GameDashboard.jsx    ✅
+│       │   ├── Navbar.jsx           
+│       │   ├── Loader.jsx           
+│       │   └── GameDashboard.jsx
 │       ├── pages/
-│       │   ├── Home.jsx             ✅
-│       │   ├── Tests.jsx            ✅
-│       │   ├── Statistics.jsx       ✅
-│       │   └── About.jsx            ✅
+│       │   ├── Home.jsx             
+│       │   ├── Tests.jsx            
+│       │   ├── Statistics.jsx       
+│       │   └── About.jsx
 │       ├── contexts/
-│       │   └── LanguageContext.jsx  ✅
-│       ├── game.js          ✅ Game logic
-│       └── events.js        ✅ Event system
+│       │   └── LanguageContext.jsx  
+│       ├── game.js          Game logic
+│       └── events.js        Event system
 │
 ├──  Backend & Config
-│   ├── server.js            ✅ Express server
-│   ├── package.json         ✅ Dependencies
-│   ├── .env.example         ✅ Config template
-│   └── .gitignore           ✅ Git ignore
+│   ├── server.js            Express server
+│   ├── package.json         Dependencies
+│   ├── .env.example         Config template
+│   └── .gitignore           Git ignore
 │
 └──  Documentation
-    ├── README.md            ✅ Documentație principală
-    ├── SETUP.md             ✅ Setup guide
-    ├── FEATURES.md          ✅ Feature roadmap
-    ├── CONTRIBUTING.md      ✅ Contributor guide
-    └── QUICKSTART.md        ✅ 5-min setup
+    ├── README.md            Documentație principală
+    ├── SETUP.md             Setup guide
+    ├── FEATURES.md          Feature roadmap
+    ├── CONTRIBUTING.md      Contributor guide
+    └── QUICKSTART.md        5-min setup
 ```
 
 ---

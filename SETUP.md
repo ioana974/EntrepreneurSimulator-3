@@ -1,8 +1,8 @@
-# 🚀 EntrepreneurHub - Setup & Installation Guide
+# EntrepreneurHub - Setup & Installation Guide
 
 Un ghid complet pentru a configura și rula proiectul **Entrepreneur Simulator** pe calculatorul tău.
 
-## 📋 Cerințe Preliminare
+## Cerințe Preliminare
 
 Înainte de a începe, asigură-te că ai instalate:
 
@@ -16,7 +16,7 @@ Un ghid complet pentru a configura și rula proiectul **Entrepreneur Simulator**
 - **Visual Studio Code** - [Download](https://code.visualstudio.com/)
 - **Postman** - [Download](https://www.postman.com/) (pentru testare API)
 
-## 🔍 Verificare Instalare
+## Verificare Instalare
 
 Verifică versiunile prin terminal:
 
@@ -26,7 +26,7 @@ npm --version       # ar trebui să arate 6.0.0 sau mai mare
 git --version       # ar trebui să arate git version
 ```
 
-## 📥 Instalare Proiect
+## Instalare Proiect
 
 ### Pasul 1: Clone Repository
 ```bash
@@ -42,7 +42,7 @@ npm install
 
 Așteptă ca npm să instaleze toate pachetele necesare (poate dura 2-3 minute).
 
-## ⚙️ Configurare
+## Configurare
 
 ### Pasul 1: Crează Fișierul .env
 ```bash
@@ -73,7 +73,7 @@ Verifică conexiune:
 mongosh
 ```
 
-## 🎯 Rulare Proiect
+## Rulare Proiect
 
 ### Opțiunea 1: Frontend Doar (Recomandată pentru început)
 
@@ -107,7 +107,7 @@ live-server
 # Frontend va fi pe http://localhost:8080
 ```
 
-## 📝 Structura Foldere (După Setup)
+## Structura Foldere (După Setup)
 
 ```
 entrepreneur-simulator/
@@ -127,7 +127,7 @@ entrepreneur-simulator/
 └── .gitignore            # Fișiere ignorate de Git
 ```
 
-## 🧪 Testare API (cu Postman)
+## Testare API (cu Postman)
 
 ### Verificare Server
 1. Pornește backend: `npm run dev`
@@ -155,7 +155,7 @@ POST http://localhost:5000/api/courses/enroll
 Body: { "courseId": 1, "userId": "user123" }
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Problema: "npm command not found"
 **Soluție:** Node.js nu este instalat. [Descarcă și instalează Node.js](https://nodejs.org/)
@@ -185,7 +185,7 @@ npm install
 2. Verifică MONGODB_URI în .env
 3. Comentează db connection din server.js temporar
 
-## 📚 Resurse Utile
+## Resurse Utile
 
 - **React Docs:** https://react.dev
 - **Node.js Docs:** https://nodejs.org/docs
@@ -193,7 +193,7 @@ npm install
 - **MongoDB:** https://docs.mongodb.com
 - **OpenAI API:** https://platform.openai.com/docs
 
-## 🔑 API Keys Necesare (Pentru Faza 2)
+## API Keys Necesare (Pentru Faza 2)
 
 ### OpenAI API
 1. Mergi pe https://platform.openai.com
@@ -207,7 +207,7 @@ npm install
 3. Crează cluster
 4. Copiază connection string în .env
 
-## 🚀 Deployment (Viitor)
+## Deployment (Viitor)
 
 ### Deploy Frontend (Netlify)
 ```bash
@@ -220,7 +220,7 @@ npm run build
 git push heroku main
 ```
 
-## 📱 Comenzi Utile
+## Comenzi Utile
 
 ```bash
 # Development
@@ -239,7 +239,7 @@ npm run build         # Build webpack (când e configurat)
 rm -rf node_modules   # Șterge node_modules
 ```
 
-## 👥 Contribuire
+## Contribuire
 
 Vrei să adaugi feature-uri noi? Grozav!
 
@@ -248,7 +248,7 @@ Vrei să adaugi feature-uri noi? Grozav!
 3. Push: `git push origin feature/feature-name`
 4. Crează Pull Request
 
-## 🐛 Raportare Bug-uri
+## Raportare Bug-uri
 
 Găsești un bug? Raportează pe GitHub Issues cu:
 - Descriere detaliată
@@ -256,7 +256,7 @@ Găsești un bug? Raportează pe GitHub Issues cu:
 - Screenshots dacă e relevant
 - Browser/OS info
 
-## ❓ FAQ
+## FAQ
 
 **Q: Pot rula doar frontend fără backend?**
 A: Da! Frontend-ul funcționează independent. Backend-ul este opțional pentru acum.
@@ -270,7 +270,7 @@ A: Edit `js/contexts/LanguageContext.jsx` și adaugă cheia în ambele limbi.
 **Q: Pot folosi asta comercial?**
 A: Licența MIT permite uz comercial cu atribuire.
 
-## 📧 Support
+## Support
 
 Ai întrebări? Contactează:
 - Email: contact@entrepreneurhub.ro
@@ -278,6 +278,6 @@ Ai întrebări? Contactează:
 
 ---
 
-**Happy Coding! 🎉**
+**Happy Coding!**
 
-Made with ❤️ by EntrepreneurHub Team
+Made with passion by EntrepreneurHub Team

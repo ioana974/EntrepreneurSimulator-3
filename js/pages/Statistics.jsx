@@ -74,11 +74,11 @@ function Statistics() {
         maxWidth: '1200px',
         margin: '3rem auto'
       }}>
-        <StatCard icon="👥" label="Utilizatori Activi" value={stats.totalUsers.toLocaleString()} />
-        <StatCard icon="📚" label="Cursuri Active" value={stats.activeCourses} />
-        <StatCard icon="✅" label="Cursuri Completate" value={stats.completedCourses.toLocaleString()} />
-        <StatCard icon="⭐" label="Scor Mediu" value={`${stats.averageScore}%`} />
-        <StatCard icon="🎯" label="Rata Succes" value={`${stats.successRate}%`} />
+        <StatCard label="Utilizatori Activi" value={stats.totalUsers.toLocaleString()} />
+        <StatCard label="Cursuri Active" value={stats.activeCourses} />
+        <StatCard label="Cursuri Completate" value={stats.completedCourses.toLocaleString()} />
+        <StatCard label="Scor Mediu" value={`${stats.averageScore}%`} />
+        <StatCard label="Rata Succes" value={`${stats.successRate}%`} />
       </div>
 
       {/* Chart */}
@@ -169,7 +169,7 @@ function Statistics() {
           marginBottom: '1.5rem',
           color: 'var(--accent-cyan)'
         }}>
-          🎮 Statistici Simulare
+          Statistici Simulare
         </h2>
         
         <div style={{
@@ -205,10 +205,10 @@ function Statistics() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontWeight: 'bold', color: 'var(--accent-cyan)' }}>
-                        Scenar: {sim.scenario === 'sneakers' ? '👟 Fabrică Adidași' : sim.scenario === 'import-export' ? '📦 Import-Export' : '💻 Startup Tech'}
+                        Scenar: {sim.scenario === 'sneakers' ? 'Fabrică Adidași' : sim.scenario === 'import-export' ? 'Import-Export' : 'Startup Tech'}
                       </div>
                       <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                        📅 {new Date(sim.date).toLocaleDateString('ro-RO')}
+                        {new Date(sim.date).toLocaleDateString('ro-RO')}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -237,23 +237,22 @@ function Statistics() {
           marginBottom: '1.5rem',
           color: 'var(--accent-yellow)'
         }}>
-          🏆 Realizări Recente
+          Realizări Recente
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <Achievement emoji="🥇" title="1000+ Utilizatori Activi" date="August 2026" />
-          <Achievement emoji="🎓" title="50 Cursuri Lansate" date="Iulie 2026" />
-          <Achievement emoji="⭐" title="Rating 4.8/5 din 10,000 Review-uri" date="Iunie 2026" />
-          <Achievement emoji="🌍" title="Disponibil în 15 Țări" date="Aprilie 2026" />
+          <Achievement title="1000+ Utilizatori Activi" date="August 2026" />
+          <Achievement title="50 Cursuri Lansate" date="Iulie 2026" />
+          <Achievement title="Rating 4.8/5 din 10,000 Review-uri" date="Iunie 2026" />
+          <Achievement title="Disponibil în 15 Țări" date="Aprilie 2026" />
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ icon, label, value }) {
+function StatCard({ label, value }) {
   return (
     <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-      <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>{icon}</div>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{label}</p>
       <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--accent-yellow)' }}>
         {value}
@@ -288,7 +287,7 @@ function PerformanceCard({ title, percentage, color }) {
   );
 }
 
-function Achievement({ emoji, title, date }) {
+function Achievement({ title, date }) {
   return (
     <div style={{
       display: 'flex',
@@ -299,7 +298,6 @@ function Achievement({ emoji, title, date }) {
       borderRadius: '10px',
       borderLeft: '3px solid var(--accent-yellow)'
     }}>
-      <div style={{ fontSize: '2rem' }}>{emoji}</div>
       <div style={{ flex: 1 }}>
         <p style={{ fontWeight: 'bold', marginBottom: '0.3rem' }}>{title}</p>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{date}</p>

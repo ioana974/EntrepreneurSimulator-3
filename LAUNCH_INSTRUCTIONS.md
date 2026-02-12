@@ -1,10 +1,10 @@
-# 🎯 INSTRUCTIONS FOR FINAL SETUP & LAUNCH
+# INSTRUCTIONS FOR FINAL SETUP & LAUNCH
 
 **ReadMe FIRST!** Aceasta conține instrucțiunile finale pentru a lansa site-ul.
 
 ---
 
-## ⚡ QUICK START (1 Minut)
+## QUICK START (1 Minut)
 
 ### Cel mai rapid mod de a rula site-ul:
 
@@ -12,11 +12,11 @@
    - Browserul se va deschide automat
    - Site-ul este complet funcțional
 
-GATA! ✅
+GATA!
 
 ---
 
-## 📋 VERIFICARE FINALĂ (5 Minute)
+## VERIFICARE FINALĂ (5 Minute)
 
 ### Testează aceste lucruri pe site:
 
@@ -51,9 +51,9 @@ GATA! ✅
 
 ---
 
-## 🚀 OPȚIUNI DE RULARE
+## OPȚIUNI DE RULARE
 
-### Opțiunea 1: Direct (Recomandată) ✨
+### Opțiunea 1: Direct (Recomandată)
 ```
 1. Deschide index.html cu dublu-click
 2. Gata!
@@ -94,7 +94,7 @@ GATA! ✅
 
 ---
 
-## 📁 IMPORTANT FILES
+## IMPORTANT FILES
 
 ### Pagini Principale
 - `index.html` - Home page (start aici)
@@ -121,7 +121,7 @@ GATA! ✅
 
 ---
 
-## 🎨 DESIGN SPECIFICATIONS
+## DESIGN SPECIFICATIONS
 
 ### Culori Utilizate
 ```
@@ -143,7 +143,7 @@ Toate animațiile sunt în `css/animations.css`
 
 ---
 
-## 🔧 TROUBLESHOOTING
+## TROUBLESHOOTING
 
 ### Problema: Site nu se încarcă
 **Soluție:** 
@@ -168,7 +168,7 @@ Toate animațiile sunt în `css/animations.css`
 
 ---
 
-## 📱 MOBILE TEST
+## MOBILE TEST
 
 ### Pe Telefon
 1. Deschide `index.html` pe telefon
@@ -182,7 +182,7 @@ Toate animațiile sunt în `css/animations.css`
 
 ---
 
-## ✅ READY TO LAUNCH?
+## READY TO LAUNCH?
 
 ### Checklist Pre-Launch
 - [x] Site funcționează în browser
@@ -194,11 +194,11 @@ Toate animațiile sunt în `css/animations.css`
 - [x] Toate paginile sunt accesibile
 - [x] Documentație este completă
 
-**STATUS: READY FOR BETA LAUNCH! 🚀**
+**STATUS: READY FOR BETA LAUNCH!**
 
 ---
 
-## 🎓 DOCUMENTAȚIE - Care să Citești
+## DOCUMENTAȚIE - Care să Citești
 
 ### Must Read (Obligatoriu)
 1. `README.md` - Understand the project
@@ -215,7 +215,7 @@ Toate animațiile sunt în `css/animations.css`
 
 ---
 
-## 🌐 PUBLICARE ONLINE (Viitor)
+## PUBLICARE ONLINE (Viitor)
 
 Când vrei să publici online:
 
@@ -235,7 +235,7 @@ Când vrei să publici online:
 
 ---
 
-## 👥 SHARE WITH BETA TESTERS
+## SHARE WITH BETA TESTERS
 
 Dacă vrei să primești feedback:
 
@@ -246,9 +246,9 @@ Dacă vrei să primești feedback:
 
 ---
 
-## 🔐 IMPORTANT NOTES
+## IMPORTANT NOTES
 
-⚠️ **Remember:**
+**Remember:**
 - Datele de joc sunt salvate în localStorage (se pierd dacă ștergi cache)
 - Fase 2 va avea database pentru persistență
 - Backend API endpoints sunt template (nu sunt conectate la DB)
@@ -256,7 +256,7 @@ Dacă vrei să primești feedback:
 
 ---
 
-## 📞 IF YOU NEED HELP
+## IF YOU NEED HELP
 
 ### Resources
 - `README.md` - Full documentation
@@ -282,7 +282,7 @@ A: Citește SETUP.md secțiunea deployment.
 
 ---
 
-## 🎉 FINAL CHECKLIST
+## FINAL CHECKLIST
 
 Before launching publicly:
 
@@ -301,7 +301,7 @@ Before launching publicly:
 
 ---
 
-## 🚀 YOU'RE READY!
+## YOU'RE READY!
 
 **EntrepreneurHub is ready to launch!**
 
@@ -320,9 +320,9 @@ Before launching publicly:
 
 ---
 
-**Made with ❤️ by EntrepreneurHub Team**
+**Made with passion by EntrepreneurHub Team**
 
 **Launch Date:** January 5, 2026  
-**Status:** ✅ PRODUCTION READY
+**Status:** PRODUCTION READY
 
-🚀 Go change the world! 🚀
+Go change the world!

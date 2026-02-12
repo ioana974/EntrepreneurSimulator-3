@@ -1,8 +1,8 @@
-# 🎯 EntrepreneurHub - Features & Roadmap
+# EntrepreneurHub - Features & Roadmap
 
-## ✅ Faze Implementate
+## Faze Implementate
 
-### Faza 1 - MVP (Core Platform) - COMPLETĂ ✨
+### Faza 1 - MVP (Core Platform) - COMPLETĂ
 
 #### Frontend
 - [x] Design modern cu tema: Albastru Închis + Galben + Cyan
@@ -236,7 +236,7 @@ Message {
 
 ---
 
-## 🎯 Priority Matrix
+## Priority Matrix
 
 | Feature | Impact | Effort | Priority | Timeline |
 |---------|--------|--------|----------|----------|
@@ -251,7 +251,7 @@ Message {
 
 ---
 
-## 🔧 Technical Improvements
+## Technical Improvements
 
 - [ ] Setup CI/CD pipeline (GitHub Actions)
 - [ ] Implement comprehensive testing

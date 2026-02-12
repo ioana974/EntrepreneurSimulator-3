@@ -1,25 +1,19 @@
-# ⚡ Quick Start Guide - 5 Minute Setup
+# Quick Start Guide - 5 Minute Setup
 
-## 🎯 Scopul: Să rulezi site-ul in browser în maxim 5 minute
+## Scopul: Să rulezi site-ul in browser în maxim 5 minute
 
-### Varianta 1: Direct în Browser (Cea mai rapidă) ✨
+### Varianta 1: Direct în Browser (Cea mai rapidă)
 ```
 1. Deschide: entrepreneur-simulator/index.html
 2. Gata! Site-ul rulează acum.
 ```
 
 **Avantaje:**
-- Zero configurare
-- Instant în browser
-- Perfect pentru testare
 
 **Dezavantaje:**
-- Fără backend
-- Fără salvare progres persistent
 
----
 
-### Varianta 2: Cu Live Server (Recomandată) 🚀
+### Varianta 2: Cu Live Server (Recomandată)
 
 #### Pasul 1: Instalare Tools
 ```bash
@@ -47,16 +41,12 @@ Serving "." at http://127.0.0.1:8080
 Ready for changes
 ```
 
-Browserul se deschide automat la http://localhost:8080 ✅
+Browserul se deschide automat la http://localhost:8080
 
 **Avantaje:**
-- Auto-refresh pe schimbări
-- Rapid și simplu
-- Perfect pentru development
 
----
 
-### Varianta 3: Full Stack (Backend + Frontend) 💪
+### Varianta 3: Full Stack (Backend + Frontend)
 
 #### Pasul 1: Instalare Node.js
 [Download Node.js](https://nodejs.org/) (14+ version)
@@ -104,12 +94,9 @@ Serving at http://127.0.0.1:8080
 ```
 
 Acum ai:
-- Frontend: http://localhost:8080 ✅
-- Backend API: http://localhost:5000/api ✅
 
----
 
-## 🎮 Pagini Disponibile
+## Pagini Disponibile
 
 | Pagina | URL | Descriere |
 |--------|-----|-----------|
@@ -119,33 +106,31 @@ Acum ai:
 | **Statistics** | `stats.html` | Statistici platformă |
 | **About** | `about.html` | Despre platform |
 
----
 
-## 🎯 Teste Rapide
+## Teste Rapide
 
 ### 1. Test Navbar
-✅ Click pe logo -> Scroll la home
-✅ Click pe "RO" / "EN" -> Schimbă limba
-✅ Pe mobile: Click hamburger -> Menu apare
+Click pe logo -> Scroll la home
+Click pe "RO" / "EN" -> Schimbă limba
+Pe mobile: Click hamburger -> Menu apare
 
 ### 2. Test Home Page
-✅ Canvas cu particule se animează
-✅ Animații text sunt fluide
-✅ Butoanele au hover effect
+Canvas cu particule se animează
+Animații text sunt fluide
+Butoanele au hover effect
 
 ### 3. Test Game
-✅ Buton "Ia Testul" -> Jocul se start
-✅ Alege decizie -> Impacturi se actualizează
-✅ Buget scade -> Game-over când < 0
+Buton "Ia Testul" -> Jocul se start
+Alege decizie -> Impacturi se actualizează
+Buget scade -> Game-over când < 0
 
 ### 4. Test Responsive
-✅ Resize browserul pe 480px -> Mobile layout
-✅ Hamburger menu apare pe mobile
-✅ Text se redimensionează automat
+Resize browserul pe 480px -> Mobile layout
+Hamburger menu apare pe mobile
+Text se redimensionează automat
 
----
 
-## 🔧 Troubleshooting Rapid
+## Troubleshooting Rapid
 
 **Problem: Pagina nu se încarcă**
 ```
@@ -173,9 +158,8 @@ node --version    # ar trebui v14+
 npm install       # reinstalează dependențe
 ```
 
----
 
-## 📚 Next Steps
+##  Next Steps
 
 1. **Citește documentația:**
    - [README.md](README.md) - Overview complet
@@ -196,14 +180,12 @@ npm install       # reinstalează dependențe
 4. **Contribuie:**
    - [CONTRIBUTING.md](CONTRIBUTING.md) - Cum să contribui
 
----
 
-## 💡 Idei Rapide de Testat
+## Idei Rapide de Testat
 
 ### 1. Schimbă Culori
 Edit `css/theme.css`:
 ```css
---accent-yellow: #00ff00;  /* Schimbă galben în verde */
 ```
 
 ### 2. Adaugă Animație
@@ -226,9 +208,8 @@ ro: {
 ### 4. Adaugă Pagină Nouă
 Crează `newpage.html` și copiază structura din `index.html`.
 
----
 
-## 🚀 Deploy Rapid (Later)
+## Deploy Rapid (Later)
 
 ### Deploy Frontend pe Netlify
 ```bash
@@ -241,31 +222,25 @@ npm run build
 git push heroku main
 ```
 
----
 
-## 📞 Support
+## Support
 
 Ai întrebări?
-- 📖 Citește [FAQ section din README](README.md#faq)
-- 💬 Creează GitHub Issue
-- 📧 Email: contact@entrepreneurhub.ro
 
----
 
-## ✨ Congratulations!
+## Congratulations!
 
-Ai setup-at cu succes EntrepreneurHub! 🎉
+Ai setup-at cu succes EntrepreneurHub!
 
 **Ce este următorul pas?**
 
-1. ✅ Explorează pagina Home
-2. ✅ Joacă simulatorul de business
-3. ✅ Ia câteva teste
-4. ✅ Citește about page
-5. ✅ Contactează pentru bug reports
+1. Explorează pagina Home
+2. Joacă simulatorul de business
+3. Ia câteva teste
+4. Citește about page
+5. Contactează pentru bug reports
 
----
 
-**Built with ❤️ by EntrepreneurHub Team**
+**Built with passion by EntrepreneurHub Team**
 
-Happy exploring! 🚀
+Happy exploring!
