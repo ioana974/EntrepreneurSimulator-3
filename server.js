@@ -21,31 +21,21 @@ app.use(express.static('.')); // Serve static files
 
 // === ENVIRONMENT VARIABLES ===
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || '';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/entrepreneur-simulator';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 
 // === MONGODB ===
 const mongoose = require('mongoose');
-let dbAvailable = false;
-if (MONGODB_URI) {
-  mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }).then(() => {
-    dbAvailable = true;
-    console.log('Connected to MongoDB');
-  }).catch(err => console.error('MongoDB connection error:', err));
-} else {
-  console.log('MONGODB_URI not set — running in file-store mode (no MongoDB).');
-}
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Models
 const User = require('./models/User');
 const GameResult = require('./models/GameResult');
-const CourseEnrollment = require('./models/CourseEnrollment');
-const Visit = require('./models/Visit');
-const fileStore = require('./utils/fileStore');
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -583,139 +573,20 @@ app.post('/api/courses/enroll', (req, res) => {
     text: emailText,
     html: emailHtml
   };
-  // Persist enrollment to DB (if available)
-  CourseEnrollment.create({
-    userId: req.body.userId || undefined,
-    courseId: req.body.courseId,
-    courseName: courseName,
-    firstName,
-    lastName,
-    birthYear,
-    city,
-    county
-  }).then(saved => {
-    // send email (async)
-    sendEmail(mailOptions).then(info => {
-      let preview = null;
-      try { preview = nodemailer.getTestMessageUrl(info); } catch(e) { preview = null; }
-      return res.json({ success: true, message: 'Enrolled successfully, email sent', info: { preview }, savedId: saved._id });
-    }).catch(err => {
-      console.error('Email send error during enroll:', err);
-      return res.json({ success: true, message: 'Enrolled saved but email failed', error: err && err.message, savedId: saved._id });
+
+  getTransporter().then(trans => {
+    trans.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Email send error:', error);
+        return res.status(500).json({ success: false, message: 'Email could not be sent', error: error.message || error });
+      }
+      console.log('Email sent:', info);
+      res.json({ success: true, message: 'Enrolled successfully and email sent', info: { messageId: info.messageId, response: info.response } });
     });
   }).catch(err => {
-    console.error('Failed to save enrollment:', err);
-    // Attempt file-based fallback when DB save fails
-    try {
-      fileStore.saveEnrollment({ userId: req.body.userId, courseId: req.body.courseId, courseName, firstName, lastName, birthYear, city, county }).then(fsSaved => {
-        // still try to send email
-        sendEmail(mailOptions).then(info => {
-          let preview = null;
-          try { preview = nodemailer.getTestMessageUrl(info); } catch(e) { preview = null; }
-          return res.json({ success: true, message: 'Email sent; enrollment saved to local store (DB error)', info: { preview }, savedLocalId: fsSaved._id });
-        }).catch(err2 => {
-          console.error('Email send failed after DB error:', err2);
-          return res.json({ success: true, message: 'Enrollment saved to local store but email failed', savedLocalId: fsSaved._id, emailError: err2 && err2.message });
-        });
-      }).catch(fsErr => {
-        console.error('Local file save also failed:', fsErr);
-        // try send email anyway
-        sendEmail(mailOptions).then(info => {
-          let preview = null;
-          try { preview = nodemailer.getTestMessageUrl(info); } catch(e) { preview = null; }
-          return res.json({ success: true, message: 'Email sent but enrollment not saved (DB+FS error)', info: { preview } });
-        }).catch(err3 => {
-          console.error('Both DB/FS save and email failed:', err, fsErr, err3);
-          return res.status(500).json({ success: false, message: 'Enrollment failed', errors: [err && err.message, fsErr && fsErr.message, err3 && err3.message] });
-        });
-      });
-    } catch (fsCatchErr) {
-      console.error('Unexpected error in enrollment fallback:', fsCatchErr);
-      return res.status(500).json({ success: false, message: 'Enrollment failed', error: fsCatchErr && fsCatchErr.message });
-    }
+    console.error('Failed to get transporter for enrollment email:', err);
+    return res.status(500).json({ success: false, message: 'Email transporter error' });
   });
-});
-
-// Track a visit (client should POST { userId })
-app.post('/api/track/visit', async (req, res) => {
-  try {
-    const { userId } = req.body || {};
-    if (!userId) return res.status(400).json({ success: false, message: 'userId required' });
-    const visit = await Visit.create({ userId, userAgent: req.get('User-Agent'), ip: req.ip });
-    return res.json({ success: true, visitId: visit._id });
-  } catch (err) {
-    console.error('Track visit error:', err);
-    // fallback to file-based store when DB unavailable
-    try {
-      const fsVisit = await fileStore.saveVisit({ userId: req.body.userId, userAgent: req.get('User-Agent'), ip: req.ip });
-      return res.json({ success: true, visitId: fsVisit._id, fallback: 'file' });
-    } catch (fsErr) {
-      console.error('Track visit file fallback error:', fsErr);
-      return res.status(500).json({ success: false, error: err.message });
-    }
-  }
-});
-
-// Aggregate stats endpoint
-app.get('/api/stats/aggregate', async (req, res) => {
-  try {
-    // Try DB first, fall back to file-based store when DB unavailable
-    let uniqueVisitors = 0;
-    try {
-      const arr = await Visit.distinct('userId');
-      uniqueVisitors = Array.isArray(arr) ? arr.length : 0;
-    } catch (dbErr) {
-      console.error('Visit.distinct failed, using file fallback:', dbErr && dbErr.message);
-      uniqueVisitors = await fileStore.getUniqueVisitorsCount();
-    }
-
-    let enrollments = [];
-    try {
-      enrollments = await CourseEnrollment.find({}).select('courseId');
-    } catch (dbErr) {
-      console.error('CourseEnrollment.find failed, using file fallback:', dbErr && dbErr.message);
-      enrollments = await fileStore.getEnrollments();
-    }
-
-    const courseCounts = {};
-    enrollments.forEach(e => {
-      const id = (typeof e.courseId === 'number') ? e.courseId : (e.courseId || e.courseName || 'unknown');
-      courseCounts[id] = (courseCounts[id] || 0) + 1;
-    });
-
-    return res.json({ success: true, stats: { uniqueVisitors, courseCounts } });
-  } catch (err) {
-    console.error('Aggregate stats error:', err);
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Admin endpoint to list enrollments (DB or file fallback)
-app.get('/api/admin/enrollments', async (req, res) => {
-  try {
-    const adminKey = req.query.adminKey || req.headers['x-admin-key'];
-    const envKey = process.env.ADMIN_KEY;
-
-    // If ADMIN_KEY set, require it. If not set, allow only localhost requests.
-    const isLocal = req.ip === '::1' || req.ip === '127.0.0.1' || req.ip === '::ffff:127.0.0.1';
-    if (envKey) {
-      if (!adminKey || adminKey !== envKey) return res.status(401).json({ success: false, message: 'Missing or invalid adminKey' });
-    } else if (!isLocal) {
-      return res.status(401).json({ success: false, message: 'Admin access restricted. Set ADMIN_KEY or call from localhost.' });
-    }
-
-    try {
-      const enrollments = await CourseEnrollment.find({}).sort({ createdAt: -1 }).limit(1000);
-      return res.json({ success: true, source: 'db', enrollments });
-    } catch (dbErr) {
-      console.error('Admin enrollments DB read failed, using file fallback:', dbErr && dbErr.message);
-      const enrollments = await fileStore.getEnrollments();
-      return res.json({ success: true, source: 'file', enrollments });
-    }
-  } catch (err) {
-    console.error('Admin enrollments error:', err);
-    return res.status(500).json({ success: false, error: err.message });
-  }
 });
 
 // === ERROR HANDLING ===

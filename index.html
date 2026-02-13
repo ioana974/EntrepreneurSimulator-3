@@ -535,24 +535,6 @@
         localStorage.setItem('userId', newUserId);
         users.push(newUserId);
         localStorage.setItem('appUsers', JSON.stringify(users));
-        // notify server about visit (best-effort)
-        try {
-          fetch(API_BASE + '/api/track/visit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: newUserId })
-          }).catch(e => console.debug('Visit track failed (ignored):', e));
-        } catch (e) { console.debug('Visit track exception:', e); }
-      }
-      else {
-        // existing user - still report a visit
-        try {
-          fetch(API_BASE + '/api/track/visit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-          }).catch(e => console.debug('Visit track failed (ignored):', e));
-        } catch (e) { console.debug('Visit track exception:', e); }
       }
     }
     
@@ -562,64 +544,31 @@
     });
 
     function renderLessons() {
-      document.getElementById('stats-title').textContent = t('statistics_title');
+      const lessons = [
+        { id: 'fundamentals', title: t('fundamentals'), desc: t('fundamentals_desc'), link: 'lessons.html' },
+        { id: 'innovation', title: t('innovation'), desc: t('innovation_desc'), link: 'lesson2.html' },
+        { id: 'financial', title: t('financial'), desc: t('financial_desc'), link: 'lesson3.html' },
+        { id: 'marketing', title: t('marketing'), desc: t('marketing_desc'), link: 'lesson4.html' }
+      ];
 
-      // Try to fetch aggregated stats from server; fall back to localStorage
-      fetch(API_BASE + '/api/stats/aggregate').then(r => r.json()).then(result => {
-        if (result && result.success && result.stats) {
-          const uniqueVisitors = result.stats.uniqueVisitors || 0;
-          const courseCounts = result.stats.courseCounts || {};
-          const activeCoursesCount = Object.values(courseCounts).reduce((s, v) => s + v, 0);
+      document.getElementById('lessons-title').textContent = t('lessons_title');
+      document.getElementById('lessons-desc').textContent = t('lessons_desc');
 
-          const html = `
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-              <div class="card" style="padding: 2rem; text-align: center;">
-                <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${uniqueVisitors}</p>
-                <p style="color: var(--text-secondary); margin-top: 0.5rem;">${t('total_users')}</p>
-              </div>
-              <div class="card" style="padding: 2rem; text-align: center;">
-                <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${activeCoursesCount}</p>
-                <p style="color: var(--text-secondary); margin-top: 0.5rem;">${t('active_courses')}</p>
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-              ${Object.keys(courseCounts).map(cid => `
-                <div class="card" style="padding: 1rem; text-align: center;">
-                  <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-cyan);">Course ${cid}</p>
-                  <p style="font-size: 1.6rem; font-weight: bold; color: var(--accent-yellow);">${courseCounts[cid]}</p>
-                </div>
-              `).join('')}
-            </div>
-          `;
-          document.getElementById('stats-content').innerHTML = html;
-          return;
-        }
-        throw new Error('Invalid stats response');
-      }).catch(() => {
-        // fallback to localStorage-based stats
-        const stats = getAppStats();
-        const html = `
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-            <div class="card" style="padding: 2rem; text-align: center;">
-              <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${stats.totalUsers}</p>
-              <p style="color: var(--text-secondary); margin-top: 0.5rem;">${t('total_users')}</p>
-            </div>
-            <div class="card" style="padding: 2rem; text-align: center;">
-              <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${stats.activeCoursesCount}</p>
-              <p style="color: var(--text-secondary); margin-top: 0.5rem;">${t('active_courses')}</p>
-            </div>
-            <div class="card" style="padding: 2rem; text-align: center;">
-              <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${stats.completedTests}</p>
-              <p style="color: var(--text-secondary); margin-top: 0.5rem;">${t('completed')}</p>
-            </div>
-            <div class="card" style="padding: 2rem; text-align: center;">
-              <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${stats.avgTestScore}</p>
-              <p style="color: var(--text-secondary); margin-top: 0.5rem;">${t('avg_score')}</p>
-            </div>
-          </div>
-        `;
-        document.getElementById('stats-content').innerHTML = html;
-      });
+      const content = lessons.map(l => `
+        <div class="card" onclick="window.location.href='${l.link}'" style="padding: 2rem; cursor: pointer; transition: transform 0.3s; transform: scale(1);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--accent-cyan);">${l.title}</h3>
+          <p style="color: var(--text-secondary); line-height: 1.6;">${l.desc}</p>
+        </div>
+      `).join('');
+      document.getElementById('lessons-content').innerHTML = content;
+    }
+
+    function renderCourses() {
+      const courses = [
+        { title: t('startup101'), instructor: t('instructor'), weeks: '4', level: t('beginner'), color: '#10b981' },
+        { title: t('scaling'), instructor: t('instructor2'), weeks: '6', level: t('intermediate'), color: '#f59e0b' },
+        { title: t('advanced_lead'), instructor: t('instructor3'), weeks: '8', level: t('advanced'), color: '#ef4444' }
+      ];
 
       document.getElementById('courses-title').textContent = t('courses_title');
       document.getElementById('courses-desc').textContent = t('courses_desc');
@@ -1094,38 +1043,8 @@
     }
 
     function renderAdminPanel() {
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
       const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
-
-      // Try to fetch enrollments from server admin endpoint; fallback to localStorage
-      async function fetchEnrollmentsFromServer() {
-        const candidates = [];
-        if (window.location.protocol === 'file:') {
-          candidates.push('http://localhost:5001/api/admin/enrollments');
-          candidates.push('http://localhost:5000/api/admin/enrollments');
-        } else {
-          candidates.push(window.location.origin + '/api/admin/enrollments');
-        }
-
-        for (let url of candidates) {
-          try {
-            const resp = await fetch(url, { credentials: 'omit' });
-            if (!resp.ok) continue;
-            const json = await resp.json();
-            if (json && json.success && Array.isArray(json.enrollments)) return { source: json.source || 'server', data: json.enrollments };
-            if (json && Array.isArray(json.enrollments)) return { source: json.source || 'server', data: json.enrollments };
-          } catch (e) {
-            // ignore and try next
-          }
-        }
-        return null;
-      }
-
-      let enrollments = [];
-      // fetch but allow UI to render quickly
-      const serverResultPromise = fetchEnrollmentsFromServer();
-      // try to use immediate localStorage data until server responds
-      enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
-      // once server responds, replace content
       
       let html = '<div style="margin-bottom: 3rem;"><h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Course Enrollments (' + enrollments.length + ')</h3>';
       
@@ -1193,14 +1112,6 @@
       }
       
       document.getElementById('admin-content').innerHTML = html;
-
-      // update with server data when available
-      serverResultPromise.then(result => {
-        if (result && Array.isArray(result.data)) {
-          localStorage.setItem('courseEnrollments', JSON.stringify(result.data));
-          renderAdminPanel();
-        }
-      }).catch(() => {});
     }
 
     function downloadEnrollments(format) {
