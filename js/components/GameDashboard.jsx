@@ -23,7 +23,6 @@ function GameDashboard() {
   const [calcDisplay, setCalcDisplay] = useState('0');
 
   // Game finality
-  const [totalRounds, setTotalRounds] = useState(21);
   const [gameEnded, setGameEnded] = useState(false);
   const [finalStats, setFinalStats] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -479,7 +478,9 @@ function GameDashboard() {
     setEmployees(newEmployees);
 
     const nextQ = currentQuestion + 1;
-    if (nextQ >= totalRounds) {
+    const complexQuestions = getComplexQuestions();
+    const totalQuestions = complexQuestions.length;
+    if (nextQ >= totalQuestions) {
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
     } else {
       setCurrentQuestion(nextQ);
@@ -636,6 +637,7 @@ function GameDashboard() {
 
   // --- Current question ---
   const complexQuestions = getComplexQuestions();
+  const totalRounds = complexQuestions.length;
   const currentQ = complexQuestions[currentQuestion % complexQuestions.length];
   const gameProgress = Math.round(((currentQuestion + 1) / totalRounds) * 100);
   const payrollMonthly = employees.reduce((s, e) => s + (e.salary || 0), 0);
