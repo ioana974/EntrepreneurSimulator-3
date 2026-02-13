@@ -286,19 +286,19 @@ function Home() {
         <div className="courses-grid">
           <CourseCard 
             title="Startup 101"
-            instructor="Andrei Popescu"
+            instructor="Turda Ioana Elena"
             duration="4 săptămâni"
             level="Începător"
           />
           <CourseCard 
             title="Scaling Your Business"
-            instructor="Maria Ionescu"
+            instructor="Turda Ioana Elena"
             duration="6 săptămâni"
             level="Intermediar"
           />
           <CourseCard 
             title="Advanced Leadership"
-            instructor="John Smith"
+            instructor="Ardusatan Gavril"
             duration="8 săptămâni"
             level="Avansat"
           />

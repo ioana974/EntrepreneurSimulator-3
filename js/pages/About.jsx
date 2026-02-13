@@ -70,35 +70,15 @@ function About() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
           gap: '2rem'
         }}>
-          <TeamMember 
-            name="Ioana Popescu"
-            role="Fondatoare & Product Manager"
-            bio="Expert în digital marketing și transformare digitală"
+          <TeamMember
+            name="Turda Ioana Elena"
+            role="Fondatoare, Developer, Creatoare site și conținut, Vizual, Simulator"
+            bio="Fondatoare și dezvoltator principal — responsabilă pentru concept, conținut, design vizual și dezvoltarea simulatorului."
           />
-          <TeamMember 
-            name="Andrei Ionescu"
-            role="Lead Developer"
-            bio="Full-stack developer cu 8 ani de experiență"
-          />
-          <TeamMember 
-            name="Maria Gheorghiu"
-            role="Content Director"
-            bio="Antreprenor cu 3 startup-uri de succes"
-          />
-          <TeamMember 
-            name="Victor Stan"
-            role="UX/UI Designer"
-            bio="Designer cu experiență în tech startups"
-          />
-          <TeamMember 
-            name="Elena Cristea"
-            role="Community Manager"
-            bio="Specialist în engagement și community building"
-          />
-          <TeamMember 
-            name="Costel Rusu"
-            role="AI/ML Specialist"
-            bio="Data scientist și expert în machine learning"
+          <TeamMember
+            name="Ardusatan Gavril"
+            role="Profesor coordonator"
+            bio="Profesor coordonator și mentor academic pentru proiectul educațional."
           />
         </div>
       </section>

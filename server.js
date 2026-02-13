@@ -43,6 +43,72 @@ const jwt = require('jsonwebtoken');
 // === EMAIL SETUP ===
 let transporter = null;
 
+// Helper to ensure transporter is initialized (creates Ethereal test account if needed)
+async function getTransporter() {
+  if (transporter) return transporter;
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD && process.env.EMAIL_PASSWORD !== 'REPLACE_WITH_APP_PASSWORD') {
+    transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+    try {
+      await transporter.verify();
+      console.log('Email transporter ready (real SMTP)');
+    } catch (err) {
+      console.error('Email transporter verify failed:', err);
+    }
+    return transporter;
+  }
+
+  // create Ethereal test account
+  const testAccount = await nodemailer.createTestAccount();
+  transporter = nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass
+    }
+  });
+  console.log('Using Ethereal test account for emails. View messages at https://ethereal.email (use credentials below)');
+  console.log('Ethereal user:', testAccount.user);
+  console.log('Ethereal pass:', testAccount.pass);
+  return transporter;
+}
+
+// Generic sendEmail helper: prefers SendGrid (API) if SENDGRID_API_KEY set, otherwise uses nodemailer transporter
+async function sendEmail({ to, from, subject, text, html }) {
+  if (process.env.SENDGRID_API_KEY) {
+    try {
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      const msg = {
+        to,
+        from: from || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
+        subject,
+        text,
+        html
+      };
+      return await sgMail.send(msg);
+    } catch (err) {
+      // If SendGrid package is not installed or sending fails, log and fall back to nodemailer
+      console.error('SendGrid send failed or module missing — falling back to nodemailer:', err && err.message ? err.message : err);
+    }
+  }
+
+  const trans = await getTransporter();
+  return new Promise((resolve, reject) => {
+    trans.sendMail({ from: from || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com', to, subject, text, html }, (err, info) => {
+      if (err) return reject(err);
+      return resolve(info);
+    });
+  });
+}
+
 // If real credentials are provided, use them. Otherwise create an Ethereal test account.
 if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD && process.env.EMAIL_PASSWORD !== 'REPLACE_WITH_APP_PASSWORD') {
   transporter = nodemailer.createTransport({
@@ -196,14 +262,9 @@ app.post('/api/game/start', (req, res) => {
     subject: emailSubject,
     html: emailHtml
   };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Could not send start notification:', error);
-    } else {
-      console.log('Start notification sent:', info.response);
-    }
-  });
+  sendEmail(mailOptions).then(info => {
+    console.log('Start notification sent');
+  }).catch(err => console.error('Could not send start notification:', err));
 
   res.json({ success: true, gameState });
 });
@@ -225,14 +286,14 @@ app.post('/api/game/submit', async (req, res) => {
         html: `<h3>Rezultate joc</h3><pre>${JSON.stringify({ playerName, scenarioId, state }, null, 2)}</pre>`
       };
 
-      transporter.sendMail(mailOptions, (err, info) => {
-        if (err) {
-          console.error('Error sending admin results:', err);
-          return res.status(500).json({ success: false, message: 'Could not send results' });
-        }
-        const preview = nodemailer.getTestMessageUrl(info);
-        if (preview) console.log('Admin results preview URL:', preview);
+      sendEmail(mailOptions).then(info => {
+        // nodemailer preview available only when using Ethereal; include if present
+        let preview = null;
+        try { preview = nodemailer.getTestMessageUrl(info); } catch(e) { preview = null; }
         return res.json({ success: true, message: 'Results sent to admin (no player email provided)', preview, savedId: saved._id });
+      }).catch(err => {
+        console.error('Error sending admin results:', err);
+        return res.status(500).json({ success: false, message: 'Could not send results', error: err.message || err });
       });
     } else {
       const playerMailOptions = {
@@ -244,17 +305,29 @@ app.post('/api/game/submit', async (req, res) => {
 
       const adminMailOptions = Object.assign({}, playerMailOptions, { to: process.env.ADMIN_EMAIL || 'turdaioanaelena@gmail.com', subject: `(ADMIN) Rezultate joc - ${playerName || 'Jucător'}` });
 
-      transporter.sendMail(playerMailOptions, (err1, info1) => {
-        const previewPlayer = nodemailer.getTestMessageUrl(info1);
-        if (previewPlayer) console.log('Player results preview URL:', previewPlayer);
-        if (err1) console.error('Error sending results to player:', err1);
-        transporter.sendMail(adminMailOptions, (err2, info2) => {
-          const previewAdmin = nodemailer.getTestMessageUrl(info2);
-          if (previewAdmin) console.log('Admin results preview URL:', previewAdmin);
-          if (err1 && err2) {
-            return res.status(500).json({ success: false, message: 'Both emails failed' });
-          }
+      // send to player first, then admin
+      sendEmail(playerMailOptions).then(info1 => {
+        let previewPlayer = null;
+        try { previewPlayer = nodemailer.getTestMessageUrl(info1); } catch(e) { previewPlayer = null; }
+        sendEmail(adminMailOptions).then(info2 => {
+          let previewAdmin = null;
+          try { previewAdmin = nodemailer.getTestMessageUrl(info2); } catch(e) { previewAdmin = null; }
           return res.json({ success: true, message: 'Results emailed', info: { player: info1, admin: info2, preview: { player: previewPlayer, admin: previewAdmin } }, savedId: saved._id });
+        }).catch(err2 => {
+          console.error('Error sending admin results:', err2);
+          // if player was sent but admin failed, still respond success for player
+          return res.json({ success: true, message: 'Player emailed; admin failed', info: { player: info1, adminError: err2 && err2.message }, savedId: saved._id });
+        });
+      }).catch(err1 => {
+        console.error('Error sending results to player:', err1);
+        // try to send admin anyway
+        sendEmail(adminMailOptions).then(info2 => {
+          let previewAdmin = null;
+          try { previewAdmin = nodemailer.getTestMessageUrl(info2); } catch(e) { previewAdmin = null; }
+          return res.json({ success: true, message: 'Admin emailed; player failed', info: { admin: info2, preview: { admin: previewAdmin } }, savedId: saved._id });
+        }).catch(err2 => {
+          console.error('Both emails failed:', err1, err2);
+          return res.status(500).json({ success: false, message: 'Both emails failed', errors: [err1 && err1.message, err2 && err2.message] });
         });
       });
     }
@@ -263,6 +336,8 @@ app.post('/api/game/submit', async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Note: other endpoints should use getTransporter() helper when sending emails
 
 // Simple endpoint to send a test email to the configured admin email
 app.get('/api/test-email', (req, res) => {
@@ -273,15 +348,51 @@ app.get('/api/test-email', (req, res) => {
     subject: 'Test email - EntrepreneurHub',
     html: `<p>Acesta este un email de test trimis la ${new Date().toLocaleString()}</p>`
   };
-  transporter.sendMail(mailOptions, (err, info) => {
-    if (err) {
-      console.error('Test email failed:', err);
-      return res.status(500).json({ success: false, error: err.message || err });
-    }
-    const preview = nodemailer.getTestMessageUrl(info);
-    if (preview) console.log('Test email preview URL:', preview);
-    return res.json({ success: true, info, preview });
+  getTransporter().then(trans => {
+    trans.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error('Test email failed:', err);
+        return res.status(500).json({ success: false, error: err.message || err });
+      }
+      const preview = nodemailer.getTestMessageUrl(info);
+      if (preview) console.log('Test email preview URL:', preview);
+      return res.json({ success: true, info, preview });
+    });
+  }).catch(err => {
+    console.error('Failed to get transporter for test email:', err);
+    return res.status(500).json({ success: false, error: 'Email transporter error' });
   });
+});
+
+// DEBUG: send a results-like email without persisting to DB (useful when MongoDB is not available)
+app.post('/api/debug/send-result', async (req, res) => {
+  try {
+    const { playerName, playerEmail, state } = req.body || {};
+    if (!playerEmail) return res.status(400).json({ success: false, message: 'playerEmail required' });
+
+    const playerMailOptions = {
+      from: process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
+      to: playerEmail,
+      subject: `Rezultate joc - ${playerName || 'Jucător'}`,
+      html: `<h3>Salut ${playerName || ''},</h3><p>Iată un sumar al jocului tău:</p><pre>${JSON.stringify(state || {}, null, 2)}</pre>`
+    };
+
+    const adminMailOptions = Object.assign({}, playerMailOptions, { to: process.env.ADMIN_EMAIL || 'turdaioanaelena@gmail.com', subject: `(ADMIN) Rezultate joc - ${playerName || 'Jucător'}` });
+
+    // send to player then admin
+    const info1 = await sendEmail(playerMailOptions);
+    let previewPlayer = null;
+    try { previewPlayer = nodemailer.getTestMessageUrl(info1); } catch(e) { previewPlayer = null; }
+
+    const info2 = await sendEmail(adminMailOptions);
+    let previewAdmin = null;
+    try { previewAdmin = nodemailer.getTestMessageUrl(info2); } catch(e) { previewAdmin = null; }
+
+    return res.json({ success: true, message: 'Debug emails sent', info: { player: info1, admin: info2, preview: { player: previewPlayer, admin: previewAdmin } } });
+  } catch (err) {
+    console.error('Debug send-result error:', err);
+    return res.status(500).json({ success: false, error: err.message || err });
+  }
 });
 
 // Save intermediate game state for a user (requires token)
@@ -393,16 +504,24 @@ app.get('/api/courses', (req, res) => {
     {
       id: 1,
       title: 'Startup 101',
-      instructor: 'Andrei Popescu',
+      instructor: 'Turda Ioana Elena',
       duration: '4 săptămâni',
       level: 'Începător'
     },
     {
       id: 2,
       title: 'Scaling Your Business',
-      instructor: 'Maria Ionescu',
+      instructor: 'Turda Ioana Elena',
       duration: '6 săptămâni',
       level: 'Intermediar'
+    }
+    ,
+    {
+      id: 3,
+      title: 'Advanced Entrepreneurship',
+      instructor: 'Ardusatan Gavril',
+      duration: '8 săptămâni',
+      level: 'Avansat'
     }
   ];
   res.json({ success: true, courses });
@@ -455,13 +574,18 @@ app.post('/api/courses/enroll', (req, res) => {
     html: emailHtml
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Email send error:', error);
-      return res.status(500).json({ success: false, message: 'Email could not be sent', error: error.message || error });
-    }
-    console.log('Email sent:', info);
-    res.json({ success: true, message: 'Enrolled successfully and email sent', info: { messageId: info.messageId, response: info.response } });
+  getTransporter().then(trans => {
+    trans.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Email send error:', error);
+        return res.status(500).json({ success: false, message: 'Email could not be sent', error: error.message || error });
+      }
+      console.log('Email sent:', info);
+      res.json({ success: true, message: 'Enrolled successfully and email sent', info: { messageId: info.messageId, response: info.response } });
+    });
+  }).catch(err => {
+    console.error('Failed to get transporter for enrollment email:', err);
+    return res.status(500).json({ success: false, message: 'Email transporter error' });
   });
 });
 

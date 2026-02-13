@@ -1,4 +1,11 @@
-# === GIT IGNORE - Fișiere care nu trebuie urmărite ===
+node_modules/
+.env
+dist/
+build/
+*.log
+/.cache
+/.env.local
+.DS_Store# === GIT IGNORE - Fișiere care nu trebuie urmărite ===
 
 # Dependencies
 node_modules/

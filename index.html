@@ -159,15 +159,15 @@
         courses_title: 'Cursuri Online',
         courses_desc: 'Înscrie-te la cursuri profesionale conduse de specialiști',
         startup101: 'Startup 101',
-        instructor: 'Andrei Popescu',
+        instructor: 'Turda Ioana Elena',
         weeks: 'săptămâni',
         beginner: 'Începător',
         enroll: 'Înscrie-te',
         scaling: 'Scaling Your Business',
-        instructor2: 'Maria Ionescu',
+        instructor2: 'Turda Ioana Elena',
         intermediate: 'Intermediar',
         advanced_lead: 'Advanced Leadership',
-        instructor3: 'John Smith',
+        instructor3: 'Ardusatan Gavril',
         advanced: 'Avansat',
         tests_title: 'Teste și Evaluări',
         tests_desc: 'Testează-ți cunoștințele și progresul cu evaluări interactive',
@@ -181,15 +181,12 @@
         mission: 'Misiunea Noastră',
         mission_text: 'EntrepreneurHub a fost creat cu o singură misiune clară: să democratizeze educația entrepreneurială și să ofere adolescenților și tinerilor o platformă interactivă unde pot învăța, experimenta și crești ca antreprenori.',
         team: 'Echipa Noastră',
-        founder: 'Ioana Popescu',
-        founder_role: 'Fondatoare',
-        founder_bio: 'Expert în digital marketing și transformare digitală',
-        dev_lead: 'Andrei Ionescu',
-        dev_role: 'Lead Developer',
-        dev_bio: 'Full-stack developer cu 8 ani de experiență',
-        content: 'Maria Gheorghiu',
-        content_role: 'Content Director',
-        content_bio: 'Antreprenor cu 3 startup-uri de succes',
+        founder: 'Turda Ioana Elena',
+        founder_role: 'Fondatoare, Developer, Creatoare site și conținut, Vizual, Simulator',
+        founder_bio: 'Fondatoare și dezvoltator principal — responsabilă pentru concept, conținut, design vizual și dezvoltarea simulatorului.',
+        dev_lead: 'Ardusatan Gavril',
+        dev_role: 'Profesor coordonator',
+        dev_bio: 'Profesor coordonator și mentor academic pentru proiectul educațional.',
         statistics_title: 'Statistici',
         total_users: 'Total Utilizatori',
         active_courses: 'Cursuri Active',
@@ -237,15 +234,15 @@
         courses_title: 'Online Courses',
         courses_desc: 'Enroll in professional courses led by specialists',
         startup101: 'Startup 101',
-        instructor: 'Andrei Popescu',
+        instructor: 'Turda Ioana Elena',
         weeks: 'weeks',
         beginner: 'Beginner',
         enroll: 'Enroll',
         scaling: 'Scaling Your Business',
-        instructor2: 'Maria Ionescu',
+        instructor2: 'Turda Ioana Elena',
         intermediate: 'Intermediate',
         advanced_lead: 'Advanced Leadership',
-        instructor3: 'John Smith',
+        instructor3: 'Ardusatan Gavril',
         advanced: 'Advanced',
         tests_title: 'Tests and Assessments',
         tests_desc: 'Test your knowledge and progress with interactive assessments',
@@ -259,15 +256,12 @@
         mission: 'Our Mission',
         mission_text: 'EntrepreneurHub was created with one clear mission: to democratize entrepreneurial education and provide adolescents and young adults with an interactive platform where they can learn, experiment, and grow as entrepreneurs.',
         team: 'Our Team',
-        founder: 'Ioana Popescu',
-        founder_role: 'Founder',
-        founder_bio: 'Expert in digital marketing and digital transformation',
-        dev_lead: 'Andrei Ionescu',
-        dev_role: 'Lead Developer',
-        dev_bio: 'Full-stack developer with 8 years of experience',
-        content: 'Maria Gheorghiu',
-        content_role: 'Content Director',
-        content_bio: 'Entrepreneur with 3 successful startups',
+        founder: 'Turda Ioana Elena',
+        founder_role: 'Founder, Developer, Site & Content Creator, Visual, Simulator',
+        founder_bio: 'Founder and lead developer — responsible for concept, content, visual design and the simulator development.',
+        dev_lead: 'Ardusatan Gavril',
+        dev_role: 'Professor Coordinator',
+        dev_bio: 'Professor coordinator and academic mentor for the educational project.',
         statistics_title: 'Statistics',
         total_users: 'Total Users',
         active_courses: 'Active Courses',
@@ -302,6 +296,7 @@
     let testScore = 0;
     let testTimeLeft = 0;
     let testTimer = null;
+    let currentQuestionList = null;
 
     const testQuestions = {
       initial: [
@@ -628,6 +623,41 @@
       currentTest = key;
       currentQuestion = 0;
       testScore = 0;
+      // build a question list of desired length (shuffle + slice)
+      const desiredCounts = { initial: 21, fundamentals: 35, professional: 50 };
+      let pool = (testQuestions && testQuestions[key]) || [];
+      // if pool is smaller than desired, combine all available questions across categories
+      if (pool.length < (desiredCounts[key] || 0)) {
+        const combined = [];
+        for (const k in testQuestions) {
+          if (Array.isArray(testQuestions[k])) combined.push(...testQuestions[k]);
+        }
+        // remove duplicates by question text (simple dedupe)
+        const seen = new Set();
+        pool = combined.filter(q => {
+          const id = (q.q_ro || q.q || '') + '|' + (q.q_en || '');
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
+      }
+      function shuffle(a) {
+        const arr = a.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+      const desired = desiredCounts[key] || pool.length;
+      // if pool smaller than desired, repeat shuffled copies until we have enough
+      let candidates = pool.slice();
+      if (candidates.length === 0) candidates = pool.slice();
+      while (candidates.length < desired && pool.length > 0) {
+        candidates = candidates.concat(shuffle(pool));
+      }
+      currentQuestionList = shuffle(candidates).slice(0, Math.min(desired, candidates.length));
+      console.debug('DEBUG startTest:', { key, desired, poolLength: pool.length, listLength: currentQuestionList.length });
       const timeMap = { initial: 30 * 60, fundamentals: 45 * 60, professional: 60 * 60 };
       testTimeLeft = timeMap[key] || 60;
       renderTestModal();
@@ -651,14 +681,16 @@
     }
 
     function renderTestModal() {
-      if (!currentTest || currentQuestion >= testQuestions[currentTest].length) {
+      const list = currentQuestionList || ((currentTest && testQuestions[currentTest]) || []);
+      if (!currentTest || currentQuestion >= list.length) {
+        console.debug('DEBUG renderTestModal - ending test', { currentQuestion, total: list.length });
         if (testTimer) clearInterval(testTimer);
         renderTestResults();
         return;
       }
 
-      const q = testQuestions[currentTest][currentQuestion];
-      const total = testQuestions[currentTest].length;
+      const q = list[currentQuestion];
+      const total = list.length;
       const progress = ((currentQuestion + 1) / total) * 100;
       const qText = currentLanguage === 'ro' ? q.q_ro : q.q_en;
       const optionsText = currentLanguage === 'ro' ? q.options_ro : q.options_en;
@@ -687,21 +719,26 @@
 
       html += '</div>';
       document.getElementById('test-modal-content').innerHTML = html;
+      console.debug('DEBUG renderTestModal - showing question', { index: currentQuestion, total });
     }
 
     function answerQuestion(idx) {
+      const list = currentQuestionList || ((currentTest && testQuestions[currentTest]) || []);
       if (idx !== -1) {
-        const q = testQuestions[currentTest][currentQuestion];
-        if (idx === q.correct) {
+        const q = list[currentQuestion];
+        if (q && idx === q.correct) {
           testScore++;
         }
       }
       currentQuestion++;
+      console.debug('DEBUG answerQuestion:', { selectedIdx: idx, nextQuestion: currentQuestion, total: list.length, score: testScore });
       renderTestModal();
     }
 
     function renderTestResults() {
-      const total = testQuestions[currentTest].length;
+      const list = currentQuestionList || ((currentTest && testQuestions[currentTest]) || []);
+      const total = list.length;
+      console.debug('DEBUG renderTestResults:', { currentTest, total, testScore });
       const percentage = Math.round((testScore / total) * 100);
       const message = percentage >= 80 ? 'Excelent!' : percentage >= 60 ? 'Bun!' : 'Mai mult studiu!';
       
@@ -737,6 +774,8 @@
     function closeTestModal() {
       document.getElementById('test-modal').style.display = 'none';
       currentTest = null;
+      currentQuestionList = null;
+      console.debug('DEBUG closeTestModal - cleared currentTest and list');
     }
 
     function toggleEnroll(courseIndex) {
@@ -875,8 +914,7 @@
 
       const team = [
         { name: t('founder'), role: t('founder_role'), bio: t('founder_bio') },
-        { name: t('dev_lead'), role: t('dev_role'), bio: t('dev_bio') },
-        { name: t('content'), role: t('content_role'), bio: t('content_bio') }
+        { name: t('dev_lead'), role: t('dev_role'), bio: t('dev_bio') }
       ];
 
       let html = `
