@@ -38,7 +38,6 @@ const User = require('./models/User');
 const GameResult = require('./models/GameResult');
 
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 // === EMAIL SETUP ===
 let transporter = null;

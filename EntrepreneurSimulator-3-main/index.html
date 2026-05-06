@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrepreneur Simulator</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/sections.css">
+</head>
+<body>
+  <!-- Loading Bar -->
+  <div class="progress-bar" id="progress-bar" style="position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #ffd700, #00f0ff); width: 0%; z-index: 1000; transition: width 0.3s ease; box-shadow: 0 0 10px #ffd700;"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo-container" onclick="navigateTo('home')" style="cursor: pointer;">
+      <div class="logo">E</div>
+      <span class="navbar-title">EntrepreneurHub</span>
+    </div>
+    <div class="nav-menu" id="nav-menu">
+      <a href="javascript:void(0)" onclick="navigateTo('lessons')">Lecții</a>
+      <a href="javascript:void(0)" onclick="navigateTo('courses')">Cursuri</a>
+      <a href="javascript:void(0)" onclick="navigateTo('tests')">Teste</a>
+      <a href="javascript:void(0)" onclick="navigateTo('stats')">Statistici</a>
+      <a href="javascript:void(0)" onclick="navigateTo('about')">Despre</a>
+    </div>
+    <div class="nav-controls">
+      <button class="language-switch" id="lang-btn" onclick="toggleLanguage()">EN</button>
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="javascript:void(0)" onclick="navigateTo('home')">Acasă</a>
+      <a href="javascript:void(0)" onclick="navigateTo('lessons')">Lecții</a>
+      <a href="javascript:void(0)" onclick="navigateTo('courses')">Cursuri</a>
+      <a href="javascript:void(0)" onclick="navigateTo('tests')">Teste</a>
+      <a href="javascript:void(0)" onclick="navigateTo('stats')">Statistici</a>
+      <a href="javascript:void(0)" onclick="navigateTo('about')">Despre</a>
+      <a href="javascript:void(0)" onclick="navigateTo('login')">Logare</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero" id="home" style="position: relative; display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 80px); overflow: hidden;">
+    <canvas id="background-canvas" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+    <div class="content animate-fadeInUp" style="text-align: center; position: relative; z-index: 2;">
+      <h1 class="title">
+        Entrepreneur <span class="highlight">Simulator</span>
+      </h1>
+      <p class="subtitle" id="hero-subtitle">Devino antreprenor și ia decizii importante pentru succesul firmei tale!</p>
+      <p class="promotional-text" id="hero-promotional" style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.85); margin: 1.5rem auto; max-width: 600px; line-height: 1.6;">
+        Intră în lumea antreprenoriatului și experimentează provocările reale ale unui om de afaceri. Iei decizii strategice, gestionezi resurse și navighezi prin piața competitivă pentru a-ți construi imperiul afacerilor. Simulatorul nostru îți permite să înveți din greșeli fără riscuri reale și să descoperi care sunt secretele succesului în lumea business-ului.
+      </p>
+      <div class="menu" style="margin-top: 2rem;">
+        <button class="menu-item stagger-item" id="start-sim-btn" onclick="document.getElementById('start-sim-btn').setAttribute('href', 'game.html'); localStorage.setItem('autoStartGame', 'true'); window.location.href='game.html';" style="background: linear-gradient(135deg, #ffd700, #ffed4e); color: #000; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer;" >Start Simulator</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lessons Section -->
+  <section id="lessons-section" class="lesson-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="lessons-title">Lecții</h2>
+    <p class="section-subtitle animate-slideInUp" id="lessons-desc">Învață de la experți și descoperă secretele succesului entrepreneurial</p>
+    <div id="lessons-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+    </div>
+  </section>
+
+  <!-- Courses Section -->
+  <section id="courses-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; background: rgba(0,240,255,0.05); display: none;">
+    <h2 class="section-title animate-slideInUp" id="courses-title">Cursuri Online</h2>
+    <p class="section-subtitle animate-slideInUp" id="courses-desc">Înscrie-te la cursuri profesionale conduse de specialiști</p>
+    <div id="courses-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+    </div>
+  </section>
+
+  <!-- Tests Section -->
+  <section id="tests-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="tests-title">Teste și Evaluări</h2>
+    <p class="section-subtitle animate-slideInUp" id="tests-desc">Testează-ți cunoștințele și progresul cu evaluări interactive</p>
+    <div id="tests-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+    </div>
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 500; padding: 2rem; overflow-y: auto;">
+      <div style="background: var(--primary-dark); max-width: 600px; margin: 2rem auto; border-radius: 10px; padding: 2rem; color: var(--text-primary);">
+      <button onclick="closeTestModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">&times;</button>
+        <div id="test-modal-content" style="clear: both;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about-section" style="padding: 4rem 2rem; max-width: 900px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="about-title">Despre EntrepreneurHub</h2>
+    <div id="about-content"></div>
+  </section>
+
+  <!-- Statistics Section -->
+  <section id="stats-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title animate-slideInUp" id="stats-title">Statistici</h2>
+    <div id="stats-content"></div>
+  </section>
+
+  <!-- Enrollment Modal -->
+  <div id="enrollment-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 600; padding: 2rem; overflow-y: auto; align-items: center; justify-content: center;">
+    <div style="background: var(--primary-dark); max-width: 500px; margin: auto; border-radius: 10px; padding: 2rem; color: var(--text-primary);">
+      <button onclick="closeEnrollmentModal()" style="float: right; background: none; border: none; color: var(--accent-yellow); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      <div id="enrollment-content" style="clear: both;"></div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <section id="admin-section" style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; display: none;">
+    <h2 class="section-title" id="admin-title">Admin Panel</h2>
+    <div style="margin-bottom: 2rem;">
+      <button onclick="downloadEnrollments('json')" style="margin-right: 1rem; padding: 0.8rem 1.5rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Enrollments (JSON)</button>
+      <button onclick="downloadEnrollments('csv')" style="margin-right: 1rem; padding: 0.8rem 1.5rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Enrollments (CSV)</button>
+      <button onclick="downloadGameResults('json')" style="margin-right: 1rem; padding: 0.8rem 1.5rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Game Results (JSON)</button>
+      <button onclick="downloadGameResults('csv')" style="padding: 0.8rem 1.5rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Download Game Results (CSV)</button>
+    </div>
+    <div id="admin-content"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding: 2rem; color: var(--text-secondary); margin-top: 3rem; border-top: 1px solid var(--border-color);">
+    <p>&copy; 2026 EntrepreneurHub. Built with passion for entrepreneurs. <a href="javascript:openAdminPanel()" style="color: var(--accent-cyan); text-decoration: none; cursor: pointer;">Admin</a></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+
+  <!-- JavaScript Logic for Navigation, Translation, Tests, etc. -->
+  <script>
+    // Translation Object
+    const translations = {
+      ro: {
+        home: 'Acasă',
+        lessons: 'Lecții',
+        courses: 'Cursuri',
+        tests: 'Teste',
+        statistics: 'Statistici',
+        about: 'Despre',
+        hero_subtitle: 'Devino antreprenor și ia decizii importante pentru succesul firmei tale!',
+        hero_promotional: 'Intră în lumea antreprenoriatului și experimentează provocările reale ale unui om de afaceri. Iei decizii strategice, gestionezi resurse și navighezi prin piața competitivă pentru a-ți construi imperiul afacerilor. Simulatorul nostru îți permite să înveți din greșeli fără riscuri reale și să descoperi care sunt secretele succesului în lumea business-ului.',
+        start_simulator: 'Start Simulator',
+        lessons_title: 'Lecții',
+        lessons_desc: 'Învață de la experți și descoperă secretele succesului entrepreneurial',
+        fundamentals: 'Fundamentele Businessului',
+        fundamentals_desc: 'Învață conceptele de bază ale antreprenoriatului modern',
+        innovation: 'Inovație și Creativitate',
+        innovation_desc: 'Descoperă cum să-ți dezvolți ideile în produse de succes',
+        financial: 'Managementul Financiar',
+        financial_desc: 'Stăpânește gestiunea bugetului și finanțelor businessului',
+        marketing: 'Strategia de Marketing',
+        marketing_desc: 'Creează campanii eficiente și atrage clienți',
+        courses_title: 'Cursuri Online',
+        courses_desc: 'Înscrie-te la cursuri profesionale conduse de specialiști',
+        startup101: 'Startup 101',
+        instructor: 'Turda Ioana Elena',
+        weeks: 'săptămâni',
+        beginner: 'Începător',
+        enroll: 'Înscrie-te',
+        scaling: 'Scaling Your Business',
+        instructor2: 'Turda Ioana Elena',
+        intermediate: 'Intermediar',
+        advanced_lead: 'Advanced Leadership',
+        instructor3: 'Ardusatan Gavril',
+        advanced: 'Avansat',
+        tests_title: 'Teste și Evaluări',
+        tests_desc: 'Testează-ți cunoștințele și progresul cu evaluări interactive',
+        initial_assess: 'Assessment Inițial',
+        questions: 'întrebări',
+        minutes: 'minute',
+        take_test: 'Ia Testul',
+        fundamentals_test: 'Cunoștințe Fundamentale',
+        professional: 'Certificare Profesională',
+        about_title: 'Despre EntrepreneurHub',
+        mission: 'Misiunea Noastră',
+        mission_text: 'EntrepreneurHub a fost creat cu o singură misiune clară: să democratizeze educația entrepreneurială și să ofere adolescenților și tinerilor o platformă interactivă unde pot învăța, experimenta și crești ca antreprenori.',
+        team: 'Echipa Noastră',
+        founder: 'Turda Ioana Elena',
+        founder_role: 'Fondatoare, Developer, Creatoare site și conținut, Vizual, Simulator',
+        founder_bio: 'Fondatoare și dezvoltator principal — responsabilă pentru concept, conținut, design vizual și dezvoltarea simulatorului.',
+        dev_lead: 'Ardusatan Gavril',
+        dev_role: 'Profesor coordonator',
+        dev_bio: 'Profesor coordonator și mentor academic pentru proiectul educațional.',
+        statistics_title: 'Statistici',
+        total_users: 'Total Utilizatori',
+        active_courses: 'Cursuri Active',
+        completed: 'Completate',
+        avg_score: 'Scor Mediu',
+        game_stats: 'Statisticile Jocului Tău',
+        budget: 'Buget',
+        decisions: 'Decizii Luate',
+        score: 'Punctaj',
+        quiz_finished: 'Test finalizat!',
+        quiz_score: 'Punctaj:',
+        try_again: 'Incearca altul',
+        question: 'Întrebarea',
+        enrollment_form: 'Formularul de Înregistrare',
+        enrollment_subtitle: 'Completează datele pentru a te înscrie la curs',
+        first_name: 'Prenume',
+        last_name: 'Nume',
+        birth_year: 'Anul Nașterii',
+        city: 'Localitatea',
+        county: 'Județul',
+        submit_enrollment: 'Trimite Înregistrare',
+        enrollment_success: 'Mulțumesc pentru înregistrare!',
+        enrollment_success_msg: 'Vei fi contactat în 7 zile lucratoare de către profesor. Acesta îți va prezenta prețul, oferta, detalii și alte informații importante despre curs.'
+      },
+      en: {
+        home: 'Home',
+        lessons: 'Lessons',
+        courses: 'Courses',
+        tests: 'Tests',
+        statistics: 'Statistics',
+        about: 'About',
+        hero_subtitle: 'Become an entrepreneur and make important decisions for your business success!',
+        hero_promotional: 'Enter the world of entrepreneurship and experience real challenges of a business person. Make strategic decisions, manage resources, and navigate the competitive market to build your business empire. Our simulator allows you to learn from mistakes without real risks and discover the secrets of success in the business world.',
+        start_simulator: 'Start Simulator',
+        lessons_title: 'Lessons',
+        lessons_desc: 'Learn from experts and discover the secrets of entrepreneurial success',
+        fundamentals: 'Business Fundamentals',
+        fundamentals_desc: 'Learn the basic concepts of modern entrepreneurship',
+        innovation: 'Innovation and Creativity',
+        innovation_desc: 'Discover how to develop your ideas into successful products',
+        financial: 'Financial Management',
+        financial_desc: 'Master business budget and finance management',
+        marketing: 'Marketing Strategy',
+        marketing_desc: 'Create effective campaigns and attract clients',
+        courses_title: 'Online Courses',
+        courses_desc: 'Enroll in professional courses led by specialists',
+        startup101: 'Startup 101',
+        instructor: 'Turda Ioana Elena',
+        weeks: 'weeks',
+        beginner: 'Beginner',
+        enroll: 'Enroll',
+        scaling: 'Scaling Your Business',
+        instructor2: 'Turda Ioana Elena',
+        intermediate: 'Intermediate',
+        advanced_lead: 'Advanced Leadership',
+        instructor3: 'Ardusatan Gavril',
+        advanced: 'Advanced',
+        tests_title: 'Tests and Assessments',
+        tests_desc: 'Test your knowledge and progress with interactive assessments',
+        initial_assess: 'Initial Assessment',
+        questions: 'questions',
+        minutes: 'minutes',
+        take_test: 'Take Test',
+        fundamentals_test: 'Fundamental Knowledge',
+        professional: 'Professional Certification',
+        about_title: 'About EntrepreneurHub',
+        mission: 'Our Mission',
+        mission_text: 'EntrepreneurHub was created with one clear mission: to democratize entrepreneurial education and provide adolescents and young adults with an interactive platform where they can learn, experiment, and grow as entrepreneurs.',
+        team: 'Our Team',
+        founder: 'Turda Ioana Elena',
+        founder_role: 'Founder, Developer, Site & Content Creator, Visual, Simulator',
+        founder_bio: 'Founder and lead developer — responsible for concept, content, visual design and the simulator development.',
+        dev_lead: 'Ardusatan Gavril',
+        dev_role: 'Professor Coordinator',
+        dev_bio: 'Professor coordinator and academic mentor for the educational project.',
+        statistics_title: 'Statistics',
+        total_users: 'Total Users',
+        active_courses: 'Active Courses',
+        completed: 'Completed',
+        avg_score: 'Average Score',
+        game_stats: 'Your Game Statistics',
+        budget: 'Budget',
+        decisions: 'Decisions Made',
+        score: 'Score',
+        quiz_finished: 'Quiz Finished!',
+        quiz_score: 'Score:',
+        try_again: 'Try Another',
+        question: 'Question',
+        enrollment_form: 'Enrollment Form',
+        enrollment_subtitle: 'Complete your details to enroll in the course',
+        first_name: 'First Name',
+        last_name: 'Last Name',
+        birth_year: 'Birth Year',
+        city: 'City',
+        county: 'County',
+        submit_enrollment: 'Submit Enrollment',
+        enrollment_success: 'Thank you for registering!',
+        enrollment_success_msg: 'You will be contacted within 7 business days by the instructor. They will present you with the price, offer, details and other important information about the course.'
+      }
+    };
+
+    let currentLanguage = localStorage.getItem('appLanguage') || 'ro';
+    let currentPage = 'home';
+    let enrolled = new Set();
+    let currentTest = null;
+    let currentQuestion = 0;
+    let testScore = 0;
+    let testTimeLeft = 0;
+    let testTimer = null;
+    let currentQuestionList = null;
+
+    const testQuestions = {
+      initial: [
+        {q_ro:'Ce este separația patrimonială în SRL?',q_en:'What is asset separation in LLC?',options_ro:['Divorțul între asociați','Protecție patrimoniu personal','Separarea conturilor'],options_en:['Partner divorce','Personal asset protection','Account separation'],correct:1},
+        {q_ro:'Care este forma juridică recomandată pentru startup?',q_en:'Which legal form is recommended for startups?',options_ro:['PFA','SRL','SA'],options_en:['SEL','LLC','Corp'],correct:1},
+        {q_ro:'Ce este TVA Colectat?',q_en:'What is Collected VAT?',options_ro:['Taxa plătită furnizorilor','Taxa adăugată la vânzări','Taxa pe profit'],options_en:['Tax paid to suppliers','Tax added to sales','Tax on profit'],correct:1},
+        {q_ro:'Care regim fiscal are rate de 1-3%?',q_en:'Which tax regime has 1-3% rates?',options_ro:['Microîntreprindere','Impozit profit','SRL'],options_en:['Micro-business','Profit tax','LLC'],correct:0},
+        {q_ro:'Ce sunt codurile CAEN?',q_en:'What are NACE codes?',options_ro:['Coduri secrete','Clasificare activități economice','Coduri bancari'],options_en:['Secret codes','Classification of activities','Bank codes'],correct:1},
+        {q_ro:'Unde se înregistrează marcele în România?',q_en:'Where are trademarks registered in Romania?',options_ro:['La OSIM','La Notariat','La Primărie'],options_en:['At OSIM','At Notary','At City Hall'],correct:0},
+        {q_ro:'Ce este un MVP?',q_en:'What is an MVP?',options_ro:['Produs perfect','Produs minim viabil','Manager de vânzări'],options_en:['Perfect product','Minimum viable product','Sales manager'],correct:1},
+        {q_ro:'Care sunt fazele Design Thinking?',q_en:'What are Design Thinking phases?',options_ro:['3 faze','5 faze','10 faze'],options_en:['3 phases','5 phases','10 phases'],correct:1},
+        {q_ro:'Ce sunt clase NISA la mărci?',q_en:'What are NISA classes for trademarks?',options_ro:['Clase sociale','Categorii de produse/servicii','Nivele dificultate'],options_en:['Social classes','Product/service categories','Difficulty levels'],correct:1},
+        {q_ro:'Care e importanța prototipării rapide?',q_en:'Why is rapid prototyping important?',options_ro:['Costuri mici','Testare rapidă cu feedback','Marketing'],options_en:['Low costs','Quick testing with feedback','Marketing'],correct:1},
+        {q_ro:'Ce este Ciclul de Conversie (CCC)?',q_en:'What is Cash Conversion Cycle?',options_ro:['DIO+DSO-DPO','DIO×DSO/DPO','DSO-DIO'],options_en:['DIO+DSO-DPO','DIO×DSO/DPO','DSO-DIO'],correct:0},
+        {q_ro:'Ce este Burn Rate?',q_en:'What is Burn Rate?',options_ro:['Rata creșterii','Cheltuieli minus venituri','Profit'],options_en:['Growth rate','Expenses minus revenue','Profit'],correct:1},
+        {q_ro:'Care e formula pentru Marja Brută?',q_en:'What is Gross Margin formula?',options_ro:['(Revenue-COGS)/Revenue','Revenue/COGS','COGS/Revenue'],options_en:['(Rev-COGS)/Rev','Rev/COGS','COGS/Rev'],correct:0},
+        {q_ro:'Ce este EBITDA?',q_en:'What is EBITDA?',options_ro:['Venit din dobânzi','Profit operațional','Cost vânzări'],options_en:['Interest income','Operating profit','Cost of sales'],correct:1},
+        {q_ro:'Dacă ai 300K în bancă și burn 30K/lună, care e runway-ul?',q_en:'If you have 300K bank and burn 30K/month, what is runway?',options_ro:['5 luni','10 luni','15 luni'],options_en:['5 months','10 months','15 months'],correct:1},
+        {q_ro:'Ce este LTV?',q_en:'What is LTV?',options_ro:['Cost achiziție client','Valoare client pe viață','Venit mediu'],options_en:['Customer acquisition cost','Customer lifetime value','Average revenue'],correct:1},
+        {q_ro:'Ce este CAC?',q_en:'What is CAC?',options_ro:['Cost of All Commodities','Costul achiziției client','Customer Annual Charge'],options_en:['Cost of All Commodities','Customer acquisition cost','Customer Annual Charge'],correct:1},
+        {q_ro:'Care e raportul ideal LTV/CAC?',q_en:'What is ideal LTV/CAC ratio?',options_ro:['1:1','3:1','10:1'],options_en:['1:1','3:1','10:1'],correct:1},
+        {q_ro:'Ce este funnel de conversie?',q_en:'What is conversion funnel?',options_ro:['Aparat laborator','Etape Awareness→Conversion','Reducere preț'],options_en:['Lab device','Stages Awareness→Conversion','Price discount'],correct:1},
+        {q_ro:'Ce prescripție GDPR trebuie respectată?',q_en:'What GDPR requirement must be followed?',options_ro:['Nicio restricție','Informed Consent + Privacy Policy','Doar pentru EU'],options_en:['No restriction','Informed Consent + Privacy Policy','Only for EU'],correct:1},
+        {q_ro:'Ce este un plan de afaceri?',q_en:'What is a business plan?',options_ro:['Hartă birou','Document cu strategie și finanțe','Contract bancă'],options_en:['Office map','Strategy & finance document','Bank contract'],correct:1},
+        {q_ro:'Care caracteristici au antreprenorii de succes?',q_en:'What traits do successful entrepreneurs have?',options_ro:['Bogați','Gândire disruptivă, persistență','Norocos'],options_en:['Rich','Disruptive thinking, persistence','Lucky'],correct:1},
+        {q_ro:'Ce este pivoting?',q_en:'What is pivoting?',options_ro:['Mișcare dans','Schimbare strategie pe date reale','Rotire stoc'],options_en:['Dance move','Strategy change on real data','Stock rotation'],correct:1},
+        {q_ro:'Ce este networking-ul?',q_en:'What is networking?',options_ro:['Internet','Relații cu oameni relevanți','Sistem calcul'],options_en:['Internet','Relations with relevant people','Computer system'],correct:1},
+        {q_ro:'De ce este importantă etapa MVP?',q_en:'Why is MVP stage important?',options_ro:['Costă puțin','Validează rapid ideea pe piață','E obligatorie'],options_en:['Low cost','Quickly validates idea on market','Mandatory'],correct:1}
+      ],
+      fundamentals: [
+        {q_ro:'Ce este separația patrimonială în SRL?',q_en:'What is asset separation in LLC?',options_ro:['Divorțul între asociați','Protecție patrimoniu personal','Separarea conturilor'],options_en:['Partner divorce','Personal asset protection','Account separation'],correct:1},
+        {q_ro:'Care este forma juridică recomandată pentru startup?',q_en:'Which legal form is recommended for startups?',options_ro:['PFA','SRL','SA'],options_en:['SEL','LLC','Corp'],correct:1},
+        {q_ro:'Ce este TVA Colectat?',q_en:'What is Collected VAT?',options_ro:['Taxa plătită furnizorilor','Taxa adăugată la vânzări','Taxa pe profit'],options_en:['Tax paid to suppliers','Tax added to sales','Tax on profit'],correct:1},
+        {q_ro:'Care regim fiscal are rate de 1-3%?',q_en:'Which tax regime has 1-3% rates?',options_ro:['Microîntreprindere','Impozit profit','SRL'],options_en:['Micro-business','Profit tax','LLC'],correct:0},
+        {q_ro:'Ce sunt codurile CAEN?',q_en:'What are NACE codes?',options_ro:['Coduri secrete','Clasificare activități economice','Coduri bancari'],options_en:['Secret codes','Classification of activities','Bank codes'],correct:1},
+        {q_ro:'Ce se întâmplă dacă TVA Deductibil > TVA Colectat?',q_en:'What if Deductible VAT > Collected VAT?',options_ro:['Plătești diferența','Ai TVA de recuperat','Nicio problemă'],options_en:['Pay difference','Have VAT to recover','No problem'],correct:1},
+        {q_ro:'Ce este REVISAL?',q_en:'What is REVISAL?',options_ro:['Software contabilitate','Registru Evidență Salariați','Bază date globală'],options_en:['Accounting software','Employees Registry','Global database'],correct:1},
+        {q_ro:'Care diferență SRL vs PFA la risc?',q_en:'What is LLC vs SEL risk difference?',options_ro:['Nu sunt diferite','SRL are protecție patrimonială','PFA are protecție'],options_en:['No difference','LLC has asset protection','SEL has protection'],correct:1},
+        {q_ro:'Cum se calculează DIO (Days Inventory)?',q_en:'How to calculate DIO?',options_ro:['Zile până vânzare','Zile după vânzare','Zile plată furnizor'],options_en:['Days to sell','Days after sale','Days to pay supplier'],correct:0},
+        {q_ro:'Ce este Runway-ul?',q_en:'What is Runway?',options_ro:['Pistă avion','Luni de funcționare cu cash','Perioadă proiecție'],options_en:['Airport runway','Months operating on cash','Projection period'],correct:1},
+        {q_ro:'Ce sunt cheltuielile deductibile?',q_en:'What are deductible expenses?',options_ro:['Cheltuieli personale','Salarii, chirii, materii prime','Doar utils'],options_en:['Personal expenses','Salaries, rent, raw materials','Only utilities'],correct:1},
+        {q_ro:'Unde se depun documente constituire SRL?',q_en:'Where to file LLC documents?',options_ro:['Primărie','Notariat și ONRC','Banca'],options_en:['City Hall','Notary and Commerce Registry','Bank'],correct:1},
+        {q_ro:'Ce e răspundere solidară?',q_en:'What is joint liability?',options_ro:['Răspundere împreună','Răspundere separată','Fără răspundere'],options_en:['Joint liability','Separate liability','No liability'],correct:0},
+        {q_ro:'Care e cost normal SRL?',q_en:'What is typical LLC setup cost?',options_ro:['100 lei','1000-2000 lei','10000 lei'],options_en:['100 lei','1000-2000 lei','10000 lei'],correct:1},
+        {q_ro:'De ce e important actul constitutiv?',q_en:'Why is Articles of Association important?',options_ro:['Legislație','Protecție și structură governance','Marketing'],options_en:['Legislation','Protection and governance structure','Marketing'],correct:1},
+        {q_ro:'Ce se întâmplă dacă Gross Margin scade?',q_en:'What if Gross Margin drops?',options_ro:['E bun','Problemă cu costuri directe','Nu contează'],options_en:['Good','Problem with direct costs','Doesnt matter'],correct:1},
+        {q_ro:'Când trebuie să acționezi dacă Runway < 6 luni?',q_en:'When to act if Runway < 6 months?',options_ro:['Niciodată','Urgent: Cost Cutting sau finanțare','După 3 luni'],options_en:['Never','Urgent: Cost cutting or funding','After 3 months'],correct:1},
+        {q_ro:'Ce e Sensitivity Analysis?',q_en:'What is Sensitivity Analysis?',options_ro:['Psihologie','Model What-If pentru impact','Marketing'],options_en:['Psychology','What-If model for impact','Marketing'],correct:1},
+        {q_ro:'Cum se calculează Net Margin?',q_en:'How to calculate Net Margin?',options_ro:['Net Profit/Revenue','Gross Margin minus tax','Revenue/Cost'],options_en:['Net Profit/Revenue','Gross minus tax','Revenue/Cost'],correct:0},
+        {q_ro:'Ce sunt Dividendele?',q_en:'What are Dividends?',options_ro:['Salariu angajați','Profit distribuit acționarilor','Taxă'],options_en:['Employee salary','Profit distributed to shareholders','Tax'],correct:1},
+        {q_ro:'Ce e Factoring?',q_en:'What is Factoring?',options_ro:['Gestionare butik','Vânzare facturi cu discount','Serviciu contabil'],options_en:['Boutique management','Invoice sale with discount','Accounting service'],correct:1},
+        {q_ro:'Care e importanța protecției IP?',q_en:'Why is IP protection important?',options_ro:['Cosmetic','Protejează valoare companie','Doar pentru mari'],options_en:['Cosmetic','Protects company value','Only for big'],correct:1},
+        {q_ro:'Ce sunt clase NISA?',q_en:'What are NISA classes?',options_ro:['Clase școlare','Categorii prod/servicii mărci','Nivele preț'],options_en:['School grades','Product/service categories for marks','Price levels'],correct:1},
+        {q_ro:'Ce e Cost of Sales (COGS)?',q_en:'What is Cost of Goods Sold?',options_ro:['Costuri indirecte','Costuri directe produse vândute','Salarii'],options_en:['Indirect costs','Direct costs of goods sold','Salaries'],correct:1},
+        {q_ro:'De ce sunt importanți stakeholder-ii?',q_en:'Why are stakeholders important?',options_ro:['Nu sunt','Influențează strategie și decizii','Doar investitori'],options_en:['Not important','Influence strategy and decisions','Only investors'],correct:1},
+        {q_ro:'Care este forma juridică recomandată?',q_en:'What legal form is recommended?',options_ro:['PFA','SRL','SA'],options_en:['SEL','LLC','Corp'],correct:1},
+        {q_ro:'Ce sunt codurile NACE?',q_en:'What are NACE codes?',options_ro:['Coduri securitate','Clasificare économice','Coduri intern'],options_en:['Security codes','Economic classification','Internal codes'],correct:1},
+        {q_ro:'Unde se plătesc impozitele în România?',q_en:'Where are taxes paid in Romania?',options_ro:['La bancă','ANAF','La primărie'],options_en:['At bank','ANAF','At city hall'],correct:1},
+        {q_ro:'Ce este capitalizarea?',q_en:'What is capitalization?',options_ro:['Salvare capital','Transformare profit în capital','Impozit'],options_en:['Capital saving','Convert profit to capital','Tax'],correct:1},
+        {q_ro:'Care sunt obligațiile unui antreprenor?',q_en:'What are entrepreneur obligations?',options_ro:['Doar legale','Contabile, fiscale, de angajare','Doar fiscale'],options_en:['Only legal','Accounting, tax, hiring','Only tax'],correct:1},
+        {q_ro:'Ce este contractul de parteneriat?',q_en:'What is partnership agreement?',options_ro:['Opțional','Obligatoriu și protector','Doar tax'],options_en:['Optional','Mandatory and protective','Only tax'],correct:1},
+        {q_ro:'Cum se editează statutul SRL?',q_en:'How to modify LLC bylaws?',options_ro:['Ușor','Necesită acord asociați și notariat','Automat'],options_en:['Easy','Needs agreement and notary','Automatic'],correct:1},
+        {q_ro:'Ce sunt provizioanele?',q_en:'What are provisions?',options_ro:['Reduceri','Riscuri potențiale în conturi','Impozite'],options_en:['Discounts','Potential risks in accounts','Taxes'],correct:1},
+        {q_ro:'Ce este amortizarea?',q_en:'What is depreciation?',options_ro:['Reducere preț','Scadere valoare active în timp','Taxă'],options_en:['Price reduction','Asset value decrease over time','Tax'],correct:1},
+        {q_ro:'Care sunt drepturi unui acționar?',q_en:'What are shareholder rights?',options_ro:['Doar profit','Vot, profit, informații','Doar vot'],options_en:['Only profits','Vote, profits, information','Only vote'],correct:1},
+        {q_ro:'Ce este board-ul?',q_en:'What is the board?',options_ro:['Random grupo','Corp governance și decizii','HR team'],options_en:['Random group','Corp governance and decisions','HR team'],correct:1}
+      ],
+      professional: [
+        {q_ro:'Calculează CCC pentru DIO=45, DSO=30, DPO=20?',q_en:'Calculate CCC with DIO=45, DSO=30, DPO=20?',options_ro:['25 zile','55 zile','95 zile'],options_en:['25 days','55 days','95 days'],correct:1},
+        {q_ro:'Ce e diferența Profit contabil vs fiscal?',q_en:'Accounting vs Tax Profit difference?',options_ro:['Nu e diferență','Contabil pe IFRS, Fiscal pe ANAF','Sunt opuse'],options_en:['No difference','Accounting on IFRS, Tax on ANAF','Opposite'],correct:1},
+        {q_ro:'Cum influențează Elasticity of Demand pricing?',q_en:'How does Elasticity affect pricing?',options_ro:['Deloc','Elastic=preț scade','Mereu pozitiv'],options_en:['Not at all','Elastic=price down','Always positive'],correct:1},
+        {q_ro:'Ce sunt Provizioane pentru Creanțe?',q_en:'What are Allowances for Receivables?',options_ro:['Taxe directe','Riscuri creanțe neîncasate','Reduceri'],options_en:['Direct taxes','Risks for uncollected','Discounts'],correct:1},
+        {q_ro:'Care e raportul EBITDA/Revenue ideal?',q_en:'What is ideal EBITDA/Revenue?',options_ro:['10%','30-40%','90%'],options_en:['10%','30-40%','90%'],correct:1},
+        {q_ro:'Ce sunt Patent claims?',q_en:'What are Patent claims?',options_ro:['Prospecte','Definiții invenție protejate','Drepturi proprietar'],options_en:['Brochures','Invention definitions','Owner rights'],correct:1},
+        {q_ro:'Cum se calculează Revenue Multiple?',q_en:'How to calculate Revenue Multiple?',options_ro:['Valuation/Revenue','Revenue/Valuation','Revenue×2'],options_en:['Valuation/Revenue','Revenue/Valuation','Revenue×2'],correct:0},
+        {q_ro:'Ce e Comparable Companies Analysis?',q_en:'What is Comps Analysis?',options_ro:['Analiză concurență','Valuation prin comparare similare','Survey'],options_en:['Competitor analysis','Valuation by comparing','Market survey'],correct:1},
+        {q_ro:'Ce sunt scenarios în Financial Modeling?',q_en:'What are scenarios in Fin. Modeling?',options_ro:['Povești','Base/Bull/Bear projections','Setări'],options_en:['Stories','Base/Bull/Bear projections','Settings'],correct:1},
+        {q_ro:'Cum se calculează Blended Discount Rate?',q_en:'How to calculate WACC?',options_ro:['Medie simplă','WACC=pondere debit+equity','Dobândă bancă'],options_en:['Simple average','WACC=weight debt+equity','Bank interest'],correct:1},
+        {q_ro:'Ce e Product-Market Fit?',q_en:'What is Product-Market Fit?',options_ro:['Vânzări OK','Clienți angajați, growth, NPS>50','Niciodată'],options_en:['OK sales','Engaged, growth, NPS>50','Never'],correct:1},
+        {q_ro:'Care sunt indicatori Viral Coefficient?',q_en:'What indicates Viral Coefficient?',options_ro:['Random','(Invited)×(Conv)>1=exponențial','Mereu 0'],options_en:['Random','(Inv)×(Conv)>1=exponential','Always 0'],correct:1},
+        {q_ro:'Ce e Positioning Strategy?',q_en:'What is Positioning Strategy?',options_ro:['Loc office','Definiție valoare vs competitors','Adresă'],options_en:['Office location','Unique value vs competitors','Address'],correct:1},
+        {q_ro:'Cum se structurează Cap Table?',q_en:'How to structure Cap Table?',options_ro:['Aleatoriu','Founders 70%, Investors 20%, Pool 10%','Egal'],options_en:['Random','Founders 70%, Investors 20%, Pool 10%','Equal'],correct:1},
+        {q_ro:'Ce sunt Attribution Models?',q_en:'What are Attribution Models?',options_ro:['Culori brand','Alocație credit pe touchpoint','Nume'],options_en:['Brand colors','Allocate credit per touchpoint','Names'],correct:1},
+        {q_ro:'De ce e important A/B Testing?',q_en:'Why is A/B Testing important?',options_ro:['Rar','Validare optimizări statistic','Marketing'],options_en:['Rarely','Validate optimizations stat','Marketing'],correct:1},
+        {q_ro:'Ce e Dynamic Pricing?',q_en:'What is Dynamic Pricing?',options_ro:['Preț fix','Preț adaptat demand/supply','Reducere'],options_en:['Fixed price','Price to demand/supply','Discount'],correct:1},
+        {q_ro:'Cum calculezi CAC Payback Period?',q_en:'How to calculate CAC Payback?',options_ro:['CAC/Monthly Rev','Luni recuperare CAC','Random'],options_en:['CAC/Monthly Rev','Months recover CAC','Random'],correct:1},
+        {q_ro:'Ce sunt Cohort Analysis?',q_en:'What is Cohort Analysis?',options_ro:['Analiza vârstă','Grup users behavior în timp','Survey'],options_en:['Age analysis','Group users over time','Survey'],correct:1},
+        {q_ro:'De ce e important Unit Economics?',q_en:'Why Unit Economics?',options_ro:['Cosmetic','Profitabilitate per customer','Taxe'],options_en:['Cosmetic','Profitability per customer','Taxes'],correct:1},
+        {q_ro:'Ce este Break-even Point?',q_en:'What is Break-even Point?',options_ro:['Start afaceri','Revenue=Total Cost','Stop afaceri'],options_en:['Start business','Revenue=Total Cost','Stop business'],correct:1},
+        {q_ro:'Cum se calculează Customer Acquisition Cost?',q_en:'How to calculate CAC?',options_ro:['Random','Marketing Spend / Customers','Revenue/Cost'],options_en:['Random','Marketing Spend / Customers','Revenue/Cost'],correct:1},
+        {q_ro:'Ce sunt Retention Metrics?',q_en:'What are Retention Metrics?',options_ro:['Noi clienți','Clienți care rămân','Cost marketing'],options_en:['New customers','Customers retained','Marketing cost'],correct:1},
+        {q_ro:'Ce este Churn Rate?',q_en:'What is Churn Rate?',options_ro:['Creștere','% clienți care pleacă','Profit margin'],options_en:['Growth','% customers leaving','Profit margin'],correct:1},
+        {q_ro:'Cum se calculează MRR?',q_en:'How to calculate MRR?',options_ro:['Revenue anual','Revenue recurent lunar','Cost mediu'],options_en:['Annual revenue','Monthly recurring revenue','Average cost'],correct:1},
+        {q_ro:'Ce sunt Growth Hacks?',q_en:'What are Growth Hacks?',options_ro:['Gaming','Tehnici creative creștere rapid','Marketing standard'],options_en:['Gaming','Creative rapid growth techniques','Standard marketing'],correct:1},
+        {q_ro:'Ce este Funnel Optimization?',q_en:'What is Funnel Optimization?',options_ro:['Design','Îmbunătățire fiecare etapă conversie','Hardware'],options_en:['Design','Improve each conversion stage','Hardware'],correct:1},
+        {q_ro:'Cum influențează Network Effects valoarea?',q_en:'How do Network Effects add value?',options_ro:['Negativ','Valoare crește cu utilizatori','Static'],options_en:['Negative','Value grows with users','Static'],correct:1},
+        {q_ro:'Ce este Lifetime Value (LTV)?',q_en:'What is Lifetime Value?',options_ro:['Sales o dată','Total profit din relație client','Venit mediu'],options_en:['One-time sales','Total profit from customer','Average revenue'],correct:1},
+        {q_ro:'De ce competitor analysis?',q_en:'Why analyze competitors?',options_ro:['Deloc important','Înțeler piață și oportunități','Inutilă'],options_en:['Not important','Understand market and opportunities','Useless'],correct:1},
+        {q_ro:'Ce sunt Stakeholder interests?',q_en:'What are stakeholder interests?',options_ro:['Doar proprietari','Proprietari+angajati+clienți+furnizori','Doar clienți'],options_en:['Only owners','Owners+employees+clients+suppliers','Only clients'],correct:1},
+        {q_ro:'Cum maximizezi profitabilitate?',q_en:'How to maximize profitability?',options_ro:['Preț mare','Optimizare cost+pricing+volume','Volume mare'],options_en:['High price','Optimize cost+pricing+volume','High volume'],correct:1},
+        {q_ro:'Ce este Market Segmentation?',q_en:'What is Market Segmentation?',options_ro:['Piață unu','Împărțire piață în grupuri target','Random'],options_en:['One market','Divide market into target groups','Random'],correct:1},
+        {q_ro:'Ce sunt KPIs?',q_en:'What are KPIs?',options_ro:['Chei SRL','Indicatori cheie performanță','Taxe'],options_en:['LLC keys','Key performance indicators','Taxes'],correct:1},
+        {q_ro:'De ce Dashboard Analytics?',q_en:'Why use Analytics Dashboard?',options_ro:['Design','Track metrics critici real-time','Cosmetic'],options_en:['Design','Track critical metrics live','Cosmetic'],correct:1},
+        {q_ro:'Ce este Sales Forecast?',q_en:'What is Sales Forecast?',options_ro:['Vânzări reale','Proiecție vânzări viitoare','Cost vânzare'],options_en:['Real sales','Future sales projection','Sales cost'],correct:1},
+        {q_ro:'Cum se calculează CAGR?',q_en:'How to calculate CAGR?',options_ro:['Medie vânzări','(Ending/Beginning)^(1/years)-1','Sum vânzări'],options_en:['Average sales','(Ending/Beginning)^(1/y)-1','Sum sales'],correct:1},
+        {q_ro:'Ce sunt Valuation Multiples?',q_en:'What are Valuation Multiples?',options_ro:['Preț fix','Revenue/EBITDA/Profit multipliers','Random'],options_en:['Fixed price','Revenue/EBITDA/Profit multipliers','Random'],correct:1},
+        {q_ro:'De ce focus pe customer experience?',q_en:'Why focus on customer experience?',options_ro:['Cosmetic','Retention+advocacy+growth','Inutilă'],options_en:['Cosmetic','Retention+advocacy+growth','Useless'],correct:1},
+        {q_ro:'Ce este Supplier Relationship?',q_en:'What is Supplier Relationship?',options_ro:['Compra casual','Partnership strategic pe calitate+preț','Random'],options_en:['Casual buying','Strategic partnership on quality+price','Random'],correct:1}
+      ]
+    };
+
+    function t(key) {
+      return translations[currentLanguage][key] || key;
+    }
+
+    // Determine API base so fetch works even when page opened via file://
+    const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:5000' : window.location.origin;
+    console.log('API_BASE:', API_BASE);
+
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'ro' ? 'en' : 'ro';
+      localStorage.setItem('appLanguage', currentLanguage);
+      document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+      
+      // Update navbar menu items
+      const navItems = document.querySelectorAll('#nav-menu a');
+      navItems[0].textContent = t('lessons');
+      navItems[1].textContent = t('courses');
+      navItems[2].textContent = t('tests');
+      navItems[3].textContent = t('statistics');
+      navItems[4].textContent = t('about');
+      
+      // Update mobile menu items
+      const mobileItems = document.querySelectorAll('#mobile-menu a');
+      mobileItems[0].textContent = t('home');
+      mobileItems[1].textContent = t('lessons');
+      mobileItems[2].textContent = t('courses');
+      mobileItems[3].textContent = t('tests');
+      mobileItems[4].textContent = t('statistics');
+      mobileItems[5].textContent = t('about');
+      
+      // Update hero section
+      document.getElementById('hero-subtitle').textContent = t('hero_subtitle');
+      document.getElementById('hero-promotional').textContent = t('hero_promotional');
+      document.getElementById('start-sim-btn').textContent = t('start_simulator');
+      
+      renderPage();
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function closeMenu() {
+      document.getElementById('mobile-menu').style.display = 'none';
+    }
+
+    function navigateTo(page) {
+      currentPage = page;
+      closeMenu();
+      showProgressBar();
+      renderPage();
+      // adjust hero height after navigation so centering stays strict under navbar
+      adjustHeroToNavbar();
+      window.scrollTo(0, 0);
+    }
+
+    function showProgressBar() {
+      const bar = document.getElementById('progress-bar');
+      bar.style.width = '30%';
+      setTimeout(() => bar.style.width = '70%', 100);
+      setTimeout(() => bar.style.width = '100%', 500);
+      setTimeout(() => bar.style.width = '0%', 1000);
+    }
+
+    function renderPage() {
+      const sections = ['home', 'lessons-section', 'courses-section', 'tests-section', 'about-section', 'stats-section', 'admin-section'];
+      sections.forEach(s => document.getElementById(s).style.display = 'none');
+
+      switch(currentPage) {
+        case 'home':
+          document.getElementById('home').style.display = 'block';
+          break;
+        case 'lessons':
+          renderLessons();
+          document.getElementById('lessons-section').style.display = 'block';
+          break;
+        case 'courses':
+          renderCourses();
+          document.getElementById('courses-section').style.display = 'block';
+          break;
+        case 'tests':
+          renderTests();
+          document.getElementById('tests-section').style.display = 'block';
+          break;
+        case 'about':
+          renderAbout();
+          document.getElementById('about-section').style.display = 'block';
+          break;
+        case 'stats':
+          renderStatistics();
+          document.getElementById('stats-section').style.display = 'block';
+          break;
+        case 'admin':
+          renderAdmin();
+          document.getElementById('admin-section').style.display = 'block';
+          break;
+      }
+    }
+
+    // Ensure hero is exactly the visible area under the navbar
+    function adjustHeroToNavbar(){
+      const nav = document.querySelector('.navbar');
+      const heroEl = document.getElementById('home');
+      if(!nav || !heroEl) return;
+      const navH = nav.offsetHeight || 80;
+      heroEl.style.minHeight = (window.innerHeight - navH) + 'px';
+      // also resize canvas used by main.js if present
+      const canvas = document.getElementById('background-canvas');
+      if(canvas){
+        canvas.width = heroEl.clientWidth;
+        canvas.height = heroEl.clientHeight;
+      }
+    }
+
+    window.addEventListener('resize', adjustHeroToNavbar);
+    window.addEventListener('orientationchange', adjustHeroToNavbar);
+    
+    // Initialize user tracking
+    function initUserTracking() {
+      let users = JSON.parse(localStorage.getItem('appUsers') || '[]');
+      const userId = localStorage.getItem('userId');
+      
+      if (!userId) {
+        const newUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', newUserId);
+        users.push(newUserId);
+        localStorage.setItem('appUsers', JSON.stringify(users));
+      }
+    }
+    
+    window.addEventListener('load', () => { 
+      adjustHeroToNavbar();
+      initUserTracking();
+    });
+
+    function renderLessons() {
+      const lessons = [
+        { id: 'fundamentals', title: t('fundamentals'), desc: t('fundamentals_desc'), link: 'lessons.html' },
+        { id: 'innovation', title: t('innovation'), desc: t('innovation_desc'), link: 'lesson2.html' },
+        { id: 'financial', title: t('financial'), desc: t('financial_desc'), link: 'lesson3.html' },
+        { id: 'marketing', title: t('marketing'), desc: t('marketing_desc'), link: 'lesson4.html' }
+      ];
+
+      document.getElementById('lessons-title').textContent = t('lessons_title');
+      document.getElementById('lessons-desc').textContent = t('lessons_desc');
+
+      const content = lessons.map(l => `
+        <div class="card" onclick="window.location.href='${l.link}'" style="padding: 2rem; cursor: pointer; transition: transform 0.3s; transform: scale(1);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--accent-cyan);">${l.title}</h3>
+          <p style="color: var(--text-secondary); line-height: 1.6;">${l.desc}</p>
+        </div>
+      `).join('');
+      document.getElementById('lessons-content').innerHTML = content;
+    }
+
+    function renderCourses() {
+      const courses = [
+        { title: t('startup101'), instructor: t('instructor'), weeks: '4', level: t('beginner'), color: '#10b981' },
+        { title: t('scaling'), instructor: t('instructor2'), weeks: '6', level: t('intermediate'), color: '#f59e0b' },
+        { title: t('advanced_lead'), instructor: t('instructor3'), weeks: '8', level: t('advanced'), color: '#ef4444' }
+      ];
+
+      document.getElementById('courses-title').textContent = t('courses_title');
+      document.getElementById('courses-desc').textContent = t('courses_desc');
+
+      const content = courses.map((c, idx) => `
+        <div class="card" style="padding: 2rem;">
+          <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--accent-yellow);">${c.title}</h3>
+          <p style="margin-bottom: 0.5rem; color: var(--text-secondary);">Profesor: ${c.instructor}</p>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);">Durata: ${c.weeks} ${t('weeks')}</p>
+          <div style="display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; background: ${c.color}; color: white; font-size: 0.9rem; font-weight: bold; margin-bottom: 1rem;">${c.level}</div>
+          <button onclick="toggleEnroll(${idx})" style="width: 100%; padding: 0.8rem; background: ${enrolled.has(idx) ? 'var(--accent-yellow)' : 'var(--accent-cyan)'}; color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ${enrolled.has(idx) ? 'Înscris' : t('enroll')}
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('courses-content').innerHTML = content;
+    }
+
+    function toggleEnroll(idx) {
+      if (enrolled.has(idx)) {
+        enrolled.delete(idx);
+      } else {
+        enrolled.add(idx);
+      }
+      renderCourses();
+    }
+
+    function renderTests() {
+      const tests = [
+        { key: 'initial', title: t('initial_assess'), questions: 25, time: 30 },
+        { key: 'fundamentals', title: t('fundamentals_test'), questions: 35, time: 45 },
+        { key: 'professional', title: t('professional'), questions: 50, time: 60 }
+      ];
+
+      document.getElementById('tests-title').textContent = t('tests_title');
+      document.getElementById('tests-desc').textContent = t('tests_desc');
+
+      const content = tests.map(test => `
+        <div class="card" style="padding: 2rem;">
+          <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--accent-cyan);">${test.title}</h3>
+          <p style="margin-bottom: 0.5rem; color: var(--text-secondary)"> ${test.questions} ${t('questions')}</p>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);"> ${test.time} ${t('minutes')}</p>
+          <button onclick="startTest('${test.key}')" style="width: 100%; padding: 0.8rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ${t('take_test')}
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('tests-content').innerHTML = content;
+    }
+
+    function startTest(key) {
+      currentTest = key;
+      currentQuestion = 0;
+      testScore = 0;
+      // build a question list of desired length (shuffle + slice)
+      const desiredCounts = { initial: 21, fundamentals: 35, professional: 50 };
+      let pool = (testQuestions && testQuestions[key]) || [];
+      // if pool is smaller than desired, combine all available questions across categories
+      if (pool.length < (desiredCounts[key] || 0)) {
+        const combined = [];
+        for (const k in testQuestions) {
+          if (Array.isArray(testQuestions[k])) combined.push(...testQuestions[k]);
+        }
+        // remove duplicates by question text (simple dedupe)
+        const seen = new Set();
+        pool = combined.filter(q => {
+          const id = (q.q_ro || q.q || '') + '|' + (q.q_en || '');
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
+      }
+      function shuffle(a) {
+        const arr = a.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+      const desired = desiredCounts[key] || pool.length;
+      // if pool smaller than desired, repeat shuffled copies until we have enough
+      let candidates = pool.slice();
+      if (candidates.length === 0) candidates = pool.slice();
+      while (candidates.length < desired && pool.length > 0) {
+        candidates = candidates.concat(shuffle(pool));
+      }
+      currentQuestionList = shuffle(candidates).slice(0, Math.min(desired, candidates.length));
+      console.debug('DEBUG startTest:', { key, desired, poolLength: pool.length, listLength: currentQuestionList.length });
+      const timeMap = { initial: 30 * 60, fundamentals: 45 * 60, professional: 60 * 60 };
+      testTimeLeft = timeMap[key] || 60;
+      renderTestModal();
+      document.getElementById('test-modal').style.display = 'block';
+      
+      if (testTimer) clearInterval(testTimer);
+      testTimer = setInterval(() => {
+        testTimeLeft--;
+        if (testTimeLeft <= 0) {
+          clearInterval(testTimer);
+          answerQuestion(-1);
+        } else {
+          const modal = document.getElementById('test-modal-content');
+          if (modal && modal.querySelector('div')) {
+            const timerEl = modal.querySelector('div');
+            const timerDiv = timerEl.querySelector('div:last-child');
+            if (timerDiv) timerDiv.textContent = ' ' + testTimeLeft + 's';
+          }
+        }
+      }, 1000);
+    }
+
+    function renderTestModal() {
+      const list = currentQuestionList || ((currentTest && testQuestions[currentTest]) || []);
+      if (!currentTest || currentQuestion >= list.length) {
+        console.debug('DEBUG renderTestModal - ending test', { currentQuestion, total: list.length });
+        if (testTimer) clearInterval(testTimer);
+        renderTestResults();
+        return;
+      }
+
+      const q = list[currentQuestion];
+      const total = list.length;
+      const progress = ((currentQuestion + 1) / total) * 100;
+      const qText = currentLanguage === 'ro' ? q.q_ro : q.q_en;
+      const optionsText = currentLanguage === 'ro' ? q.options_ro : q.options_en;
+
+      let html = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <p style="color: var(--text-secondary);">${t('question')} ${currentQuestion + 1}/${total}</p>
+          <div style="background: var(--primary-gray); padding: 0.5rem 1rem; border-radius: 5px; border: 2px solid var(--accent-yellow); color: var(--accent-yellow); font-weight: bold;">
+            ${testTimeLeft}s
+          </div>
+        </div>
+        <div style="height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden; margin-bottom: 2rem;">
+          <div style="height: 100%; background: var(--accent-yellow); width: ${progress}%; transition: width 0.3s;"></div>
+        </div>
+        <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">${qText}</h3>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+      `;
+
+      optionsText.forEach((opt, idx) => {
+        html += `
+          <button onclick="answerQuestion(${idx})" style="padding: 1rem; background: var(--primary-gray); color: var(--text-primary); border: 2px solid var(--border-color); border-radius: 5px; cursor: pointer; transition: all 0.3s; text-align: left; font-weight: 500;" onmouseover="this.style.borderColor='var(--accent-yellow)'; this.style.transform='translateX(5px)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.transform='translateX(0)';">
+            ${opt}
+          </button>
+        `;
+      });
+
+      html += '</div>';
+      document.getElementById('test-modal-content').innerHTML = html;
+      console.debug('DEBUG renderTestModal - showing question', { index: currentQuestion, total });
+    }
+
+    function answerQuestion(idx) {
+      const list = currentQuestionList || ((currentTest && testQuestions[currentTest]) || []);
+      if (idx !== -1) {
+        const q = list[currentQuestion];
+        if (q && idx === q.correct) {
+          testScore++;
+        }
+      }
+      currentQuestion++;
+      console.debug('DEBUG answerQuestion:', { selectedIdx: idx, nextQuestion: currentQuestion, total: list.length, score: testScore });
+      renderTestModal();
+    }
+
+    function renderTestResults() {
+      const list = currentQuestionList || ((currentTest && testQuestions[currentTest]) || []);
+      const total = list.length;
+      console.debug('DEBUG renderTestResults:', { currentTest, total, testScore });
+      const percentage = Math.round((testScore / total) * 100);
+      const message = percentage >= 80 ? 'Excelent!' : percentage >= 60 ? 'Bun!' : 'Mai mult studiu!';
+      
+      // Track test score in localStorage
+      const userId = localStorage.getItem('userId');
+      let testScoresData = JSON.parse(localStorage.getItem('testScores') || '[]');
+      testScoresData.push({
+        userId: userId,
+        testId: currentTest,
+        score: percentage,
+        correctAnswers: testScore,
+        totalQuestions: total,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('testScores', JSON.stringify(testScoresData));
+      
+      const html = `
+        <h2 style="color: var(--accent-yellow); font-size: 2rem; margin-bottom: 1rem; text-align: center;">${t('quiz_finished')}</h2>
+        <p style="font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 1rem; text-align: center;">${message}</p>
+        <p style="font-size: 1.5rem; color: var(--accent-cyan); margin-bottom: 2rem; text-align: center;">
+          ${t('quiz_score')} <strong>${testScore}/${total}</strong> (${percentage}%)
+        </p>
+        <div style="height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; margin-bottom: 2rem;">
+          <div style="height: 100%; background: linear-gradient(90deg, var(--accent-yellow), var(--accent-cyan)); width: ${percentage}%; transition: width 0.5s;"></div>
+        </div>
+        <button onclick="closeTestModal()" style="width: 100%; padding: 1rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+          Înapoi la teste
+        </button>
+      `;
+      document.getElementById('test-modal-content').innerHTML = html;
+    }
+
+    function closeTestModal() {
+      document.getElementById('test-modal').style.display = 'none';
+      currentTest = null;
+      currentQuestionList = null;
+      console.debug('DEBUG closeTestModal - cleared currentTest and list');
+    }
+
+    function toggleEnroll(courseIndex) {
+      openEnrollmentModal(courseIndex);
+    }
+
+    function openEnrollmentModal(courseIndex) {
+      const courses = [
+        t('startup101'),
+        t('scaling'),
+        t('advanced_lead')
+      ];
+      
+      const html = `
+        <h2 style="color: var(--accent-yellow); margin-bottom: 0.5rem;">${t('enrollment_form')}</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">${courses[courseIndex]}</p>
+        <form id="enrollment-form" onsubmit="submitEnrollment(event, ${courseIndex})">
+          <div style="margin-bottom: 1rem;">
+            <input type="text" id="firstName" placeholder="${t('first_name')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <input type="text" id="lastName" placeholder="${t('last_name')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <input type="number" id="birthYear" placeholder="${t('birth_year')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <input type="text" id="city" placeholder="${t('city')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <input type="text" id="county" placeholder="${t('county')}" required style="width: 100%; padding: 0.8rem; background: rgba(0, 240, 255, 0.1); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px;">
+          </div>
+          <button type="submit" style="width: 100%; padding: 0.8rem; background: var(--accent-yellow); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1rem;">${t('submit_enrollment')}</button>
+        </form>
+      `;
+      
+      document.getElementById('enrollment-content').innerHTML = html;
+      document.getElementById('enrollment-modal').style.display = 'flex';
+    }
+
+    function submitEnrollment(event, courseIndex) {
+      event.preventDefault();
+      
+      const courses = [
+        t('startup101'),
+        t('scaling'),
+        t('advanced_lead')
+      ];
+
+      const data = {
+        courseName: courses[courseIndex],
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        birthYear: document.getElementById('birthYear').value,
+        city: document.getElementById('city').value,
+        county: document.getElementById('county').value
+      };
+
+      // Send to backend
+      fetch(API_BASE + '/api/courses/enroll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(async response => {
+        const text = await response.text();
+        let result;
+        try { result = JSON.parse(text); } catch (e) { result = { success: false, error: 'Invalid JSON response', raw: text }; }
+        console.log('Enroll response:', response.status, result);
+        if (!response.ok || !result.success) {
+          const message = result.error || result.message || 'A apărut o eroare la server.';
+          alert('Eroare înscriere: ' + message);
+          return;
+        }
+        // Track enrollment in localStorage
+        const userId = localStorage.getItem('userId');
+        let enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+        enrollments.push({
+          userId: userId,
+          courseId: courseIndex,
+          courseName: courses[courseIndex],
+          enrollmentDate: new Date().toISOString()
+        });
+        localStorage.setItem('courseEnrollments', JSON.stringify(enrollments));
+        // success path — show confirmation inside the modal (don’t immediately hide it)
+        enrolled.add(courseIndex);
+        renderCourses();
+        showSuccessMessage(data.firstName);
+        // ensure modal stays visible so the user can read the message and click OK
+        document.getElementById('enrollment-modal').style.display = 'flex';
+      })
+      .catch(async err => {
+        console.error('Network or fetch error:', err);
+        // If page opened via file://, explain the likely cause
+        if (window.location.protocol === 'file:') {
+          alert('Eroare de rețea: Se pare că ai deschis site-ul direct din fișier (file://).\n\nPornește serverul local în terminal cu `npm start` în folderul proiectului și accesează site-ul printr-un server local (ex: http://localhost:8000) sau deschide index.html cu Live Server.');
+          return;
+        }
+
+        // Otherwise try to check API health for more informative message
+        try {
+          const healthResp = await fetch(API_BASE + '/api/health');
+          const health = await healthResp.json();
+          if (!health || !health.status) {
+            alert('Eroare de rețea: Serverul nu a răspuns cum trebuie. Verifică serverul (npm start) și consultă consola server pentru erori.');
+          } else {
+            alert('Eroare de rețea: ' + (err.message || err) + '\n\nServerul pare activ, verifică consola browser pentru detalii.');
+          }
+        } catch (e) {
+          alert('Eroare de rețea: Nu se poate contacta serverul la ' + API_BASE + '.\nPornește serverul local cu `npm start` și încearcă din nou.');
+        }
+      });
+    }
+
+    function showSuccessMessage(firstName) {
+      const html = `
+        <div style="text-align: center;">
+          <h2 style="color: var(--accent-yellow); margin-bottom: 1rem;">${t('enrollment_success')}</h2>
+          <p style="color: var(--text-primary); line-height: 1.8; margin-bottom: 2rem; font-size: 1.05rem;">
+            ${t('enrollment_success_msg')}
+          </p>
+          <button onclick="closeEnrollmentModal()" style="padding: 0.8rem 2rem; background: var(--accent-cyan); color: var(--primary-dark); border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">OK</button>
+        </div>
+      `;
+      document.getElementById('enrollment-content').innerHTML = html;
+    }
+
+    function closeEnrollmentModal() {
+      document.getElementById('enrollment-modal').style.display = 'none';
+    }
+
+    function renderAbout() {
+      document.getElementById('about-title').textContent = t('about_title');
+
+      const team = [
+        { name: t('founder'), role: t('founder_role'), bio: t('founder_bio') },
+        { name: t('dev_lead'), role: t('dev_role'), bio: t('dev_bio') }
+      ];
+
+      let html = `
+        <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+          <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--accent-cyan);">${t('mission')}</h3>
+          <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">${t('mission_text')}</p>
+        </div>
+        <h3 style="font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--accent-yellow);">${t('team')}</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+      `;
+
+      team.forEach(member => {
+        html += `
+          <div class="card" style="text-align: center; padding: 2rem;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-yellow)); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">${member.name.charAt(0)}</div>
+            <h4 style="font-size: 1.1rem; margin-bottom: 0.3rem; color: var(--accent-cyan);">${member.name}</h4>
+            <p style="font-size: 0.9rem; color: var(--accent-yellow); margin-bottom: 1rem;">${member.role}</p>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">${member.bio}</p>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      document.getElementById('about-content').innerHTML = html;
+    }
+
+    function getAppStats() {
+      const users = JSON.parse(localStorage.getItem('appUsers') || '[]');
+      const testScores = JSON.parse(localStorage.getItem('testScores') || '[]');
+      const simScores = JSON.parse(localStorage.getItem('simulationScores') || '[]');
+      const courseEnrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      
+      const totalUsers = users.length;
+      const activeCoursesCount = new Set(courseEnrollments.map(e => e.userId)).size;
+      const completedTests = testScores.length;
+      const avgTestScore = completedTests > 0 ? (testScores.reduce((sum, t) => sum + t.score, 0) / completedTests).toFixed(1) : 0;
+      const avgSimScore = simScores.length > 0 ? (simScores.reduce((sum, s) => sum + s.score, 0) / simScores.length).toFixed(1) : 0;
+      
+      return {
+        totalUsers,
+        activeCoursesCount,
+        completedTests,
+        avgTestScore,
+        avgSimScore,
+        simCount: simScores.length
+      };
+    }
+
+    function renderStatistics() {
+      document.getElementById('stats-title').textContent = t('statistics_title');
+      const stats = getAppStats();
+
+      const html = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-yellow);">${stats.totalUsers}</p>
+            <p style="color: var(--text-secondary);">${t('total_users')}</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-cyan);">${stats.activeCoursesCount}</p>
+            <p style="color: var(--text-secondary);">${t('active_courses')}</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: #10b981;">${stats.completedTests}</p>
+            <p style="color: var(--text-secondary);">${t('completed')}</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: #f59e0b;">${stats.avgTestScore}%</p>
+            <p style="color: var(--text-secondary);">Scor Mediu Teste</p>
+          </div>
+          <div class="card" style="padding: 2rem; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: #a855f7;">${stats.avgSimScore}</p>
+            <p style="color: var(--text-secondary);">Scor Mediu Simulare</p>
+          </div>
+        </div>
+      `;
+      document.getElementById('stats-content').innerHTML = html;
+    }
+
+    async function renderAdmin() {
+      try {
+        const response = await fetch('/api/admin/enrollments');
+        const data = await response.json();
+        if (data.success) {
+          const enrollments = data.enrollments;
+          let html = `
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--accent-cyan);">Înscrieri la Cursuri (${enrollments.length})</h2>
+            ${enrollments.length === 0 ? '<p>Nicio înscriere încă.</p>' : '<div style="max-height: 600px; overflow-y: auto;">'}
+          `;
+          enrollments.forEach(enrollment => {
+            const date = enrollment.createdAt ? new Date(enrollment.createdAt.seconds * 1000).toLocaleDateString('ro-RO') : 'N/A';
+            html += `
+              <div style="padding: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-weight: bold; color: var(--accent-cyan);">${enrollment.firstName} ${enrollment.lastName}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Curs: ${enrollment.courseName}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Localitate: ${enrollment.city}, ${enrollment.county}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">An naștere: ${enrollment.birthYear}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.9rem; color: var(--accent-yellow);">${date}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          if (enrollments.length > 0) html += '</div>';
+          document.getElementById('admin-content').innerHTML = html;
+        } else {
+          document.getElementById('admin-content').innerHTML = '<p>Eroare la încărcarea datelor.</p>';
+        }
+      } catch (error) {
+        console.error('Error fetching admin data:', error);
+        document.getElementById('admin-content').innerHTML = '<p>Eroare la încărcarea datelor.</p>';
+      }
+    }
+
+    // Initialize
+    function initializePage() {
+      // Check if there's a view parameter in URL - navigate to it FIRST
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('view')) {
+        currentPage = params.get('view');
+      }
+
+      // Set language button
+      document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+      
+      // Update navbar menu items
+      const navItems = document.querySelectorAll('#nav-menu a');
+      navItems[0].textContent = t('lessons');
+      navItems[1].textContent = t('courses');
+      navItems[2].textContent = t('tests');
+      navItems[3].textContent = t('statistics');
+      navItems[4].textContent = t('about');
+      
+      // Update mobile menu items
+      const mobileItems = document.querySelectorAll('#mobile-menu a');
+      mobileItems[0].textContent = t('home');
+      mobileItems[1].textContent = t('lessons');
+      mobileItems[2].textContent = t('courses');
+      mobileItems[3].textContent = t('tests');
+      mobileItems[4].textContent = t('statistics');
+      mobileItems[5].textContent = t('about');
+      
+      // Update hero section
+      document.getElementById('hero-subtitle').textContent = t('hero_subtitle');
+      document.getElementById('hero-promotional').textContent = t('hero_promotional');
+      document.getElementById('start-sim-btn').textContent = t('start_simulator');
+      
+      renderPage();
+    }
+    
+    // === ADMIN PANEL FUNCTIONS ===
+    function openAdminPanel() {
+      const password = prompt('Enter admin password:');
+      const correctPassword = btoa('admin123'); // 'admin123' encoded - change this!
+      if (btoa(password || '') === correctPassword) {
+        renderAdminPanel();
+        navigateTo('admin');
+      } else {
+        alert('Invalid password');
+      }
+    }
+
+    function renderAdminPanel() {
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      
+      let html = '<div style="margin-bottom: 3rem;"><h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Course Enrollments (' + enrollments.length + ')</h3>';
+      
+      if (enrollments.length === 0) {
+        html += '<p style="color: var(--text-secondary);">No enrollments yet</p>';
+      } else {
+        html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; color: var(--text-primary);">';
+        html += '<thead style="background: var(--primary-gray);"><tr style="border-bottom: 2px solid var(--accent-yellow);">';
+        html += '<th style="padding: 0.8rem; text-align: left;">Course</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">First Name</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Last Name</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Birth Year</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">City</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">County</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Date</th>';
+        html += '</tr></thead><tbody>';
+        
+        enrollments.forEach((e, i) => {
+          html += '<tr style="border-bottom: 1px solid var(--border-color); ' + (i % 2 === 0 ? 'background: rgba(0,240,255,0.05);' : '') + '">';
+          html += '<td style="padding: 0.8rem;">' + (e.courseName || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.firstName || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.lastName || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.birthYear || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.city || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (e.county || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + new Date(e.enrollmentDate).toLocaleString() + '</td>';
+          html += '</tr>';
+        });
+        
+        html += '</tbody></table></div>';
+      }
+      
+      html += '</div><div style="margin-bottom: 3rem;"><h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Game Results (' + gameResults.length + ')</h3>';
+      
+      if (gameResults.length === 0) {
+        html += '<p style="color: var(--text-secondary);">No game results yet</p>';
+      } else {
+        html += '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; color: var(--text-primary);">';
+        html += '<thead style="background: var(--primary-gray);"><tr style="border-bottom: 2px solid var(--accent-yellow);">';
+        html += '<th style="padding: 0.8rem; text-align: left;">Player Name</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Email</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Scenario</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Final Budget</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Reputation</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Employees</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Duration</th>';
+        html += '<th style="padding: 0.8rem; text-align: left;">Date</th>';
+        html += '</tr></thead><tbody>';
+        
+        gameResults.forEach((g, i) => {
+          const state = g.state || {};
+          html += '<tr style="border-bottom: 1px solid var(--border-color); ' + (i % 2 === 0 ? 'background: rgba(0,240,255,0.05);' : '') + '">';
+          html += '<td style="padding: 0.8rem;">' + (g.playerName || 'Anonymous') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (g.playerEmail || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (g.scenarioId || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">$' + (state.budget || 0) + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (state.reputation || 0) + '%</td>';
+          html += '<td style="padding: 0.8rem;">' + (state.employees || 0) + '</td>';
+          html += '<td style="padding: 0.8rem;">Year ' + (state.year || 1) + ', Month ' + (state.month || 1) + '</td>';
+          html += '<td style="padding: 0.8rem;">' + new Date(g.submissionDate).toLocaleString() + '</td>';
+          html += '</tr>';
+        });
+        
+        html += '</tbody></table></div>';
+      }
+      
+      document.getElementById('admin-content').innerHTML = html;
+    }
+
+    function downloadEnrollments(format) {
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      if (enrollments.length === 0) {
+        alert('No enrollments to download');
+        return;
+      }
+
+      let content, filename, type;
+
+      if (format === 'json') {
+        content = JSON.stringify(enrollments, null, 2);
+        filename = 'enrollments_' + new Date().toISOString().split('T')[0] + '.json';
+        type = 'application/json';
+      } else if (format === 'csv') {
+        const headers = ['Course', 'First Name', 'Last Name', 'Birth Year', 'City', 'County', 'Date'];
+        const rows = enrollments.map(e => [
+          e.courseName || '',
+          e.firstName || '',
+          e.lastName || '',
+          e.birthYear || '',
+          e.city || '',
+          e.county || '',
+          new Date(e.enrollmentDate).toLocaleString()
+        ]);
+        
+        content = [headers, ...rows].map(row => 
+          row.map(cell => '"' + (cell + '').replace(/"/g, '""') + '"').join(',')
+        ).join('\n');
+        
+        filename = 'enrollments_' + new Date().toISOString().split('T')[0] + '.csv';
+        type = 'text/csv';
+      }
+
+      const blob = new Blob([content], { type: type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadGameResults(format) {
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      if (gameResults.length === 0) {
+        alert('No game results to download');
+        return;
+      }
+
+      let content, filename, type;
+
+      if (format === 'json') {
+        content = JSON.stringify(gameResults, null, 2);
+        filename = 'game_results_' + new Date().toISOString().split('T')[0] + '.json';
+        type = 'application/json';
+      } else if (format === 'csv') {
+        const headers = ['Player Name', 'Email', 'Scenario', 'Final Budget', 'Reputation', 'Employees', 'Year', 'Month', 'Date'];
+        const rows = gameResults.map(g => {
+          const state = g.state || {};
+          return [
+            g.playerName || 'Anonymous',
+            g.playerEmail || '',
+            g.scenarioId || '',
+            state.budget || 0,
+            state.reputation || 0,
+            state.employees || 0,
+            state.year || 1,
+            state.month || 1,
+            new Date(g.submissionDate).toLocaleString()
+          ];
+        });
+        
+        content = [headers, ...rows].map(row => 
+          row.map(cell => '"' + (cell + '').replace(/"/g, '""') + '"').join(',')
+        ).join('\n');
+        
+        filename = 'game_results_' + new Date().toISOString().split('T')[0] + '.csv';
+        type = 'text/csv';
+      }
+
+      const blob = new Blob([content], { type: type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    initializePage();
+  </script>
+</body>
+</html>
