@@ -8,7 +8,9 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
 // const mongoose = require('mongoose');
-// const { OpenAI } = require('openai');
+const admin = require('firebase-admin');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
 
@@ -25,19 +27,23 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/entrep
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 
-// === MONGODB ===
-const mongoose = require('mongoose');
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// === FIREBASE SETUP ===
+let db;
 
-// Models
-const User = require('./models/User');
-const GameResult = require('./models/GameResult');
+try {
+  const serviceAccount = require('./firebase-key.json');
 
-const bcrypt = require('bcryptjs');
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+
+  db = admin.firestore();
+  console.log('✅ Connected to Firebase Firestore');
+
+} catch (error) {
+  console.error('❌ Firebase initialization failed:', error.message);
+  console.log('⚠️ Running without Firebase');
+}
 
 // === EMAIL SETUP ===
 let transporter = null;
@@ -175,13 +181,24 @@ app.post('/api/auth/register', async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email) return res.status(400).json({ success: false, message: 'Name and email required' });
 
-    let user = await User.findOne({ email });
-    if (user) return res.json({ success: true, message: 'User exists', userId: user._id });
+    if (db) {
+      // Use Firebase Firestore
+      const usersRef = db.collection('users');
+      const userDoc = await usersRef.where('email', '==', email).limit(1).get();
+      if (!userDoc.empty) {
+        const user = userDoc.docs[0].data();
+        return res.json({ success: true, message: 'User exists', userId: userDoc.docs[0].id });
+      }
 
-    const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
-    user = await User.create({ name, email, passwordHash });
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
-    return res.json({ success: true, userId: user._id, token });
+      const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+      const newUser = { name, email, passwordHash, createdAt: new Date() };
+      const docRef = await usersRef.add(newUser);
+      const token = jwt.sign({ id: docRef.id, email }, JWT_SECRET, { expiresIn: '30d' });
+      return res.json({ success: true, userId: docRef.id, token });
+    } else {
+      // Fallback to in-memory or error
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, error: err.message });
@@ -193,14 +210,22 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, message: 'Email and password required' });
 
-    const user = await User.findOne({ email });
-    if (!user || !user.passwordHash) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    if (db) {
+      const usersRef = db.collection('users');
+      const userDoc = await usersRef.where('email', '==', email).limit(1).get();
+      if (userDoc.empty) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      const user = userDoc.docs[0].data();
+      if (!user.passwordHash) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
+      const ok = await bcrypt.compare(password, user.passwordHash);
+      if (!ok) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+
+      const token = jwt.sign({ id: userDoc.docs[0].id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({ success: true, token, user: { id: userDoc.docs[0].id, name: user.name, email: user.email } });
+    } else {
+      return res.status(500).json({ success: false, message: 'Database not available' });
+    }
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, error: err.message });
@@ -274,7 +299,22 @@ app.post('/api/game/submit', async (req, res) => {
     const { playerName, playerEmail, scenarioId, state, userId } = req.body || {};
 
     // Persist result in DB
-    const saved = await GameResult.create({ user: userId || undefined, playerName, playerEmail, scenarioId, state });
+    let savedId;
+    if (db) {
+      const gameResultsRef = db.collection('gameResults');
+      const newResult = {
+        user: userId || undefined,
+        playerName,
+        playerEmail,
+        scenarioId,
+        state,
+        submittedAt: new Date()
+      };
+      const docRef = await gameResultsRef.add(newResult);
+      savedId = docRef.id;
+    } else {
+      savedId = 'no-db';
+    }
 
     // Send emails as before
     if (!playerEmail) {
@@ -289,7 +329,7 @@ app.post('/api/game/submit', async (req, res) => {
         // nodemailer preview available only when using Ethereal; include if present
         let preview = null;
         try { preview = nodemailer.getTestMessageUrl(info); } catch(e) { preview = null; }
-        return res.json({ success: true, message: 'Results sent to admin (no player email provided)', preview, savedId: saved._id });
+        return res.json({ success: true, message: 'Results sent to admin (no player email provided)', preview, savedId });
       }).catch(err => {
         console.error('Error sending admin results:', err);
         return res.status(500).json({ success: false, message: 'Could not send results', error: err.message || err });
@@ -311,11 +351,11 @@ app.post('/api/game/submit', async (req, res) => {
         sendEmail(adminMailOptions).then(info2 => {
           let previewAdmin = null;
           try { previewAdmin = nodemailer.getTestMessageUrl(info2); } catch(e) { previewAdmin = null; }
-          return res.json({ success: true, message: 'Results emailed', info: { player: info1, admin: info2, preview: { player: previewPlayer, admin: previewAdmin } }, savedId: saved._id });
+          return res.json({ success: true, message: 'Results emailed', info: { player: info1, admin: info2, preview: { player: previewPlayer, admin: previewAdmin } }, savedId });
         }).catch(err2 => {
           console.error('Error sending admin results:', err2);
           // if player was sent but admin failed, still respond success for player
-          return res.json({ success: true, message: 'Player emailed; admin failed', info: { player: info1, adminError: err2 && err2.message }, savedId: saved._id });
+          return res.json({ success: true, message: 'Player emailed; admin failed', info: { player: info1, adminError: err2 && err2.message }, savedId });
         });
       }).catch(err1 => {
         console.error('Error sending results to player:', err1);
@@ -323,7 +363,7 @@ app.post('/api/game/submit', async (req, res) => {
         sendEmail(adminMailOptions).then(info2 => {
           let previewAdmin = null;
           try { previewAdmin = nodemailer.getTestMessageUrl(info2); } catch(e) { previewAdmin = null; }
-          return res.json({ success: true, message: 'Admin emailed; player failed', info: { admin: info2, preview: { admin: previewAdmin } }, savedId: saved._id });
+          return res.json({ success: true, message: 'Admin emailed; player failed', info: { admin: info2, preview: { admin: previewAdmin } }, savedId });
         }).catch(err2 => {
           console.error('Both emails failed:', err1, err2);
           return res.status(500).json({ success: false, message: 'Both emails failed', errors: [err1 && err1.message, err2 && err2.message] });
@@ -398,8 +438,23 @@ app.post('/api/debug/send-result', async (req, res) => {
 app.post('/api/game/save', authMiddleware, async (req, res) => {
   try {
     const { state, scenarioId } = req.body || {};
-    const saved = await GameResult.create({ user: req.user.id, playerName: state.playerName || undefined, playerEmail: state.playerEmail || undefined, scenarioId, state });
-    return res.json({ success: true, savedId: saved._id });
+    let savedId;
+    if (db) {
+      const gameResultsRef = db.collection('gameResults');
+      const newResult = {
+        user: req.user.id,
+        playerName: state.playerName || undefined,
+        playerEmail: state.playerEmail || undefined,
+        scenarioId,
+        state,
+        submittedAt: new Date()
+      };
+      const docRef = await gameResultsRef.add(newResult);
+      savedId = docRef.id;
+    } else {
+      savedId = 'no-db';
+    }
+    return res.json({ success: true, savedId });
   } catch (err) {
     console.error('Save error:', err);
     return res.status(500).json({ success: false, error: err.message });
@@ -409,8 +464,14 @@ app.post('/api/game/save', authMiddleware, async (req, res) => {
 // Get game history for a user
 app.get('/api/game/history', authMiddleware, async (req, res) => {
   try {
-    const list = await GameResult.find({ user: req.user.id }).sort({ createdAt: -1 }).limit(50);
-    return res.json({ success: true, results: list });
+    if (db) {
+      const gameResultsRef = db.collection('gameResults');
+      const snapshot = await gameResultsRef.where('user', '==', req.user.id).orderBy('submittedAt', 'desc').limit(50).get();
+      const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return res.json({ success: true, results });
+    } else {
+      return res.json({ success: true, results: [] });
+    }
   } catch (err) {
     console.error('History error:', err);
     return res.status(500).json({ success: false, error: err.message });
