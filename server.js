@@ -410,13 +410,13 @@ app.get('/api/test-email', async (req, res) => {
   };
 
   try {
-    const info = await sendEmailWithTimeout(mailOptions, 60000);
+    const info = await sendEmailWithTimeout(mailOptions, 30000);
     const preview = nodemailer.getTestMessageUrl(info);
     if (preview) console.log('Test email preview URL:', preview);
     return res.json({ success: true, transport: USING_SENDGRID ? 'sendgrid' : 'smtp', info, preview });
   } catch (err) {
     console.error('Test email failed:', err);
-    return res.status(500).json({ success: false, transport: USING_SENDGRID ? 'sendgrid' : 'smtp', error: err.message || err.toString() });
+    return res.json({ success: false, transport: USING_SENDGRID ? 'sendgrid' : 'smtp', error: err.message || err.toString() });
   }
 });
 
@@ -663,18 +663,16 @@ app.post('/api/courses/enroll', (req, res) => {
     html: emailHtml
   };
 
-  // TEMP: Skip email sending for testing
-  console.log('TEMP: Skipping email send for testing. Would send:', mailOptions);
-  return res.json({ success: true, message: 'Enrolled successfully (email skipped for testing)', transport: 'none', info: { note: 'Email temporarily disabled' } });
-
-  sendEmailWithTimeout(mailOptions, 60000)
+  console.log('Attempting to send enrollment email...');
+  sendEmailWithTimeout(mailOptions, 30000)
     .then(info => {
-      console.log('Email sent:', info);
+      console.log('Email sent successfully:', info);
       res.json({ success: true, message: 'Enrolled successfully and email sent', transport: USING_SENDGRID ? 'sendgrid' : 'smtp', info: { messageId: info?.messageId, response: info?.response || info } });
     })
     .catch(err => {
-      console.error('Enrollment email error:', err);
-      return res.status(500).json({ success: false, message: 'Email could not be sent', transport: USING_SENDGRID ? 'sendgrid' : 'smtp', error: err.message || err });
+      console.error('Enrollment email failed:', err);
+      // Still return success for enrollment, but log the email failure
+      res.json({ success: true, message: 'Enrolled successfully (email failed)', transport: USING_SENDGRID ? 'sendgrid' : 'smtp', emailError: err.message || err.toString() });
     });
 });
 
