@@ -663,6 +663,10 @@ app.post('/api/courses/enroll', (req, res) => {
     html: emailHtml
   };
 
+  // TEMP: Skip email sending for testing
+  console.log('TEMP: Skipping email send for testing. Would send:', mailOptions);
+  return res.json({ success: true, message: 'Enrolled successfully (email skipped for testing)', transport: 'none', info: { note: 'Email temporarily disabled' } });
+
   sendEmailWithTimeout(mailOptions, 60000)
     .then(info => {
       console.log('Email sent:', info);
