@@ -116,7 +116,7 @@ async function sendEmail({ to, from, subject, text, html }) {
   });
 }
 
-async function sendEmailWithTimeout(emailOptions, timeoutMs = 20000) {
+async function sendEmailWithTimeout(emailOptions, timeoutMs = 60000) { // Increased to 60 seconds for debugging
   return Promise.race([
     sendEmail(emailOptions),
     new Promise((_, reject) => setTimeout(() => reject(new Error('Email provider connection timed out')), timeoutMs))
