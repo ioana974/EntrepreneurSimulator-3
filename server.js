@@ -26,6 +26,7 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/entrepreneur-simulator';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
+const USING_SENDGRID = Boolean(process.env.SENDGRID_API_KEY);
 
 // === FIREBASE SETUP ===
 let db;
@@ -46,6 +47,13 @@ try {
   console.error('❌ Firebase initialization failed:', error.message);
   console.log('⚠️ Running without Firebase');
 }
+
+console.log('Email configuration:', {
+  sendgrid: USING_SENDGRID,
+  smtp: Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD),
+  smtpService: process.env.EMAIL_SERVICE || 'gmail',
+  adminEmail: process.env.ADMIN_EMAIL || null
+});
 
 // === EMAIL SETUP ===
 let transporter = null;
@@ -388,27 +396,35 @@ app.post('/api/game/submit', async (req, res) => {
 // Note: other endpoints should use getTransporter() helper when sending emails
 
 // Simple endpoint to send a test email to the configured admin email
-app.get('/api/test-email', (req, res) => {
+app.get('/api/test-email', async (req, res) => {
   const to = process.env.ADMIN_EMAIL || 'turdaioanaelena@gmail.com';
   const mailOptions = {
-    from: process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
     to,
     subject: 'Test email - EntrepreneurHub',
     html: `<p>Acesta este un email de test trimis la ${new Date().toLocaleString()}</p>`
   };
-  getTransporter().then(trans => {
-    trans.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        console.error('Test email failed:', err);
-        return res.status(500).json({ success: false, error: err.message || err });
-      }
-      const preview = nodemailer.getTestMessageUrl(info);
-      if (preview) console.log('Test email preview URL:', preview);
-      return res.json({ success: true, info, preview });
-    });
-  }).catch(err => {
-    console.error('Failed to get transporter for test email:', err);
-    return res.status(500).json({ success: false, error: 'Email transporter error' });
+
+  try {
+    const info = await sendEmailWithTimeout(mailOptions, 60000);
+    const preview = nodemailer.getTestMessageUrl(info);
+    if (preview) console.log('Test email preview URL:', preview);
+    return res.json({ success: true, transport: USING_SENDGRID ? 'sendgrid' : 'smtp', info, preview });
+  } catch (err) {
+    console.error('Test email failed:', err);
+    return res.status(500).json({ success: false, transport: USING_SENDGRID ? 'sendgrid' : 'smtp', error: err.message || err.toString() });
+  }
+});
+
+app.get('/api/email-diagnostics', (req, res) => {
+  res.json({
+    sendgrid: USING_SENDGRID,
+    smtp: Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD),
+    smtpService: process.env.EMAIL_SERVICE || 'gmail',
+    emailFrom: process.env.EMAIL_FROM || process.env.EMAIL_USER || null,
+    adminEmail: process.env.ADMIN_EMAIL || null,
+    firebaseConfigured: Boolean(db),
+    nodeEnv: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -643,14 +659,14 @@ app.post('/api/courses/enroll', (req, res) => {
     html: emailHtml
   };
 
-  sendEmailWithTimeout(mailOptions, 20000)
+  sendEmailWithTimeout(mailOptions, 60000)
     .then(info => {
       console.log('Email sent:', info);
-      res.json({ success: true, message: 'Enrolled successfully and email sent', info: { messageId: info?.messageId, response: info?.response || info } });
+      res.json({ success: true, message: 'Enrolled successfully and email sent', transport: USING_SENDGRID ? 'sendgrid' : 'smtp', info: { messageId: info?.messageId, response: info?.response || info } });
     })
     .catch(err => {
       console.error('Enrollment email error:', err);
-      return res.status(500).json({ success: false, message: 'Email could not be sent', error: err.message || err });
+      return res.status(500).json({ success: false, message: 'Email could not be sent', transport: USING_SENDGRID ? 'sendgrid' : 'smtp', error: err.message || err });
     });
 });
 
