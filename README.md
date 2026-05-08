@@ -90,9 +90,12 @@ NODE_ENV=production node server.js
 
 3. Add environment variables in Render dashboard:
    - Copy all values from your `.env` file
-   - Add the Firebase service account key content as `FIREBASE_KEY_JSON`
+   - Add the Firebase service account key content as `FIREBASE_CREDENTIALS`
+     (paste the full JSON from the downloaded service account key)
 
-4. Deploy!
+4. Do NOT add `firebase-key.json` to GitHub. Keep it ignored.
+
+5. Deploy!
 
 ## API Endpoints
 

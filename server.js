@@ -31,7 +31,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 let db;
 
 try {
-  const serviceAccount = require('./firebase-key.json');
+  const serviceAccount = process.env.FIREBASE_CREDENTIALS
+    ? JSON.parse(process.env.FIREBASE_CREDENTIALS)
+    : require('./firebase-key.json');
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -112,6 +114,13 @@ async function sendEmail({ to, from, subject, text, html }) {
       return resolve(info);
     });
   });
+}
+
+async function sendEmailWithTimeout(emailOptions, timeoutMs = 20000) {
+  return Promise.race([
+    sendEmail(emailOptions),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Email provider connection timed out')), timeoutMs))
+  ]);
 }
 
 // If real credentials are provided, use them. Otherwise create an Ethereal test account.
@@ -627,26 +636,22 @@ app.post('/api/courses/enroll', (req, res) => {
 
   // Send email
   const mailOptions = {
-    from: process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
+    from: process.env.EMAIL_USER || process.env.EMAIL_FROM || 'noreply@entrepreneurhub.com',
     to: 'turdaioanaelena@gmail.com',
     subject: emailSubject,
     text: emailText,
     html: emailHtml
   };
 
-  getTransporter().then(trans => {
-    trans.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Email send error:', error);
-        return res.status(500).json({ success: false, message: 'Email could not be sent', error: error.message || error });
-      }
+  sendEmailWithTimeout(mailOptions, 20000)
+    .then(info => {
       console.log('Email sent:', info);
-      res.json({ success: true, message: 'Enrolled successfully and email sent', info: { messageId: info.messageId, response: info.response } });
+      res.json({ success: true, message: 'Enrolled successfully and email sent', info: { messageId: info?.messageId, response: info?.response || info } });
+    })
+    .catch(err => {
+      console.error('Enrollment email error:', err);
+      return res.status(500).json({ success: false, message: 'Email could not be sent', error: err.message || err });
     });
-  }).catch(err => {
-    console.error('Failed to get transporter for enrollment email:', err);
-    return res.status(500).json({ success: false, message: 'Email transporter error' });
-  });
 });
 
 // === ERROR HANDLING ===
