@@ -27,6 +27,8 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/entrep
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 const USING_SENDGRID = Boolean(process.env.SENDGRID_API_KEY);
+const SMTP_SERVICE = process.env.EMAIL_SERVICE && !process.env.EMAIL_SERVICE.includes('@') ? process.env.EMAIL_SERVICE : 'gmail';
+const EMAIL_FROM = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com';
 
 // === FIREBASE SETUP ===
 let db;
@@ -51,7 +53,9 @@ try {
 console.log('Email configuration:', {
   sendgrid: USING_SENDGRID,
   smtp: Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD),
-  smtpService: process.env.EMAIL_SERVICE || 'gmail',
+  smtpService: SMTP_SERVICE,
+  rawEmailService: process.env.EMAIL_SERVICE || null,
+  emailFrom: EMAIL_FROM,
   adminEmail: process.env.ADMIN_EMAIL || null
 });
 
@@ -63,7 +67,7 @@ async function getTransporter() {
   if (transporter) return transporter;
   if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD && process.env.EMAIL_PASSWORD !== 'REPLACE_WITH_APP_PASSWORD') {
     transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE || 'gmail',
+      service: SMTP_SERVICE,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
@@ -103,7 +107,7 @@ async function sendEmail({ to, from, subject, text, html }) {
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
       const msg = {
         to,
-        from: from || process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
+        from: from || EMAIL_FROM,
         subject,
         text,
         html
@@ -399,7 +403,7 @@ app.post('/api/game/submit', async (req, res) => {
 app.get('/api/test-email', async (req, res) => {
   const to = process.env.ADMIN_EMAIL || 'turdaioanaelena@gmail.com';
   const mailOptions = {
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com',
+    from: EMAIL_FROM,
     to,
     subject: 'Test email - EntrepreneurHub',
     html: `<p>Acesta este un email de test trimis la ${new Date().toLocaleString()}</p>`
@@ -421,7 +425,7 @@ app.get('/api/email-diagnostics', (req, res) => {
     sendgrid: USING_SENDGRID,
     smtp: Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD),
     smtpService: process.env.EMAIL_SERVICE || 'gmail',
-    emailFrom: process.env.EMAIL_FROM || process.env.EMAIL_USER || null,
+    emailFrom: EMAIL_FROM,
     adminEmail: process.env.ADMIN_EMAIL || null,
     firebaseConfigured: Boolean(db),
     nodeEnv: process.env.NODE_ENV || 'development'
@@ -652,7 +656,7 @@ app.post('/api/courses/enroll', (req, res) => {
 
   // Send email
   const mailOptions = {
-    from: process.env.EMAIL_USER || process.env.EMAIL_FROM || 'noreply@entrepreneurhub.com',
+    from: EMAIL_FROM,
     to: 'turdaioanaelena@gmail.com',
     subject: emailSubject,
     text: emailText,
