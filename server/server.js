@@ -64,6 +64,33 @@ console.log('Email configuration:', {
 // === EMAIL SETUP ===
 let transporter = null;
 
+function parseOpenAIJson(responseText) {
+  if (!responseText || typeof responseText !== "string") {
+    throw new Error("OpenAI returned an empty response.");
+  }
+
+  let cleaned = responseText.trim();
+
+  // Remove ```json ... ``` or ``` ... ```
+  cleaned = cleaned
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  // Keep only the JSON object, in case extra text sneaks in
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    throw new Error("No JSON object found in OpenAI response.");
+  }
+
+  cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+
+  return JSON.parse(cleaned);
+}
+
 // Helper to ensure transporter is initialized (creates Ethereal test account if needed)
 async function getTransporter() {
   if (transporter) return transporter;
@@ -249,7 +276,7 @@ Folosește limba română pentru titluri, descrieri și detalii. Nu adăuga text
     const jsonText = jsonTextMatch ? jsonTextMatch[0] : trimmed;
 
     try {
-      payload = JSON.parse(jsonText);
+      payload = parseOpenAIJson(jsonText);
     } catch (parseError) {
       console.error('OpenAI JSON parse error:', parseError.message, 'response text:', trimmed);
       return res.status(500).json({ success: false, message: 'Could not parse OpenAI response as JSON' });
