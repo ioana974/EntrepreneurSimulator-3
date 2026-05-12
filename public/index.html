@@ -538,10 +538,22 @@
       }
     }
     
-    window.addEventListener('load', () => { 
+    function getInitialPageFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const view = params.get('view');
+      const validViews = ['home', 'lessons', 'courses', 'tests', 'stats', 'about', 'admin'];
+      return validViews.includes(view) ? view : 'home';
+    }
+
+    function initializeApp() {
       adjustHeroToNavbar();
       initUserTracking();
-    });
+      currentPage = getInitialPageFromQuery();
+      renderPage();
+      document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+    }
+
+    window.addEventListener('load', initializeApp);
 
     function renderLessons() {
       const lessons = [
@@ -1035,28 +1047,16 @@
       const password = prompt('Enter admin password:');
       const correctPassword = btoa('admin123'); // 'admin123' encoded - change this!
       if (btoa(password || '') === correctPassword) {
-        navigateTo('admin');
         renderAdminPanel();
+        navigateTo('admin');
       } else {
         alert('Invalid password');
       }
     }
 
-    async function renderAdminPanel() {
-      let enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
-      let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
-
-      try {
-        const response = await fetch('/api/admin/dashboard');
-        const data = await response.json();
-        if (data.success) {
-          enrollments = data.enrollments || [];
-          gameResults = data.gameResults || [];
-          window.__adminDashboard = { enrollments, gameResults };
-        }
-      } catch (error) {
-        console.warn('Could not load live admin data, using local data instead:', error);
-      }
+    function renderAdminPanel() {
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
       
       let html = '<div style="margin-bottom: 3rem;"><h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Course Enrollments (' + enrollments.length + ')</h3>';
       
@@ -1082,7 +1082,7 @@
           html += '<td style="padding: 0.8rem;">' + (e.birthYear || '-') + '</td>';
           html += '<td style="padding: 0.8rem;">' + (e.city || '-') + '</td>';
           html += '<td style="padding: 0.8rem;">' + (e.county || '-') + '</td>';
-          html += '<td style="padding: 0.8rem;">' + new Date(e.enrollmentDate || e.createdAt || Date.now()).toLocaleString() + '</td>';
+          html += '<td style="padding: 0.8rem;">' + new Date(e.enrollmentDate).toLocaleString() + '</td>';
           html += '</tr>';
         });
         
@@ -1116,7 +1116,7 @@
           html += '<td style="padding: 0.8rem;">' + (state.reputation || 0) + '%</td>';
           html += '<td style="padding: 0.8rem;">' + (state.employees || 0) + '</td>';
           html += '<td style="padding: 0.8rem;">Year ' + (state.year || 1) + ', Month ' + (state.month || 1) + '</td>';
-          html += '<td style="padding: 0.8rem;">' + new Date(g.submissionDate || g.createdAt || Date.now()).toLocaleString() + '</td>';
+          html += '<td style="padding: 0.8rem;">' + new Date(g.submissionDate).toLocaleString() + '</td>';
           html += '</tr>';
         });
         
@@ -1127,7 +1127,7 @@
     }
 
     function downloadEnrollments(format) {
-      const enrollments = (window.__adminDashboard && window.__adminDashboard.enrollments) || JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
+      const enrollments = JSON.parse(localStorage.getItem('courseEnrollments') || '[]');
       if (enrollments.length === 0) {
         alert('No enrollments to download');
         return;
@@ -1148,7 +1148,7 @@
           e.birthYear || '',
           e.city || '',
           e.county || '',
-          new Date(e.enrollmentDate || e.createdAt || Date.now()).toLocaleString()
+          new Date(e.enrollmentDate).toLocaleString()
         ]);
         
         content = [headers, ...rows].map(row => 
@@ -1171,7 +1171,7 @@
     }
 
     function downloadGameResults(format) {
-      const gameResults = (window.__adminDashboard && window.__adminDashboard.gameResults) || JSON.parse(localStorage.getItem('gameResults') || '[]');
+      const gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
       if (gameResults.length === 0) {
         alert('No game results to download');
         return;
@@ -1196,7 +1196,7 @@
             state.employees || 0,
             state.year || 1,
             state.month || 1,
-            new Date(g.submissionDate || g.createdAt || Date.now()).toLocaleString()
+            new Date(g.submissionDate).toLocaleString()
           ];
         });
         

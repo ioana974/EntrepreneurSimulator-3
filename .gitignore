@@ -1,11 +1,4 @@
-node_modules/
-.env
-dist/
-build/
-*.log
-/.cache
-/.env.local
-.DS_Store# === GIT IGNORE - Fișiere care nu trebuie urmărite ===
+# === GIT IGNORE - Fișiere care nu trebuie urmărite ===
 
 # Dependencies
 node_modules/
@@ -14,10 +7,24 @@ yarn-debug.log
 yarn-error.log
 package-lock.json
 
+# Ignore nested duplicate working copy
+EntrepreneurSimulator-3-main/
+
 # Environment
 .env
 .env.local
 .env.development.local
+.env.bak*
+
+# Firebase
+firebase-key.json
+
+# Build outputs
+dist/
+build/
+*.log
+/.cache
+.DS_Store
 .env.test.local
 .env.production.local
 .env.bak
