@@ -17,6 +17,18 @@ function GameDashboard() {
   const [playerEmail, setPlayerEmail] = useState('');
   const [savedExists, setSavedExists] = useState(false);
   const [resultsSent, setResultsSent] = useState(false);
+  const [customScenarioOptions, setCustomScenarioOptions] = useState({
+    name: 'Propria mea afacere',
+    type: 'service',
+    budget: 120000,
+    currency: 'RON',
+    employees: 6,
+    goal: 'profit',
+    competition: 'medie'
+  });
+  const [generatedQuestions, setGeneratedQuestions] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
 
   // Calculator & UI state
   const [showCalculator, setShowCalculator] = useState(false);
@@ -65,6 +77,42 @@ function GameDashboard() {
     }
   ];
 
+  const customSalaryForType = (type) => {
+    switch (type) {
+      case 'manufacturing': return 1500;
+      case 'logistics': return 1100;
+      case 'software': return 2200;
+      case 'service': return 900;
+      case 'retail': return 1000;
+      default: return 1000;
+    }
+  };
+
+  const customRevenueForType = (type) => {
+    switch (type) {
+      case 'manufacturing': return 15000;
+      case 'logistics': return 13000;
+      case 'software': return 11000;
+      case 'service': return 10000;
+      case 'retail': return 9500;
+      default: return 10000;
+    }
+  };
+
+  const customScenario = {
+    id: 'custom',
+    name: 'Creează propria ta afacere',
+    description: 'Definește buget, angajați, monedă și obiective pentru un scenariu personalizat.',
+    type: 'custom',
+    startBudget: customScenarioOptions.budget,
+    startEmployees: customScenarioOptions.employees,
+    salaryPerEmployee: customSalaryForType(customScenarioOptions.type),
+    monthlyRevenue: customRevenueForType(customScenarioOptions.type),
+    customOptions: { ...customScenarioOptions }
+  };
+
+  const allScenarios = [...scenarios, customScenario];
+
   // --- Generate employees with details ---
   const generateEmployees = (scenario) => {
     const firstNames = ['Ion', 'Maria', 'Ana', 'Mihai', 'Elena', 'Alexandru', 'Andrei', 'Dana', 'Cristian', 'Laura'];
@@ -86,6 +134,82 @@ function GameDashboard() {
     return employees;
   };
 
+  const getCustomScenarioQuestions = () => {
+    if (scenario?.type !== 'custom') return [];
+    if (generatedQuestions && generatedQuestions.length > 0) {
+      return generatedQuestions;
+    }
+
+    const goalText = {
+      profit: 'profit rapid',
+      'creștere': 'creștere rapidă',
+      stabilitate: 'stabilitate și cashflow',
+      piață: 'intrare pe piață nouă'
+    }[scenario.customOptions.goal] || 'un obiectiv clar';
+
+    return [
+      {
+        id: 'custom-1',
+        title: `Start strategic pentru ${scenario.customOptions.name}`,
+        description: `Ai ales un business ${scenario.customOptions.type} cu buget ${scenario.customOptions.budget.toLocaleString()} și ${scenario.customOptions.employees} angajați. Primele decizii sunt critice.`,
+        technicalDetails: `Scop: ${goalText}. Concurență: ${scenario.customOptions.competition}.`,
+        choices: [
+          { text: 'Investește în clarificarea ofertei și valoarea unică', budgetChange: -3000, reputationChange: 5 },
+          { text: 'Optimizează costurile inițiale și amână angajările', budgetChange: 0, reputationChange: -2 },
+          { text: 'Lansează rapid cu o versiune minim viabilă', budgetChange: -5000, reputationChange: 4 }
+        ]
+      },
+      {
+        id: 'custom-2',
+        title: 'Planul de marketing adaptat businessului tău',
+        description: `Dezvoltă abordarea potrivită pentru ${scenario.customOptions.type} și concurență ${scenario.customOptions.competition}.`,
+        technicalDetails: `Folosește un buget inteligent pentru a-ți crește vizibilitatea fără a epuiza numerarul.`,
+        choices: [
+          { text: 'Concentrează-te pe clienți locali', budgetChange: -4000, reputationChange: 6 },
+          { text: 'Tintește expansiunea națională', budgetChange: -8000, reputationChange: 10 },
+          { text: 'Folosește rețele și recomandări gratuite', budgetChange: 0, reputationChange: 1 }
+        ]
+      }
+    ];
+  };
+
+  const generateCustomQuestionsAI = async (options) => {
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const response = await fetch('/api/ai/generate-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customOptions: options })
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setAiError(data.message || 'AI generation failed');
+        return [];
+      }
+      if (Array.isArray(data.questions) && data.questions.length > 0) {
+        setGeneratedQuestions(data.questions);
+        return data.questions;
+      }
+      setAiError('AI nu a returnat întrebări valide');
+      return [];
+    } catch (error) {
+      console.error('AI error:', error);
+      setAiError(error.message || 'AI unavailable');
+      return [];
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (scenario?.id === 'custom') {
+      setGeneratedQuestions(null);
+      setAiError(null);
+    }
+  }, [scenario?.id, JSON.stringify(customScenarioOptions)]);
+
   // --- Generate dynamic questions with employee names ---
   const getComplexQuestions = () => {
     const lowestPerfEmployee = employees.length > 0 ? employees.reduce((min, emp) => emp.performance < min.performance ? emp : min) : null;
@@ -94,7 +218,10 @@ function GameDashboard() {
     const candidateName1 = 'Alexandru (senior)';
     const candidateName2 = 'Ștefan (junior)';
 
+    const customQuestions = getCustomScenarioQuestions();
+
     return [
+      ...customQuestions,
       {
         id: 1,
         title: 'Alegerea Formei Juridice (SRL vs PFA)',
@@ -409,15 +536,23 @@ function GameDashboard() {
     localStorage.setItem('entrepreneur_playerName', playerName);
     localStorage.setItem('entrepreneur_playerEmail', playerEmail || '');
 
-    setScenario(selectedScenario);
-    setBudget(selectedScenario.startBudget);
-    setEmployees(generateEmployees(selectedScenario));
+    const actualScenario = selectedScenario.id === 'custom'
+      ? { ...customScenario, name: customScenarioOptions.name || 'Propria mea afacere' }
+      : selectedScenario;
+
+    if (selectedScenario.id === 'custom') {
+      await generateCustomQuestionsAI(customScenarioOptions);
+    }
+
+    setScenario(actualScenario);
+    setBudget(actualScenario.startBudget);
+    setEmployees(generateEmployees(actualScenario));
     setReputation(50);
     setYear(1);
     setMonth(1);
     setCurrentQuestion(0);
     setGameStarted(true);
-    setCompetitors(generateCompetitors(selectedScenario));
+    setCompetitors(generateCompetitors(actualScenario));
   };
 
   // --- Apply choice & advance ---
@@ -720,11 +855,133 @@ function GameDashboard() {
 
           <div style={{ margin: '1.5rem 0' }}>
             <h3 style={{ marginTop: 0 }}>{t('choose_scenario')}</h3>
-            <ScenarioSelect scenarios={scenarios} selectedId={scenario?.id} onSelect={(s) => setScenario(s)} />
+            <ScenarioSelect scenarios={allScenarios} selectedId={scenario?.id} onSelect={(s) => setScenario(s)} />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-            <button className="btn btn-primary" onClick={() => startGame(scenario || scenarios[0])}>{t('startGame')}</button>
+          {scenario?.id === 'custom' && (
+            <div className="card" style={{ padding: '1rem', marginBottom: '1.5rem', border: '2px dashed var(--accent-yellow)', background: 'rgba(255, 223, 93, 0.08)' }}>
+              <h3 style={{ marginTop: 0 }}>Creează propriul tău business</h3>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>Alege structura și obiectivul; asistentul AI va adapta întrebările și provocările.</p>
+
+              <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Nume business</label>
+              <input
+                value={customScenarioOptions.name}
+                onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, name: e.target.value })}
+                placeholder="Afacerea mea"
+                style={{ width: '100%', padding: '.8rem 1rem', marginBottom: '1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+              />
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Tip Afacere</label>
+                  <select
+                    value={customScenarioOptions.type}
+                    onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, type: e.target.value })}
+                    style={{ width: '100%', padding: '.8rem 1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+                  >
+                    <option value="service">Servicii</option>
+                    <option value="retail">Retail</option>
+                    <option value="manufacturing">Producție</option>
+                    <option value="logistics">Transport / Logistică</option>
+                    <option value="software">Startup Tech</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Obiectiv principal</label>
+                  <select
+                    value={customScenarioOptions.goal}
+                    onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, goal: e.target.value })}
+                    style={{ width: '100%', padding: '.8rem 1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+                  >
+                    <option value="profit">Profit rapid</option>
+                    <option value="creștere">Creștere rapidă</option>
+                    <option value="stabilitate">Stabilitate și cashflow</option>
+                    <option value="piață">Intrare pe piață nouă</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Buget inițial</label>
+                  <input
+                    type="number"
+                    min="10000"
+                    max="500000"
+                    value={customScenarioOptions.budget}
+                    onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, budget: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '.8rem 1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Angajați inițiali</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="35"
+                    value={customScenarioOptions.employees}
+                    onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, employees: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '.8rem 1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', marginTop: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Monedă</label>
+                  <select
+                    value={customScenarioOptions.currency}
+                    onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, currency: e.target.value })}
+                    style={{ width: '100%', padding: '.8rem 1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+                  >
+                    <option value="RON">RON</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '.5rem', fontWeight: '600' }}>Nivel concurență</label>
+                  <select
+                    value={customScenarioOptions.competition}
+                    onChange={e => setCustomScenarioOptions({ ...customScenarioOptions, competition: e.target.value })}
+                    style={{ width: '100%', padding: '.8rem 1rem', borderRadius: '6px', border: '1px solid var(--accent-cyan)', background: 'var(--primary-gray)', color: 'var(--text-primary)' }}
+                  >
+                    <option value="mica">Mică</option>
+                    <option value="medie">Medie</option>
+                    <option value="mare">Mare</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '8px', background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.15)' }}>
+                <p style={{ margin: 0, color: 'var(--text-secondary)' }}><strong>Rezumat:</strong> Buget: <strong>{customScenarioOptions.budget.toLocaleString()} {customScenarioOptions.currency}</strong>, angajați: <strong>{customScenarioOptions.employees}</strong>, tip: <strong>{customScenarioOptions.type}</strong>, concurență: <strong>{customScenarioOptions.competition}</strong>.</p>
+              </div>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem' }}>
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={() => generateCustomQuestionsAI(customScenarioOptions)}
+                  disabled={aiLoading}
+                  style={{ padding: '0.8rem 1rem', borderRadius: '6px', minWidth: '220px' }}
+                >
+                  {aiLoading ? 'Așteaptă, generează...' : 'Regenerare întrebări AI'}
+                </button>
+                {generatedQuestions && generatedQuestions.length > 0 && (
+                  <span style={{ alignSelf: 'center', color: 'var(--text-secondary)' }}>
+                    Întrebări AI generate: {generatedQuestions.length}
+                  </span>
+                )}
+              </div>
+
+              {aiLoading && <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Generare întrebări AI în curs…</p>}
+              {aiError && <p style={{ marginTop: '1rem', color: '#ff6666' }}>AI: {aiError}</p>}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', marginTop: '2rem' }}>
+            <button className="btn btn-primary" onClick={() => startGame(scenario || allScenarios[0])}>{t('startGame')}</button>
             {savedExists && <button className="btn btn-secondary" onClick={resumeSaved}>{t('continueGame')}</button>}
             <button className="btn btn-secondary" onClick={() => { localStorage.removeItem(STORAGE_KEY); setSavedExists(false); alert(t('progress_deleted')); }}>{t('delete_saved')}</button>
           </div>

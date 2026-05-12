@@ -538,10 +538,22 @@
       }
     }
     
-    window.addEventListener('load', () => { 
+    function getInitialPageFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const view = params.get('view');
+      const validViews = ['home', 'lessons', 'courses', 'tests', 'stats', 'about', 'admin'];
+      return validViews.includes(view) ? view : 'home';
+    }
+
+    function initializeApp() {
       adjustHeroToNavbar();
       initUserTracking();
-    });
+      currentPage = getInitialPageFromQuery();
+      renderPage();
+      document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
+    }
+
+    window.addEventListener('load', initializeApp);
 
     function renderLessons() {
       const lessons = [

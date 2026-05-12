@@ -8,7 +8,7 @@ export default function ScenarioSelect({ scenarios, selectedId, onSelect }) {
           <h3 style={{ marginTop: 0 }}>{s.name}</h3>
           <p style={{ color: 'var(--text-secondary)' }}>{s.description}</p>
           <ul style={{ marginTop: '0.5rem', paddingLeft: '1.2rem' }}>
-            <li>Buget: ${s.startBudget.toLocaleString()}</li>
+            <li>Buget: {s.currency ? `${s.startBudget.toLocaleString()} ${s.currency}` : `${s.startBudget.toLocaleString()} RON`}</li>
             <li>Angajați: {s.startEmployees}</li>
             <li>Tip: {s.type}</li>
           </ul>

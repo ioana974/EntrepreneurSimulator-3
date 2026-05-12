@@ -7,6 +7,9 @@ yarn-debug.log
 yarn-error.log
 package-lock.json
 
+# Ignore nested duplicate working copy
+EntrepreneurSimulator-3-main/
+
 # Environment
 .env
 .env.local

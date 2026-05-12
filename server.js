@@ -7,6 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
+const OpenAI = require('openai');
 // const mongoose = require('mongoose');
 const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
@@ -29,6 +30,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_me';
 const USING_SENDGRID = Boolean(process.env.SENDGRID_API_KEY);
 const SMTP_SERVICE = process.env.EMAIL_SERVICE && !process.env.EMAIL_SERVICE.includes('@') ? process.env.EMAIL_SERVICE : 'gmail';
 const EMAIL_FROM = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@entrepreneurhub.com';
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 // === FIREBASE SETUP ===
 let db;
@@ -194,6 +196,91 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD && process.env.EMAIL_PA
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'EntrepreneurHub Server is running' });
+});
+
+// AI question generation for custom business scenarios
+app.post('/api/ai/generate-questions', async (req, res) => {
+  if (!openai) {
+    return res.status(500).json({ success: false, message: 'OpenAI API key is not configured' });
+  }
+
+  const customOptions = req.body.customOptions || {};
+  const {
+    name = 'Afacere personalizată',
+    type = 'service',
+    budget = 100000,
+    employees = 5,
+    goal = 'profit',
+    competition = 'medie'
+  } = customOptions;
+
+  const prompt = `Ești un generator de întrebări pentru un simulator de afaceri educațional.
+Generează 4 întrebări de tip scenariu pentru opțiunea "Creează propria ta afacere".
+
+Date business:
+- Nume: ${name}
+- Tip: ${type}
+- Buget inițial: ${budget} RON
+- Angajați: ${employees}
+- Obiectiv: ${goal}
+- Concurență: ${competition}
+
+Folosește baza teoretică din lecțiile site-ului (Business Fundamentals, Innovation & Creativity, Financial Management, Marketing Strategy).
+Probele trebuie să reflecte concepte precum forma juridică, TVA, microîntreprindere, MVP, marketing digital, burn rate, cashflow, LTV/CAC și strategii competitive.
+
+Răspunde strict cu un JSON valid de forma:
+{
+  "questions": [
+    {
+      "id": "custom-1",
+      "title": "...",
+      "description": "...",
+      "technicalDetails": "...",
+      "choices": [
+         { "text": "...", "budgetChange": -3000, "reputationChange": 5 },
+         ...
+      ]
+    }
+  ]
+}
+
+Folosește limba română pentru titluri, descrieri și detalii. Nu adăuga text suplimentar în afara JSON-ului.`;
+
+  try {
+    const response = await openai.responses.create({
+      model: 'gpt-4.1-mini',
+      input: prompt,
+      temperature: 0.7,
+      max_tokens: 900
+    });
+
+    const textOutput = (response.output || []).map(block => {
+      if (typeof block === 'string') return block;
+      if (Array.isArray(block.content)) return block.content.map(item => item?.text || '').join('');
+      return '';
+    }).join('');
+
+    let payload = null;
+    const trimmed = textOutput.trim();
+    const jsonTextMatch = trimmed.match(/\{[\s\S]*\}$/);
+    const jsonText = jsonTextMatch ? jsonTextMatch[0] : trimmed;
+
+    try {
+      payload = JSON.parse(jsonText);
+    } catch (parseError) {
+      console.error('OpenAI JSON parse error:', parseError.message, 'response text:', trimmed);
+      return res.status(500).json({ success: false, message: 'Could not parse OpenAI response as JSON' });
+    }
+
+    if (!payload || !Array.isArray(payload.questions)) {
+      return res.status(500).json({ success: false, message: 'OpenAI response did not contain a questions array' });
+    }
+
+    return res.json({ success: true, questions: payload.questions });
+  } catch (err) {
+    console.error('AI generation error:', err);
+    return res.status(500).json({ success: false, message: 'AI generation failed', error: err.message || String(err) });
+  }
 });
 
 // === AUTH ROUTES ===
