@@ -215,7 +215,7 @@ app.post('/api/ai/generate-questions', async (req, res) => {
   } = customOptions;
 
   const prompt = `Ești un generator de întrebări pentru un simulator de afaceri educațional.
-Generează 4 întrebări de tip scenariu pentru opțiunea "Creează propria ta afacere".
+Generează 21 întrebări de tip scenariu pentru opțiunea "Creează propria ta afacere".
 
 Date business:
 - Nume: ${name}

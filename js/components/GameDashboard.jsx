@@ -219,8 +219,7 @@ function GameDashboard() {
     const candidateName2 = 'Ștefan (junior)';
 
     const customQuestions = getCustomScenarioQuestions();
-
-    return [
+    const allQuestions = [
       ...customQuestions,
       {
         id: 1,
@@ -360,7 +359,7 @@ function GameDashboard() {
         description: 'Un investitor oferă să cumpere pachetul majoritar — ieși pe profit acum sau continui.',
         technicalDetails: 'Exit option: evaluate EBITDA multiple, one-time liquidity vs long-term growth.',
         choices: [
-          { text: 'Acceptă oferta de exit (primești +40K)', budgetChange: 40000, reputationChange: 0, endGameImmediate: true },
+          { text: 'Acceptă oferta de exit (primești +40K)', budgetChange: 40000, reputationChange: 0 },
           { text: 'Refuză și continui dezvoltarea', budgetChange: 0, reputationChange: 5 }
         ]
       },
@@ -454,6 +453,7 @@ function GameDashboard() {
         ]
       }
     ];
+    return scenario?.type === 'custom' ? allQuestions.slice(0, 21) : allQuestions;
   };
 
   // --- Initialize ---
