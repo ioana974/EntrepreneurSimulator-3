@@ -722,16 +722,17 @@ function GameDashboard() {
         playerName,
         playerEmail: targetEmail,
         scenarioId: scenario?.id,
+        scenarioName: scenario?.name || scenario?.title || scenario?.id,
         state: { budget, reputation, employees: employees.length, year, month },
         userId,
         submissionDate: new Date().toISOString()
       };
-      
+
       // Save game results to localStorage (no backend needed)
       let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
       gameResults.push(payload);
       localStorage.setItem('gameResults', JSON.stringify(gameResults));
-      
+
       setResultsSent(true);
       alert(t('report_sent'));
     } catch (err) {

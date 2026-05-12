@@ -871,6 +871,11 @@
           userId: userId,
           courseId: courseIndex,
           courseName: courses[courseIndex],
+          firstName: document.getElementById('firstName').value,
+          lastName: document.getElementById('lastName').value,
+          birthYear: document.getElementById('birthYear').value,
+          city: document.getElementById('city').value,
+          county: document.getElementById('county').value,
           enrollmentDate: new Date().toISOString()
         });
         localStorage.setItem('courseEnrollments', JSON.stringify(enrollments));
@@ -1111,7 +1116,7 @@
           html += '<tr style="border-bottom: 1px solid var(--border-color); ' + (i % 2 === 0 ? 'background: rgba(0,240,255,0.05);' : '') + '">';
           html += '<td style="padding: 0.8rem;">' + (g.playerName || 'Anonymous') + '</td>';
           html += '<td style="padding: 0.8rem;">' + (g.playerEmail || '-') + '</td>';
-          html += '<td style="padding: 0.8rem;">' + (g.scenarioId || '-') + '</td>';
+          html += '<td style="padding: 0.8rem;">' + (g.scenarioName || g.scenarioId || '-') + '</td>';
           html += '<td style="padding: 0.8rem;">$' + (state.budget || 0) + '</td>';
           html += '<td style="padding: 0.8rem;">' + (state.reputation || 0) + '%</td>';
           html += '<td style="padding: 0.8rem;">' + (state.employees || 0) + '</td>';
@@ -1190,7 +1195,7 @@
           return [
             g.playerName || 'Anonymous',
             g.playerEmail || '',
-            g.scenarioId || '',
+            g.scenarioName || g.scenarioId || '',
             state.budget || 0,
             state.reputation || 0,
             state.employees || 0,
