@@ -2,9 +2,9 @@ const path = require('path');
 
 module.exports = {
   mode: process.env.NODE_ENV || 'production',
-  entry: path.resolve(__dirname, 'js', 'game.jsx'),
+  entry: path.resolve(__dirname, '..', 'public', 'js', 'game.jsx'),
   output: {
-    path: path.resolve(__dirname, 'js'),
+    path: path.resolve(__dirname, '..', 'public', 'js'),
     filename: 'game.bundle.js',
     publicPath: '/'
   },
