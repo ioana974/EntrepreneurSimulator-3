@@ -198,7 +198,7 @@ app.post('/api/ai/generate-questions', async (req, res) => {
   } = customOptions;
 
   const prompt = `Ești un generator de întrebări pentru un simulator de afaceri educațional.
-Generează 21 întrebări de tip scenariu pentru opțiunea "Creează propria ta afacere".
+Generează 12 întrebări de tip scenariu pentru opțiunea "Creează propria ta afacere".
 
 Date business:
 - Nume: ${name}
@@ -234,13 +234,13 @@ Folosește limba română pentru titluri, descrieri și detalii. Nu adăuga text
       model: 'gpt-4.1-mini',
       input: prompt,
       temperature: 0.7,
-      max_output_tokens: 900
+      max_output_tokens: 12000
     });
 
     const textOutput = (response.output || []).map(block => {
       if (typeof block === 'string') return block;
       if (Array.isArray(block.content)) return block.content.map(item => item?.text || '').join('');
-      return '';
+      return 
     }).join('');
 
     let payload = null;
