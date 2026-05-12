@@ -9,7 +9,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
 const OpenAI = require('openai');
-// const mongoose = require('mongoose');
 const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -177,23 +176,6 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD && process.env.EMAIL_PA
   });
 }
 
-// === PLACEHOLDER - MONGODB CONNECTION ===
-// mongoose.connect(MONGODB_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-// }).then(() => {
-//   console.log('Connected to MongoDB');
-// }).catch(err => {
-//   console.error('MongoDB connection error:', err);
-// });
-
-// === PLACEHOLDER - OPENAI SETUP ===
-// const openai = new OpenAI({
-//   apiKey: OPENAI_API_KEY
-// });
-
-// === ROUTES ===
-
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'EntrepreneurHub Server is running' });
@@ -252,7 +234,7 @@ Folosește limba română pentru titluri, descrieri și detalii. Nu adăuga text
       model: 'gpt-4.1-mini',
       input: prompt,
       temperature: 0.7,
-      max_tokens: 900
+      max_output_tokens: 900
     });
 
     const textOutput = (response.output || []).map(block => {
