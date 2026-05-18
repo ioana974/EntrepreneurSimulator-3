@@ -44,6 +44,8 @@ function GameDashboard() {
   const currentQuestionRef = useRef(currentQuestion);
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
+    // clear last gesture when question changes so same gesture can be used again
+    try { lastGestureRef.current = null; } catch (e) {}
   }, [currentQuestion]);
   const applyChoiceRef = useRef(null);
   useEffect(() => {
@@ -733,6 +735,7 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
+    try { console.log('applyChoice called (source)', { currentQuestion, choiceText: choice?.text }); } catch (e) {}
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
     
@@ -795,6 +798,7 @@ function GameDashboard() {
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
     } else {
       setCurrentQuestion(nextQ);
+      try { console.log('applyChoice advancing (source)', { currentQuestion, nextQ }); } catch (e) {}
       saveLocalProgress({ budget: newBudget, reputation: newReputation, employees: newEmployees, currentQuestion: nextQ });
     }
   };
