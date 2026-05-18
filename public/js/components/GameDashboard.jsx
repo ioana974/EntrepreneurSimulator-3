@@ -1310,7 +1310,6 @@ function GameDashboard() {
         <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Notă testare</h4>
         <p style={{ margin: '.35rem 0' }}>Dacă vezi acest ecran în Chrome și camera cere permisiune, acceptă-o. Gesturile funcționează doar când jocul este pornit și ai dat acces la cameră.</p>
         <p style={{ margin: '.35rem 0' }}><strong>Server local</strong> înseamnă că pagina este servită de calculatorul tău, nu doar deschisă direct dintr-un fișier.</p>
-        <p style={{ margin: '.35rem 0' }}>Rulează <code>npm start</code> în terminal în folderul proiectului și apoi deschide <code>http://localhost:5000/game.html</code> în Chrome.</p>
         <p style={{ margin: '.35rem 0' }}>Deschiderea directă a fișierului în Chrome poate bloca funcționalitatea camerei și MediaPipe.</p>
       </div>
     </div>
