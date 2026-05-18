@@ -42,12 +42,14 @@ function GameDashboard() {
   const gestureCooldownRef = useRef(false);
   const lastGestureRef = useRef(null);
   const gestureNeedsResetRef = useRef(false);
-  const choiceProcessingRef = useRef(false);
   const currentQuestionRef = useRef(currentQuestion);
+  const activeQuestionIdRef = useRef(0);
+  const gestureLockRef = useRef(false);
   const applyChoiceRef = useRef(null);
 
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
+    activeQuestionIdRef.current = currentQuestion;
     lastGestureRef.current = null;
   }, [currentQuestion]);
 
@@ -150,7 +152,7 @@ function GameDashboard() {
     const complex = getComplexQuestions();
     if (!complex || complex.length === 0) return;
 
-    const cqIndex = currentQuestionRef.current % complex.length;
+    const cqIndex = activeQuestionIdRef.current % complex.length;
     const currentQ = complex[cqIndex];
 
     if (!currentQ || !Array.isArray(currentQ.choices)) return;
@@ -213,14 +215,21 @@ function GameDashboard() {
       const landmarks = results.multiHandLandmarks[0];
       const count = countExtendedFingers(landmarks);
 
+      // Ignore duplicate frames if the gestures are still the same
+      if (lastGestureRef.current === count) {
+        return;
+      }
+      lastGestureRef.current = count;
+
       const complex = getComplexQuestions();
       const cqIndex =
         complex.length > 0
-          ? currentQuestionRef.current % complex.length
+          ? activeQuestionIdRef.current % complex.length
           : 0;
 
       const currentQ = complex[cqIndex];
       const optionCount = currentQ?.choices?.length || 0;
+      let shouldResetGesture = false;
 
       /* =========================
          SCROLL GESTURES
@@ -228,82 +237,55 @@ function GameDashboard() {
 
       // PUMN = scroll down
       if (count === 0) {
-        if (lastGestureRef.current !== 'scrollDown') {
-          lastGestureRef.current = 'scrollDown';
+        window.scrollBy({
+          top: 260,
+          behavior: 'smooth'
+        });
 
-          window.scrollBy({
-            top: 260,
-            behavior: 'smooth'
-          });
-
-          setGestureStatus('Scroll jos');
-          setGestureLabel('Pumn');
-        }
-
+        setGestureStatus('Scroll jos');
+        setGestureLabel('Pumn');
         gestureNeedsResetRef.current = false;
-        return;
-      }
+        shouldResetGesture = true;
+      } else if (count === 5) {
+        window.scrollBy({
+          top: -260,
+          behavior: 'smooth'
+        });
 
-      // PALMĂ DESCHISĂ = scroll up
-      if (count === 5) {
-        if (lastGestureRef.current !== 'scrollUp') {
-          lastGestureRef.current = 'scrollUp';
-
-          window.scrollBy({
-            top: -260,
-            behavior: 'smooth'
-          });
-
-          setGestureStatus('Scroll sus');
-          setGestureLabel('Palmă');
-        }
-
+        setGestureStatus('Scroll sus');
+        setGestureLabel('Palmă');
         gestureNeedsResetRef.current = false;
-        return;
-      }
-
-      /* =========================
-         CHOICE GESTURES
-      ========================= */
-
-      if (count >= 1 && count <= optionCount) {
+        shouldResetGesture = true;
+      } else if (count >= 1 && count <= optionCount) {
         setGestureStatus(
           `Ridici ${count} degete: selectez opțiunea ${count}.`
         );
 
         setGestureLabel(`${count} degete`);
 
-        if (
-          lastGestureRef.current !== `choice${count}` &&
-          !gestureNeedsResetRef.current
-        ) {
-          lastGestureRef.current = `choice${count}`;
+        if (!gestureLockRef.current && !gestureNeedsResetRef.current) {
+          gestureLockRef.current = true;
           applyGestureChoice(count - 1);
         }
-
-        return;
-      }
-
-      /* =========================
-         RESET / INVALID
-      ========================= */
-
-      // 4 degete sau alte combinații
-      if (count === 4) {
+      } else if (count === 4) {
         lastGestureRef.current = null;
         gestureNeedsResetRef.current = false;
 
         setGestureStatus('Reset gesturi');
         setGestureLabel('4 degete');
+      } else {
+        setGestureStatus(
+          `Gest ignorat. Întrebarea are ${optionCount} opțiuni.`
+        );
 
-        return;
+        setGestureLabel(`${count} degete`);
       }
 
-      setGestureStatus(
-        `Gest ignorat. Întrebarea are ${optionCount} opțiuni.`
-      );
-
-      setGestureLabel(`${count} degete`);
+      if (shouldResetGesture) {
+        setTimeout(() => {
+          lastGestureRef.current = null;
+        }, 500);
+      }
     };
 
     const setupHands = async () => {
@@ -801,19 +783,16 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
-    if (!choice || choiceProcessingRef.current) return;
+    if (!choice || gestureLockRef.current) return;
 
-    choiceProcessingRef.current = true;
-    setTimeout(() => {
-      choiceProcessingRef.current = false;
-    }, 250);
+    gestureLockRef.current = true;
 
     try { console.log('applyChoice called (source)', { currentQuestion: currentQuestionRef.current, choice }); } catch (e) {}
     try {
       const complex = getComplexQuestions();
-      const cq = complex[currentQuestionRef.current % complex.length];
-      console.log('Current question (source):', cq?.title, 'Displayed choices:', cq?.choices?.map(c=>c.text));
-      console.log('Employees before:', employees.length, employees.map(e=>e.name));
+      const cq = complex[activeQuestionIdRef.current % complex.length];
+      console.log('Current question (source):', cq?.title, 'Displayed choices:', cq?.choices?.map(c => c.text));
+      console.log('Employees before:', employees.length, employees.map(e => e.name));
     } catch (e) {}
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
@@ -862,6 +841,7 @@ function GameDashboard() {
       setBudget(newBudget);
       setReputation(newReputation);
       setEmployees(newEmployees);
+      gestureLockRef.current = false;
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
       return;
     }
@@ -875,13 +855,16 @@ function GameDashboard() {
     const complexQuestions = getComplexQuestions();
     const totalQuestions = complexQuestions.length;
     if (nextQ >= totalQuestions) {
+      gestureLockRef.current = false;
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
     } else {
       currentQuestionRef.current = nextQ;
+      activeQuestionIdRef.current = nextQ;
       lastGestureRef.current = null;
       gestureNeedsResetRef.current = true;
 
       setCurrentQuestion(nextQ);
+      gestureLockRef.current = false;
 
       try {
         console.log('applyChoice advancing (source)', { nextQ });
