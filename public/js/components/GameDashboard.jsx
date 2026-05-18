@@ -45,6 +45,8 @@ function GameDashboard() {
   const gestureLockRef = useRef(false);
   const selectedQuestionRef = useRef(null);
   const stableGestureRef = useRef({ count: null, frames: 0 });
+  const gestureScrollCooldownRef = useRef(false);
+  const lastScrollGestureRef = useRef(null);
   const currentQuestionRef = useRef(currentQuestion);
   const applyChoiceRef = useRef(null);
 
@@ -154,7 +156,31 @@ function GameDashboard() {
 
   const resetGestureTracking = () => {
     lastGestureRef.current = null;
+    lastScrollGestureRef.current = null;
     stableGestureRef.current = { count: null, frames: 0 };
+  };
+
+  const triggerGestureScroll = (count) => {
+    const isFist = count === 0;
+    const scrollKey = isFist ? 'fist-scroll-down' : 'palm-scroll-up';
+    const scrollAmount = isFist ? 260 : -260;
+
+    if (gestureScrollCooldownRef.current || lastScrollGestureRef.current === scrollKey) {
+      setGestureStatus(isFist ? 'Pumn detectat: scroll jos deja aplicat.' : 'Palmă detectată: scroll sus deja aplicat.');
+      return;
+    }
+
+    gestureScrollCooldownRef.current = true;
+    lastScrollGestureRef.current = scrollKey;
+
+    scrollEmployeeList(scrollAmount);
+
+    setGestureStatus(isFist ? 'Pumn detectat: scroll jos în lista de angajați.' : 'Palmă detectată: scroll sus în lista de angajați.');
+    setGestureLabel(isFist ? 'Pumn' : 'Palmă');
+
+    setTimeout(() => {
+      gestureScrollCooldownRef.current = false;
+    }, 650);
   };
 
   const applyGestureChoice = (index) => {
@@ -279,10 +305,10 @@ function GameDashboard() {
 
     const onResults = (results) => {
       if (!results.multiHandLandmarks || !results.multiHandLandmarks.length) {
-        setGestureStatus('Așteaptă mâna în fața camerei...');
-        setGestureLabel('Niciun gest');
         gestureNeedsResetRef.current = false;
         resetGestureTracking();
+        setGestureStatus('Mână resetată. Ridică 1/2/3 degete pentru opțiuni sau pumn/palmă pentru scroll.');
+        setGestureLabel('Niciun gest');
         return;
       }
 
@@ -304,14 +330,12 @@ function GameDashboard() {
       const stableFrames = stableGestureRef.current.frames;
 
       if (count === 0) {
-        gestureNeedsResetRef.current = false;
-        resetGestureTracking();
-        setGestureStatus('Mână resetată. Ridică 1, 2 sau 3 degete pentru a alege.');
-        setGestureLabel('Reset');
-        return;
+        setGestureLabel('Pumn');
+      } else if (count === 4) {
+        setGestureLabel('Palmă');
+      } else {
+        setGestureLabel(`${count} degete`);
       }
-
-      setGestureLabel(`${count} degete`);
 
       console.log('[GESTURE FRAME]', {
         count,
@@ -327,17 +351,30 @@ function GameDashboard() {
       });
 
       if (stableFrames < REQUIRED_STABLE_GESTURE_FRAMES) {
-        setGestureStatus(`Detectez ${count} degete... ține mâna stabilă.`);
+        if (count === 0) {
+          setGestureStatus('Detectez pumnul... ține mâna stabilă pentru scroll jos.');
+        } else if (count === 4) {
+          setGestureStatus('Detectez palma... ține mâna stabilă pentru scroll sus.');
+        } else {
+          setGestureStatus(`Detectez ${count} degete... ține mâna stabilă.`);
+        }
         return;
       }
 
+      if (count === 0 || count === 4) {
+        triggerGestureScroll(count);
+        return;
+      }
+
+      lastScrollGestureRef.current = null;
+
       if (gestureNeedsResetRef.current) {
-        setGestureStatus('Alegerea a fost deja aplicată. Coboară mâna complet pentru reset.');
+        setGestureStatus('Alegerea a fost deja aplicată. Scoate mâna din cameră pentru reset.');
         return;
       }
 
       if (gestureLockRef.current || gestureCooldownRef.current) {
-        setGestureStatus('Alegerea se procesează. Ține mâna jos o clipă, apoi încearcă din nou.');
+        setGestureStatus('Alegerea se procesează. Scoate mâna din cameră o clipă, apoi încearcă din nou.');
         return;
       }
 
@@ -347,7 +384,7 @@ function GameDashboard() {
         return;
       }
 
-      setGestureStatus(`Gest ignorat. Întrebarea curentă are ${optionCount} opțiuni.`);
+      setGestureStatus(`Gest ignorat. Întrebarea curentă are ${optionCount} opțiuni. Pumn = scroll jos, palmă = scroll sus.`);
     };
 
     const setupHands = async () => {
@@ -385,7 +422,7 @@ function GameDashboard() {
       });
 
       await camera.start();
-      setGestureStatus('FaceID pornit. Ține gestul stabil, apoi coboară mâna complet pentru reset.');
+      setGestureStatus('FaceID pornit. 1/2/3 aleg opțiuni, pumnul dă scroll jos, palma dă scroll sus. Scoate mâna din cameră pentru reset după alegere.');
     };
 
     setupHands().catch((error) => {
@@ -1368,7 +1405,7 @@ function GameDashboard() {
             <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Instrucțiuni FaceID</h4>
             <p style={{ margin: '.35rem 0' }}>Folosește camera ta și FaceID-ul bazat pe Google MediaPipe Hands pentru a controla simulatorul cu gesturi.</p>
             <p style={{ margin: '.35rem 0' }}><strong>1 deget</strong> = opțiunea 1, <strong>2 degete</strong> = opțiunea 2, <strong>3 degete</strong> = opțiunea 3.</p>
-            <p style={{ margin: '.35rem 0' }}>După fiecare răspuns, coboară mâna scurt pentru reset, apoi ridică din nou degetele pentru următoarea întrebare.</p>
+            <p style={{ margin: '.35rem 0' }}>După fiecare răspuns, scoate mâna scurt din cameră pentru reset. Pumnul face scroll jos, palma face scroll sus în lista de angajați.</p>
             <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat.</p>
             <p style={{ margin: '.35rem 0' }}>Dacă deschizi doar fișierul direct din Chrome, poate să nu funcționeze corect cu camera și MediaPipe.</p>
           </div>
@@ -1479,7 +1516,7 @@ function GameDashboard() {
               <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '12px', background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.18)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                   <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-                    <strong>FaceID gesturi:</strong> ridică 1, 2 sau 3 degete pentru opțiunea corespunzătoare. Gesturile care nu corespund unei opțiuni sunt ignorate.
+                    <strong>FaceID gesturi:</strong> 1/2/3 degete aleg opțiunea corespunzătoare. Pumn = scroll jos, palmă = scroll sus. După o alegere, scoate mâna din cameră pentru reset.
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '.75rem' }}>
@@ -1625,4 +1662,3 @@ function GameDashboard() {
 }
 
 export default GameDashboard;
-
