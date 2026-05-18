@@ -150,7 +150,7 @@ function GameDashboard() {
     const chosenIndex = Math.min(index, currentQ.choices.length - 1);
     if (gestureCooldownRef.current) return;
     gestureCooldownRef.current = true;
-    setTimeout(() => { gestureCooldownRef.current = false; }, 1200);
+    setTimeout(() => { gestureCooldownRef.current = false; try { lastGestureRef.current = null; } catch (e) {} }, 1200);
     try { console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title, currentQIndex: cqIndex }); } catch (e) {}
     if (applyChoiceRef.current) applyChoiceRef.current(currentQ.choices[chosenIndex]); else applyChoice(currentQ.choices[chosenIndex]);
   };
