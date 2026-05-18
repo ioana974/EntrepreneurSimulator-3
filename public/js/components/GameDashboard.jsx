@@ -267,7 +267,6 @@ function GameDashboard() {
           setGestureStatus(
             `Ridici ${count} degete: selectez opțiunea ${count}.`
           );
-
           gestureLockRef.current = true;
           applyGestureChoice(count - 1);
         }
