@@ -1,0 +1,28 @@
+{
+  "visits": [
+    {
+      "userId": "test_user_123",
+      "ip": "::1",
+      "_id": "v_mll7vmrh-96qm5q",
+      "createdAt": "2026-02-13T18:24:22.013Z"
+    },
+    {
+      "userId": "test_user_123",
+      "ip": "::1",
+      "_id": "v_mll7zwqd-a29zab",
+      "createdAt": "2026-02-13T18:27:41.557Z"
+    }
+  ],
+  "enrollments": [
+    {
+      "courseName": "Startup 101",
+      "firstName": "Test",
+      "lastName": "User",
+      "birthYear": 1990,
+      "city": "Cluj",
+      "county": "Cluj",
+      "_id": "e_mll80yg8-j17th5",
+      "createdAt": "2026-02-13T18:28:30.440Z"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game - Entrepreneur Simulator</title>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/sections.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React libraries (kept for future build) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Fallback / placeholder UI when the React app is not bundled for browser -->
+    <script>
+      (function(){
+        const root = document.getElementById('root');
+        // If a compiled React app exists at js/game.bundle.js, try to load it
+        function tryLoadBundle(cb) {
+          const s = document.createElement('script');
+          s.src = 'js/game.bundle.js';
+          s.onload = () => cb(true);
+          s.onerror = () => cb(false);
+          document.body.appendChild(s);
+        }
+
+        // Render a friendly placeholder while the full app is being developed
+        function renderPlaceholder() {
+          root.innerHTML = `
+            <div style="min-height: 70vh; display:flex; align-items:center; justify-content:center; padding: 3rem;">
+              <div style="max-width:800px; text-align:center;">
+                <h1 style="font-size:2rem; margin-bottom:0.5rem;">Simulatorul este în curs de dezvoltare</h1>
+                <p style="color:var(--text-secondary); font-size:1.05rem; margin-bottom:1.5rem;">Interfața vizuală a simulării nu este încă construită pentru această versiune. Lucrăm la integrarea completă și vom oferi o experiență interactivă curând.</p>
+                <div style="display:flex; gap:0.5rem; justify-content:center;">
+                  <a href="index.html" class="btn btn-primary">Înapoi la pagina principală</a>
+                  <a href="mailto:turdaioanaelena@gmail.com" class="btn btn-secondary">Contactează-ne</a>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // If ReactDOM.createRoot and a global mount function are available, assume app renders itself
+        if (window.React && window.ReactDOM && window.renderGameApp) {
+          try { window.renderGameApp(); return; } catch (e) { console.error('renderGameApp error', e); }
+        }
+
+        // Try to load an optional prebuilt bundle (safe to fail)
+        tryLoadBundle(function(loaded){
+          if (loaded) {
+            // If bundle defines a mount function, call it
+            if (window.renderGameApp) {
+              try { window.renderGameApp(); return; } catch (e) { console.error('bundle mount error', e); }
+            }
+          }
+          // Otherwise render the placeholder
+          renderPlaceholder();
+        });
+
+      })();
+    </script>
+</body>
+</html>
