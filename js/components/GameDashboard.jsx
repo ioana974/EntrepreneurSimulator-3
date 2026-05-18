@@ -792,14 +792,14 @@ function GameDashboard() {
     setReputation(newReputation);
     setEmployees(newEmployees);
 
-    const nextQ = currentQuestion + 1;
+    const nextQ = currentQuestionRef.current + 1;
     const complexQuestions = getComplexQuestions();
     const totalQuestions = complexQuestions.length;
     if (nextQ >= totalQuestions) {
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
     } else {
       setCurrentQuestion(nextQ);
-      try { console.log('applyChoice advancing (source)', { currentQuestion, nextQ }); } catch (e) {}
+      try { console.log('applyChoice advancing (source)', { currentQuestion: currentQuestionRef.current, nextQ }); } catch (e) {}
       saveLocalProgress({ budget: newBudget, reputation: newReputation, employees: newEmployees, currentQuestion: nextQ });
     }
   };
@@ -809,7 +809,7 @@ function GameDashboard() {
     const finalBudget = override.budget ?? budget;
     const finalReputation = override.reputation ?? reputation;
     const finalEmployees = override.employees ?? employees;
-    const roundsPlayed = currentQuestion + 1;
+    const roundsPlayed = (typeof override.currentQuestion === 'number' ? override.currentQuestion : currentQuestionRef.current) + 1;
     const finalProfit = finalBudget - (scenario?.startBudget || 0);
     const success = finalProfit >= 0;
     const final = {

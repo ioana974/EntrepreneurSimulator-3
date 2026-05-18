@@ -719,7 +719,7 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
-    try { console.log('applyChoice called', { currentQuestion, choiceText: choice?.text }); } catch (e) {}
+    try { console.log('applyChoice called', { currentQuestion: currentQuestionRef.current, choiceText: choice?.text }); } catch (e) {}
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
     
@@ -775,8 +775,8 @@ function GameDashboard() {
     setReputation(newReputation);
     setEmployees(newEmployees);
 
-    const nextQ = currentQuestion + 1;
-    try { console.log('applyChoice advancing', { currentQuestion, nextQ }); } catch (e) {}
+    const nextQ = currentQuestionRef.current + 1;
+    try { console.log('applyChoice advancing', { currentQuestion: currentQuestionRef.current, nextQ }); } catch (e) {}
     const complexQuestions = getComplexQuestions();
     const totalQuestions = complexQuestions.length;
     if (nextQ >= totalQuestions) {
@@ -792,7 +792,7 @@ function GameDashboard() {
     const finalBudget = override.budget ?? budget;
     const finalReputation = override.reputation ?? reputation;
     const finalEmployees = override.employees ?? employees;
-    const roundsPlayed = currentQuestion + 1;
+    const roundsPlayed = (typeof override.currentQuestion === 'number' ? override.currentQuestion : currentQuestionRef.current) + 1;
     const finalProfit = finalBudget - (scenario?.startBudget || 0);
     const success = finalProfit >= 0;
     const final = {
