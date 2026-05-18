@@ -719,8 +719,130 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
-    try { console.log('applyChoice called', { currentQuestion: currentQuestionRef.current, choiceText: choice?.text }); } catch (e) {}
-    const newBudget = Math.round(budget + (choice.budgetChange || 0));
+    try { console.log('applyChoice called', { currentQuestion: currentQuestionRef.current, choice }); } catch (e) {}
+    try {
+      const complex = getComplexQuestions();
+      const cq = complex[currentQuestionRef.current % complex.length];
+      console.log('Current question:', cq?.title, 'Displayed choices:', (cq && cq.choices) ? cq.choices.map(function(c){return c.text;}) : []);
+      console.log('Employees before:', employees.length, employees.map(function(e){return e.name;}));
+    } catch (e) {}
+      const newBudget = Math.round(budget + (choice.budgetChange || 0));
+      const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
+    
+      let newEmployees = [...employees];
+      if (choice.employeeAdd) {
+        const newEmp = {
+          id: Math.max(...(newEmployees.length > 0 ? newEmployees.map(e => e.id) : [-1])) + 1,
+          name: 'Angajat ' + (newEmployees.length + 1),
+          age: Math.floor(Math.random() * 30) + 25,
+          seniority: 0,
+          salary: scenario.salaryPerEmployee,
+          position: 'Nou',
+          performance: 70
+        };
+        newEmployees.push(newEmp);
+      }
+    
+      if (choice.employeeRemove === 'lowest') {
+        if (newEmployees.length > 0) {
+          const lowestId = newEmployees.reduce((min, emp) => emp.performance < min.performance ? emp : min).id;
+          newEmployees = newEmployees.filter(e => e.id !== lowestId);
+        }
+      }
+      if (choice.employeeRemove === 'newest') {
+        if (newEmployees.length > 0) {
+          const newest = newEmployees[newEmployees.length - 1];
+          newEmployees = newEmployees.filter(e => e.id !== newest.id);
+        }
+      }
+    
+      // Apply targeted salary raise if present
+      if (choice.targetEmployeeId != null && choice.salaryRaisePercent) {
+        newEmployees = newEmployees.map(e => {
+          if (e.id === choice.targetEmployeeId) {
+            const raise = Math.round(e.salary * (choice.salaryRaisePercent / 100));
+            return { ...e, salary: e.salary + raise };
+          }
+          return e;
+        });
+      }
+    
+      // If choice requests immediate end (exit on profit), finalize immediately
+      if (choice.endGameImmediate) {
+        // persist the state with the budget change applied
+        setBudget(newBudget);
+        setReputation(newReputation);
+        setEmployees(newEmployees);
+        finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
+        return;
+      }
+    
+      setBudget(newBudget);
+      setReputation(newReputation);
+      setEmployees(newEmployees);
+    
+      const nextQ = currentQuestionRef.current + 1;
+      try { console.log('applyChoice advancing', { currentQuestion: currentQuestionRef.current, nextQ }); } catch (e) {}
+      const complexQuestions = getComplexQuestions();
+      const totalQuestions = complexQuestions.length;
+      if (nextQ >= totalQuestions) {
+        finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
+      } else {
+        setCurrentQuestion(nextQ);
+        saveLocalProgress({ budget: newBudget, reputation: newReputation, employees: newEmployees, currentQuestion: nextQ });
+      }
+    };
+  
+    // --- Finalize ---
+    const finalizeGame = (override = {}) => {
+      const finalBudget = override.budget ?? budget;
+      const finalReputation = override.reputation ?? reputation;
+      const finalEmployees = override.employees ?? employees;
+      const roundsPlayed = (typeof override.currentQuestion === 'number' ? override.currentQuestion : currentQuestionRef.current) + 1;
+      const finalProfit = finalBudget - (scenario?.startBudget || 0);
+      const success = finalProfit >= 0;
+      const final = {
+        budget: finalBudget,
+        reputation: finalReputation,
+        employees: finalEmployees.length,
+        year,
+        month,
+        roundsPlayed,
+        profit: finalProfit,
+        success,
+        scenarioId: scenario?.id
+      };
+    
+      // Calculate simulation score
+      const profitScore = Math.max(0, (finalProfit / (scenario?.startBudget || 1)) * 100);
+      const reputationScore = finalReputation;
+      const employeeRetentionScore = (finalEmployees.length / (scenario?.startEmployees || 1)) * 50;
+      const simulationScore = Math.round((profitScore + reputationScore + employeeRetentionScore) / 3);
+    
+      // Track simulation score in localStorage
+      const userId = localStorage.getItem('entrepreneur_userId');
+      let simScores = JSON.parse(localStorage.getItem('simulationScores') || '[]');
+      simScores.push({
+        userId: userId,
+        score: simulationScore,
+        profit: finalProfit,
+        reputation: finalReputation,
+        employees: finalEmployees.length,
+        scenario: scenario?.id,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('simulationScores', JSON.stringify(simScores));
+    
+      setFinalStats(final);
+      setGameEnded(true);
+      setGameStarted(false);
+    
+      localStorage.setItem(STORAGE_KEY + '_final', JSON.stringify(final));
+    
+      fetch('/api/game/leaderboard').then(r => r.json()).then(data => {
+        if (data && data.success) setLeaderboard(data.leaderboard || []);
+      }).catch(err => console.warn('Could not load leaderboard', err));
+    };
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
     
     let newEmployees = [...employees];

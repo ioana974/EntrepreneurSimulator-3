@@ -736,7 +736,13 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
-    try { console.log('applyChoice called (source)', { currentQuestion, choiceText: choice?.text }); } catch (e) {}
+    try { console.log('applyChoice called (source)', { currentQuestion: currentQuestionRef.current, choice }); } catch (e) {}
+    try {
+      const complex = getComplexQuestions();
+      const cq = complex[currentQuestionRef.current % complex.length];
+      console.log('Current question (source):', cq?.title, 'Displayed choices:', cq?.choices?.map(c=>c.text));
+      console.log('Employees before:', employees.length, employees.map(e=>e.name));
+    } catch (e) {}
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
     
@@ -791,6 +797,7 @@ function GameDashboard() {
     setBudget(newBudget);
     setReputation(newReputation);
     setEmployees(newEmployees);
+    try { console.log('Employees after:', newEmployees.length, newEmployees.map(e=>e.name)); } catch (e) {}
 
     const nextQ = currentQuestionRef.current + 1;
     const complexQuestions = getComplexQuestions();
