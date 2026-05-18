@@ -41,16 +41,15 @@ function GameDashboard() {
   const [gestureLabel, setGestureLabel] = useState('Niciun gest');
   const gestureCooldownRef = useRef(false);
   const lastGestureRef = useRef(null);
+  const gestureNeedsResetRef = useRef(false);
+  const choiceProcessingRef = useRef(false);
   const currentQuestionRef = useRef(currentQuestion);
+  const applyChoiceRef = useRef(null);
+
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
-    // clear last gesture when question changes so same gesture can be used again
-    try { lastGestureRef.current = null; } catch (e) {}
+    lastGestureRef.current = null;
   }, [currentQuestion]);
-  const applyChoiceRef = useRef(null);
-  useEffect(() => {
-    applyChoiceRef.current = applyChoice;
-  }, [applyChoice]);
 
   // Game finality
   const [gameEnded, setGameEnded] = useState(false);
@@ -150,26 +149,34 @@ function GameDashboard() {
   const applyGestureChoice = (index) => {
     const complex = getComplexQuestions();
     if (!complex || complex.length === 0) return;
+
     const cqIndex = currentQuestionRef.current % complex.length;
     const currentQ = complex[cqIndex];
-    if (!currentQ || !currentQ.choices || index < 0) return;
-    // If the user shows more fingers than available choices, map to the last choice
-    const chosenIndex = Math.min(index, currentQ.choices.length - 1);
-    if (gestureCooldownRef.current) return;
+
+    if (!currentQ || !Array.isArray(currentQ.choices)) return;
+    if (index < 0 || index >= currentQ.choices.length) {
+      setGestureStatus(`Gest ignorat: întrebarea are doar ${currentQ.choices.length} opțiuni.`);
+      return;
+    }
+
+    if (gestureCooldownRef.current || gestureNeedsResetRef.current) return;
+
     gestureCooldownRef.current = true;
+    gestureNeedsResetRef.current = true;
+
     setTimeout(() => {
       gestureCooldownRef.current = false;
-      try { lastGestureRef.current = null; } catch (e) {}
-    }, 1200);
-    try {
-      console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title, currentQIndex: cqIndex });
-    } catch (e) {}
-    // Use the latest applyChoice from ref to avoid stale closure captured by MediaPipe handler
+    }, 900);
+
+    const selectedChoice = currentQ.choices[index];
+
     if (applyChoiceRef.current) {
-      applyChoiceRef.current(currentQ.choices[chosenIndex]);
-    } else {
-      applyChoice(currentQ.choices[chosenIndex]);
+      applyChoiceRef.current(selectedChoice);
     }
+
+    setTimeout(() => {
+      try { lastGestureRef.current = null; } catch (e) {}
+    }, 600);
   };
 
   useEffect(() => {
@@ -206,39 +213,97 @@ function GameDashboard() {
       const landmarks = results.multiHandLandmarks[0];
       const count = countExtendedFingers(landmarks);
 
+      const complex = getComplexQuestions();
+      const cqIndex =
+        complex.length > 0
+          ? currentQuestionRef.current % complex.length
+          : 0;
+
+      const currentQ = complex[cqIndex];
+      const optionCount = currentQ?.choices?.length || 0;
+
+      /* =========================
+         SCROLL GESTURES
+      ========================= */
+
+      // PUMN = scroll down
       if (count === 0) {
-        setGestureStatus('Pumn detectat: derulează angajații în jos');
-        setGestureLabel('Pumn');
-        if (lastGestureRef.current !== 'fist') {
-          scrollEmployeeList(220);
-          lastGestureRef.current = 'fist';
+        if (lastGestureRef.current !== 'scrollDown') {
+          lastGestureRef.current = 'scrollDown';
+
+          window.scrollBy({
+            top: 260,
+            behavior: 'smooth'
+          });
+
+          setGestureStatus('Scroll jos');
+          setGestureLabel('Pumn');
         }
+
+        gestureNeedsResetRef.current = false;
         return;
       }
 
-      if (count === 4) {
-        setGestureStatus('Palmă deschisă detectată: derulează angajații în sus');
-        setGestureLabel('Palmă deschisă');
-        if (lastGestureRef.current !== 'palm') {
-          scrollEmployeeList(-220);
-          lastGestureRef.current = 'palm';
+      // PALMĂ DESCHISĂ = scroll up
+      if (count === 5) {
+        if (lastGestureRef.current !== 'scrollUp') {
+          lastGestureRef.current = 'scrollUp';
+
+          window.scrollBy({
+            top: -260,
+            behavior: 'smooth'
+          });
+
+          setGestureStatus('Scroll sus');
+          setGestureLabel('Palmă');
         }
+
+        gestureNeedsResetRef.current = false;
         return;
       }
 
-      if (count >= 1 && count <= 3) {
-        setGestureStatus(`Ridici ${count} degete: selectez opțiunea ${count}`);
+      /* =========================
+         CHOICE GESTURES
+      ========================= */
+
+      if (count >= 1 && count <= optionCount) {
+        setGestureStatus(
+          `Ridici ${count} degete: selectez opțiunea ${count}.`
+        );
+
         setGestureLabel(`${count} degete`);
-        if (lastGestureRef.current !== `choice${count}`) {
-          applyGestureChoice(count - 1);
+
+        if (
+          lastGestureRef.current !== `choice${count}` &&
+          !gestureNeedsResetRef.current
+        ) {
           lastGestureRef.current = `choice${count}`;
+          applyGestureChoice(count - 1);
         }
+
         return;
       }
 
-      setGestureStatus('Folosește 1, 2 sau 3 degete, pumn sau palmă deschisă.');
-      setGestureLabel('Niciun gest');
-      lastGestureRef.current = null;
+      /* =========================
+         RESET / INVALID
+      ========================= */
+
+      // 4 degete sau alte combinații
+      if (count === 4) {
+        lastGestureRef.current = null;
+        gestureNeedsResetRef.current = false;
+
+        setGestureStatus('Reset gesturi');
+        setGestureLabel('4 degete');
+
+        return;
+      }
+
+      setGestureStatus(
+        `Gest ignorat. Întrebarea are ${optionCount} opțiuni.`
+      );
+
+      setGestureLabel(`${count} degete`);
     };
 
     const setupHands = async () => {
@@ -736,6 +801,13 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
+    if (!choice || choiceProcessingRef.current) return;
+
+    choiceProcessingRef.current = true;
+    setTimeout(() => {
+      choiceProcessingRef.current = false;
+    }, 250);
+
     try { console.log('applyChoice called (source)', { currentQuestion: currentQuestionRef.current, choice }); } catch (e) {}
     try {
       const complex = getComplexQuestions();
@@ -805,11 +877,28 @@ function GameDashboard() {
     if (nextQ >= totalQuestions) {
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
     } else {
+      currentQuestionRef.current = nextQ;
+      lastGestureRef.current = null;
+      gestureNeedsResetRef.current = true;
+
       setCurrentQuestion(nextQ);
-      try { console.log('applyChoice advancing (source)', { currentQuestion: currentQuestionRef.current, nextQ }); } catch (e) {}
-      saveLocalProgress({ budget: newBudget, reputation: newReputation, employees: newEmployees, currentQuestion: nextQ });
+
+      try {
+        console.log('applyChoice advancing (source)', { nextQ });
+      } catch (e) {}
+
+      saveLocalProgress({
+        budget: newBudget,
+        reputation: newReputation,
+        employees: newEmployees,
+        currentQuestion: nextQ
+      });
     }
   };
+
+  useEffect(() => {
+    applyChoiceRef.current = applyChoice;
+  });
 
   // --- Finalize ---
   const finalizeGame = (override = {}) => {
@@ -1179,7 +1268,7 @@ function GameDashboard() {
             <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Instrucțiuni FaceID</h4>
             <p style={{ margin: '.35rem 0' }}>Folosește camera ta și FaceID-ul bazat pe Google MediaPipe Hands pentru a controla simulatorul cu gesturi.</p>
             <p style={{ margin: '.35rem 0' }}><strong>1 deget</strong> = opțiunea 1, <strong>2 degete</strong> = opțiunea 2, <strong>3 degete</strong> = opțiunea 3.</p>
-            <p style={{ margin: '.35rem 0' }}><strong>Pumn</strong> = scroll jos în listă, <strong>palmă deschisă</strong> = scroll sus.</p>
+            <p style={{ margin: '.35rem 0' }}>După fiecare răspuns, coboară mâna scurt, apoi ridică din nou degetele pentru următoarea întrebare.</p>
             <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat.</p>
             <p style={{ margin: '.35rem 0' }}>Dacă deschizi doar fișierul direct din Chrome, poate să nu funcționeze corect cu camera și MediaPipe.</p>
           </div>
@@ -1290,7 +1379,7 @@ function GameDashboard() {
               <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '12px', background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.18)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                   <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-                    <strong>FaceID gesturi:</strong> ridică 1/2/3 degete pentru a selecta opțiunile 1/2/3. Pumn = scroll jos, palmă deschisă = scroll sus.
+                    <strong>FaceID gesturi:</strong> ridică 1, 2 sau 3 degete pentru opțiunea corespunzătoare. Gesturile care nu corespund unei opțiuni sunt ignorate.
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '.75rem' }}>
