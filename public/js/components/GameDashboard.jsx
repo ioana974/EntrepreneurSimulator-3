@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import ScenarioSelect from './ScenarioSelect.jsx';
 
@@ -33,6 +33,14 @@ function GameDashboard() {
   // Calculator & UI state
   const [showCalculator, setShowCalculator] = useState(false);
   const [calcDisplay, setCalcDisplay] = useState('0');
+
+  const videoRef = useRef(null);
+  const employeeListRef = useRef(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [gestureStatus, setGestureStatus] = useState('FaceID gesturi se vor porni automat la începutul jocului.');
+  const [gestureLabel, setGestureLabel] = useState('Niciun gest');
+  const gestureCooldownRef = useRef(false);
+  const lastGestureRef = useRef(null);
 
   // Game finality
   const [gameEnded, setGameEnded] = useState(false);
@@ -112,6 +120,153 @@ function GameDashboard() {
   };
 
   const allScenarios = [...scenarios, customScenario];
+
+  const scrollEmployeeList = (amount = 220) => {
+    if (employeeListRef.current) {
+      employeeListRef.current.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+  };
+
+  const countExtendedFingers = (landmarks) => {
+    const fingers = [
+      landmarks[8].y < landmarks[6].y,
+      landmarks[12].y < landmarks[10].y,
+      landmarks[16].y < landmarks[14].y,
+      landmarks[20].y < landmarks[18].y
+    ];
+    return fingers.filter(Boolean).length;
+  };
+
+  const applyGestureChoice = (index) => {
+    const currentQ = getComplexQuestions()[currentQuestion % getComplexQuestions().length];
+    if (!currentQ || !currentQ.choices || index < 0 || index >= currentQ.choices.length) return;
+    if (gestureCooldownRef.current) return;
+    gestureCooldownRef.current = true;
+    setTimeout(() => {
+      gestureCooldownRef.current = false;
+    }, 1200);
+    applyChoice(currentQ.choices[index]);
+  };
+
+  useEffect(() => {
+    if (gameStarted && !cameraActive) {
+      setCameraActive(true);
+    }
+    if (!cameraActive || !gameStarted) return;
+
+    let hands = null;
+    let camera = null;
+    let stopped = false;
+
+    const loadScript = (src) => new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Could not load ${src}`));
+      document.body.appendChild(script);
+    });
+
+    const onResults = (results) => {
+      if (!results.multiHandLandmarks || !results.multiHandLandmarks.length) {
+        setGestureStatus('Așteaptă mâna în fața camerei...');
+        setGestureLabel('Niciun gest');
+        lastGestureRef.current = null;
+        return;
+      }
+
+      const landmarks = results.multiHandLandmarks[0];
+      const count = countExtendedFingers(landmarks);
+
+      if (count === 0) {
+        setGestureStatus('Pumn detectat: derulează angajații în jos');
+        setGestureLabel('Pumn');
+        if (lastGestureRef.current !== 'fist') {
+          scrollEmployeeList(220);
+          lastGestureRef.current = 'fist';
+        }
+        return;
+      }
+
+      if (count === 4) {
+        setGestureStatus('Palmă deschisă detectată: derulează angajații în sus');
+        setGestureLabel('Palmă deschisă');
+        if (lastGestureRef.current !== 'palm') {
+          scrollEmployeeList(-220);
+          lastGestureRef.current = 'palm';
+        }
+        return;
+      }
+
+      if (count >= 1 && count <= 3) {
+        setGestureStatus(`Ridici ${count} degete: selectez opțiunea ${count}`);
+        setGestureLabel(`${count} degete`);
+        if (lastGestureRef.current !== `choice${count}`) {
+          applyGestureChoice(count - 1);
+          lastGestureRef.current = `choice${count}`;
+        }
+        return;
+      }
+
+      setGestureStatus('Folosește 1, 2 sau 3 degete, pumn sau palmă deschisă.');
+      setGestureLabel('Niciun gest');
+      lastGestureRef.current = null;
+    };
+
+    const setupHands = async () => {
+      if (!window.Hands) {
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
+      }
+      if (!window.Camera) {
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+      }
+      if (!window.Hands || !window.Camera) {
+        setGestureStatus('Nu am putut încărca FaceID gesturile.');
+        return;
+      }
+
+      if (!videoRef.current) {
+        setGestureStatus('Camera nu este disponibilă.');
+        return;
+      }
+
+      const video = videoRef.current;
+      video.playsInline = true;
+      video.muted = true;
+
+      hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+      hands.setOptions({ maxNumHands: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.6, modelComplexity: 0 });
+      hands.onResults(onResults);
+
+      camera = new window.Camera(video, {
+        onFrame: async () => {
+          if (stopped) return;
+          await hands.send({ image: video });
+        },
+        width: 320,
+        height: 240
+      });
+
+      await camera.start();
+      setGestureStatus('FaceID pornit. Folosește 1/2/3 degete sau pumn/palmă.');
+    };
+
+    setupHands().catch((error) => {
+      console.warn('FaceID gesturi error:', error);
+      setGestureStatus('Eroare la pornirea FaceID.');
+    });
+
+    return () => {
+      stopped = true;
+      camera?.stop?.();
+      hands?.close?.();
+      lastGestureRef.current = null;
+    };
+  }, [cameraActive, gameStarted]);
 
   // --- Generate employees with details ---
   const generateEmployees = (scenario) => {
@@ -985,6 +1140,16 @@ function GameDashboard() {
             {savedExists && <button className="btn btn-secondary" onClick={resumeSaved}>{t('continueGame')}</button>}
             <button className="btn btn-secondary" onClick={() => { localStorage.removeItem(STORAGE_KEY); setSavedExists(false); alert(t('progress_deleted')); }}>{t('delete_saved')}</button>
           </div>
+
+          <div style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+            <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Instrucțiuni FaceID</h4>
+            <p style={{ margin: '.35rem 0' }}>Folosește camera ta și FaceID-ul bazat pe Google MediaPipe Hands pentru a controla simulatorul cu gesturi.</p>
+            <p style={{ margin: '.35rem 0' }}><strong>1 deget</strong> = opțiunea 1, <strong>2 degete</strong> = opțiunea 2, <strong>3 degete</strong> = opțiunea 3.</p>
+            <p style={{ margin: '.35rem 0' }}><strong>Pumn</strong> = scroll jos în listă, <strong>palmă deschisă</strong> = scroll sus.</p>
+            <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat și de deschidere în browserul Chrome.</p>
+            <p style={{ margin: '.35rem 0' }}>Ca să vezi dacă funcționează, deschide terminalul în folderul proiectului și rulează: <code>npm start</code>. Apoi deschide în Chrome: <code>http://localhost:5000/game.html</code>.</p>
+            <p style={{ margin: '.35rem 0' }}>Dacă deschizi doar fișierul direct din Chrome, poate să nu funcționeze corect cu camera și MediaPipe.</p>
+          </div>
         </div>
       </div>
     );
@@ -998,7 +1163,7 @@ function GameDashboard() {
       {/* LEFT SIDE: EMPLOYEES (FULL HEIGHT QUADRANT) */}
       <div className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 150px)' }}>
         <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>👥 Angajați ({employees.length}/{scenario?.startEmployees})</h3>
-        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
+        <div ref={employeeListRef} style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
           {employees.map((emp, i) => (
             <div key={emp.id} style={{ padding: '.8rem', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem', marginBottom: '.5rem', background: 'rgba(0,240,255,0.05)', borderRadius: '4px' }}>
               <div style={{ fontWeight: 'bold', color: 'var(--accent-cyan)' }}>{emp.name}</div>
@@ -1088,6 +1253,20 @@ function GameDashboard() {
                   <strong>ℹ️ {currentQ.technicalDetails.split(' - ')[0]}:</strong> {currentQ.technicalDetails.split(' - ')[1]}
                 </div>
               )}
+
+              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '12px', background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.18)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                    <strong>FaceID gesturi:</strong> ridică 1/2/3 degete pentru a selecta opțiunile 1/2/3. Pumn = scroll jos, palmă deschisă = scroll sus.
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '.75rem' }}>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Gest detectat:</span>
+                  <span style={{ padding: '.3rem .8rem', borderRadius: '999px', background: '#0ea5e9', color: '#ffffff', fontWeight: '700', fontSize: '0.8rem' }}>{gestureLabel}</span>
+                </div>
+                <div style={{ marginTop: '.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{gestureStatus}</div>
+                <video ref={videoRef} style={{ display: 'none' }} playsInline muted />
+              </div>
             </div>
 
             {/* Choices */}
@@ -1117,6 +1296,14 @@ function GameDashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+        <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Notă testare</h4>
+        <p style={{ margin: '.35rem 0' }}>Dacă vezi acest ecran în Chrome și camera cere permisiune, acceptă-o. Gesturile funcționează doar când jocul este pornit și ai dat acces la cameră.</p>
+        <p style={{ margin: '.35rem 0' }}><strong>Server local</strong> înseamnă că pagina este servită de calculatorul tău, nu doar deschisă direct dintr-un fișier.</p>
+        <p style={{ margin: '.35rem 0' }}>Rulează <code>npm start</code> în terminal în folderul proiectului și apoi deschide <code>http://localhost:5000/game.html</code> în Chrome.</p>
+        <p style={{ margin: '.35rem 0' }}>Deschiderea directă a fișierului în Chrome poate bloca funcționalitatea camerei și MediaPipe.</p>
       </div>
     </div>
 
