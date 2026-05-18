@@ -42,13 +42,19 @@ function GameDashboard() {
   const gestureCooldownRef = useRef(false);
   const lastGestureRef = useRef(null);
   const gestureNeedsResetRef = useRef(false);
-  const currentQuestionRef = useRef(currentQuestion);
   const gestureLockRef = useRef(false);
+  const selectedQuestionRef = useRef(null);
+  const stableGestureRef = useRef({ count: null, frames: 0 });
+  const currentQuestionRef = useRef(currentQuestion);
   const applyChoiceRef = useRef(null);
+
+  const REQUIRED_STABLE_GESTURE_FRAMES = 4;
 
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
     lastGestureRef.current = null;
+    selectedQuestionRef.current = null;
+    stableGestureRef.current = { count: null, frames: 0 };
   }, [currentQuestion]);
 
   // Game finality
@@ -146,19 +152,26 @@ function GameDashboard() {
     return fingers.filter(Boolean).length;
   };
 
+  const resetGestureTracking = () => {
+    lastGestureRef.current = null;
+    stableGestureRef.current = { count: null, frames: 0 };
+  };
+
   const applyGestureChoice = (index) => {
+    const questionIndex = currentQuestionRef.current;
     const complex = getComplexQuestions();
+
     if (!complex || complex.length === 0) {
       console.warn('[GESTURE CHOICE BLOCKED] No questions available.');
       return;
     }
 
-    const cqIndex = currentQuestionRef.current % complex.length;
+    const cqIndex = questionIndex % complex.length;
     const currentQ = complex[cqIndex];
 
     if (!currentQ || !Array.isArray(currentQ.choices)) {
       console.warn('[GESTURE CHOICE BLOCKED] Current question has no choices.', {
-        currentQuestionRef: currentQuestionRef.current,
+        questionIndex,
         cqIndex,
         currentQ
       });
@@ -169,7 +182,7 @@ function GameDashboard() {
       console.warn('[GESTURE CHOICE IGNORED] Finger count does not match an available option.', {
         requestedOption: index + 1,
         availableOptions: currentQ.choices.length,
-        currentQuestionRef: currentQuestionRef.current,
+        questionIndex,
         questionTitle: currentQ.title
       });
       setGestureStatus(`Gest ignorat: întrebarea are doar ${currentQ.choices.length} opțiuni.`);
@@ -181,24 +194,35 @@ function GameDashboard() {
         gestureCooldown: gestureCooldownRef.current,
         gestureNeedsReset: gestureNeedsResetRef.current,
         gestureLock: gestureLockRef.current,
-        currentQuestionRef: currentQuestionRef.current,
+        questionIndex,
         requestedOption: index + 1
       });
+      setGestureStatus('Alegerea anterioară încă se procesează. Coboară mâna pentru reset.');
       return;
     }
 
+    if (selectedQuestionRef.current === questionIndex) {
+      console.warn('[GESTURE CHOICE BLOCKED] This question already received a gesture choice.', {
+        questionIndex,
+        requestedOption: index + 1
+      });
+      setGestureStatus('Alegerea pentru această întrebare a fost deja trimisă. Coboară mâna pentru reset.');
+      return;
+    }
+
+    const selectedChoice = currentQ.choices[index];
+
+    selectedQuestionRef.current = questionIndex;
     gestureCooldownRef.current = true;
     gestureNeedsResetRef.current = true;
 
     setTimeout(() => {
       gestureCooldownRef.current = false;
-    }, 900);
-
-    const selectedChoice = currentQ.choices[index];
+    }, 700);
 
     console.log('[GESTURE CHOICE APPLY]', {
       requestedOption: index + 1,
-      currentQuestionRef: currentQuestionRef.current,
+      questionIndex,
       cqIndex,
       questionTitle: currentQ.title,
       selectedChoice: {
@@ -218,8 +242,15 @@ function GameDashboard() {
       }))
     });
 
+    setGestureStatus(`Aplic opțiunea ${index + 1}. Coboară mâna pentru următoarea întrebare.`);
+
     if (applyChoiceRef.current) {
-      applyChoiceRef.current(selectedChoice);
+      applyChoiceRef.current(selectedChoice, {
+        source: 'gesture',
+        questionIndex,
+        optionIndex: index,
+        questionTitle: currentQ.title
+      });
     }
   };
 
@@ -250,8 +281,8 @@ function GameDashboard() {
       if (!results.multiHandLandmarks || !results.multiHandLandmarks.length) {
         setGestureStatus('Așteaptă mâna în fața camerei...');
         setGestureLabel('Niciun gest');
-        lastGestureRef.current = null;
         gestureNeedsResetRef.current = false;
+        resetGestureTracking();
         return;
       }
 
@@ -259,45 +290,64 @@ function GameDashboard() {
       const count = countExtendedFingers(landmarks);
 
       const complex = getComplexQuestions();
-      const cqIndex = complex.length > 0 ? currentQuestionRef.current % complex.length : 0;
+      const questionIndex = currentQuestionRef.current;
+      const cqIndex = complex.length > 0 ? questionIndex % complex.length : 0;
       const currentQ = complex[cqIndex];
       const optionCount = currentQ?.choices?.length || 0;
 
-      if (lastGestureRef.current === count) {
-        return;
+      if (count !== stableGestureRef.current.count) {
+        stableGestureRef.current = { count, frames: 1 };
+      } else {
+        stableGestureRef.current.frames += 1;
       }
 
-      lastGestureRef.current = count;
-
-      console.log('[GESTURE FRAME]', {
-        count,
-        currentQuestionState: currentQuestion,
-        currentQuestionRef: currentQuestionRef.current,
-        cqIndex,
-        optionCount,
-        questionTitle: currentQ?.title,
-        gestureNeedsReset: gestureNeedsResetRef.current,
-        gestureCooldown: gestureCooldownRef.current,
-        gestureLock: gestureLockRef.current
-      });
+      const stableFrames = stableGestureRef.current.frames;
 
       if (count === 0) {
         gestureNeedsResetRef.current = false;
-        lastGestureRef.current = null;
+        resetGestureTracking();
         setGestureStatus('Mână resetată. Ridică 1, 2 sau 3 degete pentru a alege.');
         setGestureLabel('Reset');
         return;
       }
 
+      setGestureLabel(`${count} degete`);
+
+      console.log('[GESTURE FRAME]', {
+        count,
+        stableFrames,
+        questionIndex,
+        cqIndex,
+        optionCount,
+        questionTitle: currentQ?.title,
+        gestureNeedsReset: gestureNeedsResetRef.current,
+        gestureCooldown: gestureCooldownRef.current,
+        gestureLock: gestureLockRef.current,
+        selectedQuestion: selectedQuestionRef.current
+      });
+
+      if (stableFrames < REQUIRED_STABLE_GESTURE_FRAMES) {
+        setGestureStatus(`Detectez ${count} degete... ține mâna stabilă.`);
+        return;
+      }
+
+      if (gestureNeedsResetRef.current) {
+        setGestureStatus('Alegerea a fost deja aplicată. Coboară mâna complet pentru reset.');
+        return;
+      }
+
+      if (gestureLockRef.current || gestureCooldownRef.current) {
+        setGestureStatus('Alegerea se procesează. Ține mâna jos o clipă, apoi încearcă din nou.');
+        return;
+      }
+
       if (count >= 1 && count <= optionCount) {
         setGestureStatus(`Ridici ${count} degete: selectez opțiunea ${count}.`);
-        setGestureLabel(`${count} degete`);
         applyGestureChoice(count - 1);
         return;
       }
 
       setGestureStatus(`Gest ignorat. Întrebarea curentă are ${optionCount} opțiuni.`);
-      setGestureLabel(`${count} degete`);
     };
 
     const setupHands = async () => {
@@ -335,7 +385,7 @@ function GameDashboard() {
       });
 
       await camera.start();
-      setGestureStatus('FaceID pornit. Folosește 1/2/3 degete pentru opțiuni. Coboară mâna pentru reset.');
+      setGestureStatus('FaceID pornit. Ține gestul stabil, apoi coboară mâna complet pentru reset.');
     };
 
     setupHands().catch((error) => {
@@ -794,15 +844,26 @@ function GameDashboard() {
   };
 
   // --- Apply choice & advance ---
-  const applyChoice = (choice) => {
+  const applyChoice = (choice, meta = {}) => {
     if (!choice) {
       console.warn('[CHOICE BLOCKED] Missing choice.');
       return;
     }
 
+    const questionAtStart = currentQuestionRef.current;
+
+    if (typeof meta.questionIndex === 'number' && meta.questionIndex !== questionAtStart) {
+      console.warn('[CHOICE BLOCKED] Stale gesture tried to answer a different question.', {
+        metaQuestionIndex: meta.questionIndex,
+        currentQuestionRef: questionAtStart,
+        choice
+      });
+      return;
+    }
+
     if (gestureLockRef.current) {
       console.warn('[CHOICE BLOCKED] Choice already processing.', {
-        currentQuestionRef: currentQuestionRef.current,
+        currentQuestionRef: questionAtStart,
         choice
       });
       return;
@@ -810,39 +871,41 @@ function GameDashboard() {
 
     gestureLockRef.current = true;
 
-    try {
-      const complex = getComplexQuestions();
-      const cqIndex = complex.length > 0 ? currentQuestionRef.current % complex.length : 0;
-      const cq = complex[cqIndex];
-      console.log('[CHOICE APPLY START]', {
-        currentQuestionRef: currentQuestionRef.current,
-        cqIndex,
-        questionTitle: cq?.title,
-        displayedChoices: cq?.choices?.map((c, i) => ({
-          option: i + 1,
-          text: c.text,
-          employeeAdd: c.employeeAdd,
-          employeeRemove: c.employeeRemove,
-          budgetChange: c.budgetChange,
-          reputationChange: c.reputationChange
-        })),
-        selectedChoice: {
-          text: choice.text,
-          employeeAdd: choice.employeeAdd,
-          employeeRemove: choice.employeeRemove,
-          budgetChange: choice.budgetChange,
-          reputationChange: choice.reputationChange
-        },
-        employeesBefore: employees.length,
-        employeeNamesBefore: employees.map(e => e.name)
-      });
-    } catch (e) {
-      console.warn('[CHOICE DEBUG ERROR]', e);
-    }
+    const complex = getComplexQuestions();
+    const cqIndex = complex.length > 0 ? questionAtStart % complex.length : 0;
+    const cq = complex[cqIndex];
+
+    console.log('[CHOICE APPLY START]', {
+      source: meta.source || 'button',
+      questionAtStart,
+      cqIndex,
+      questionTitle: cq?.title,
+      optionIndex: meta.optionIndex,
+      displayedChoices: cq?.choices?.map((c, i) => ({
+        option: i + 1,
+        text: c.text,
+        employeeAdd: c.employeeAdd,
+        employeeRemove: c.employeeRemove,
+        budgetChange: c.budgetChange,
+        reputationChange: c.reputationChange
+      })),
+      selectedChoice: {
+        text: choice.text,
+        employeeAdd: choice.employeeAdd,
+        employeeRemove: choice.employeeRemove,
+        budgetChange: choice.budgetChange,
+        reputationChange: choice.reputationChange
+      },
+      budgetBefore: budget,
+      employeesBefore: employees.length,
+      employeeNamesBefore: employees.map(e => e.name)
+    });
+
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
-    
+
     let newEmployees = [...employees];
+
     if (choice.employeeAdd) {
       const newEmp = {
         id: Math.max(...(newEmployees.length > 0 ? newEmployees.map(e => e.id) : [-1])) + 1,
@@ -855,13 +918,14 @@ function GameDashboard() {
       };
       newEmployees.push(newEmp);
     }
-    
+
     if (choice.employeeRemove === 'lowest') {
       if (newEmployees.length > 0) {
         const lowestId = newEmployees.reduce((min, emp) => emp.performance < min.performance ? emp : min).id;
         newEmployees = newEmployees.filter(e => e.id !== lowestId);
       }
     }
+
     if (choice.employeeRemove === 'newest') {
       if (newEmployees.length > 0) {
         const newest = newEmployees[newEmployees.length - 1];
@@ -869,7 +933,6 @@ function GameDashboard() {
       }
     }
 
-    // Apply targeted salary raise if present
     if (choice.targetEmployeeId != null && choice.salaryRaisePercent) {
       newEmployees = newEmployees.map(e => {
         if (e.id === choice.targetEmployeeId) {
@@ -880,9 +943,18 @@ function GameDashboard() {
       });
     }
 
-    // If choice requests immediate end (exit on profit), finalize immediately
+    console.log('[CHOICE APPLY RESULT]', {
+      questionAtStart,
+      budgetBefore: budget,
+      budgetAfter: newBudget,
+      reputationBefore: reputation,
+      reputationAfter: newReputation,
+      employeesBefore: employees.length,
+      employeesAfter: newEmployees.length,
+      employeeNamesAfter: newEmployees.map(e => e.name)
+    });
+
     if (choice.endGameImmediate) {
-      // persist the state with the budget change applied
       setBudget(newBudget);
       setReputation(newReputation);
       setEmployees(newEmployees);
@@ -894,25 +966,26 @@ function GameDashboard() {
     setBudget(newBudget);
     setReputation(newReputation);
     setEmployees(newEmployees);
-    try { console.log('Employees after:', newEmployees.length, newEmployees.map(e=>e.name)); } catch (e) {}
 
-    const nextQ = currentQuestionRef.current + 1;
-    const complexQuestions = getComplexQuestions();
-    const totalQuestions = complexQuestions.length;
+    const nextQ = questionAtStart + 1;
+    const totalQuestions = complex.length;
+
     if (nextQ >= totalQuestions) {
       gestureLockRef.current = false;
-      finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
+      finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees, currentQuestion: questionAtStart });
     } else {
       currentQuestionRef.current = nextQ;
-      lastGestureRef.current = null;
-      gestureNeedsResetRef.current = true;
+      gestureNeedsResetRef.current = meta.source === 'gesture';
+      resetGestureTracking();
 
       setCurrentQuestion(nextQ);
       gestureLockRef.current = false;
 
-      try {
-        console.log('applyChoice advancing (source)', { nextQ });
-      } catch (e) {}
+      console.log('[CHOICE ADVANCE]', {
+        from: questionAtStart,
+        to: nextQ,
+        needsGestureReset: gestureNeedsResetRef.current
+      });
 
       saveLocalProgress({
         budget: newBudget,
