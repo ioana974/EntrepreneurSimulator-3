@@ -159,6 +159,7 @@ function GameDashboard() {
     gestureCooldownRef.current = true;
     setTimeout(() => {
       gestureCooldownRef.current = false;
+      try { lastGestureRef.current = null; } catch (e) {}
     }, 1200);
     try {
       console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title, currentQIndex: cqIndex });
