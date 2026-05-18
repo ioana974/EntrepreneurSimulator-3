@@ -43,13 +43,11 @@ function GameDashboard() {
   const lastGestureRef = useRef(null);
   const gestureNeedsResetRef = useRef(false);
   const currentQuestionRef = useRef(currentQuestion);
-  const activeQuestionIdRef = useRef(0);
   const gestureLockRef = useRef(false);
   const applyChoiceRef = useRef(null);
 
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
-    activeQuestionIdRef.current = currentQuestion;
     lastGestureRef.current = null;
   }, [currentQuestion]);
 
@@ -150,18 +148,44 @@ function GameDashboard() {
 
   const applyGestureChoice = (index) => {
     const complex = getComplexQuestions();
-    if (!complex || complex.length === 0) return;
+    if (!complex || complex.length === 0) {
+      console.warn('[GESTURE CHOICE BLOCKED] No questions available.');
+      return;
+    }
 
-    const cqIndex = activeQuestionIdRef.current % complex.length;
+    const cqIndex = currentQuestionRef.current % complex.length;
     const currentQ = complex[cqIndex];
 
-    if (!currentQ || !Array.isArray(currentQ.choices)) return;
+    if (!currentQ || !Array.isArray(currentQ.choices)) {
+      console.warn('[GESTURE CHOICE BLOCKED] Current question has no choices.', {
+        currentQuestionRef: currentQuestionRef.current,
+        cqIndex,
+        currentQ
+      });
+      return;
+    }
+
     if (index < 0 || index >= currentQ.choices.length) {
+      console.warn('[GESTURE CHOICE IGNORED] Finger count does not match an available option.', {
+        requestedOption: index + 1,
+        availableOptions: currentQ.choices.length,
+        currentQuestionRef: currentQuestionRef.current,
+        questionTitle: currentQ.title
+      });
       setGestureStatus(`Gest ignorat: întrebarea are doar ${currentQ.choices.length} opțiuni.`);
       return;
     }
 
-    if (gestureCooldownRef.current || gestureNeedsResetRef.current) return;
+    if (gestureCooldownRef.current || gestureNeedsResetRef.current || gestureLockRef.current) {
+      console.warn('[GESTURE CHOICE BLOCKED] Gesture is locked or waiting for reset.', {
+        gestureCooldown: gestureCooldownRef.current,
+        gestureNeedsReset: gestureNeedsResetRef.current,
+        gestureLock: gestureLockRef.current,
+        currentQuestionRef: currentQuestionRef.current,
+        requestedOption: index + 1
+      });
+      return;
+    }
 
     gestureCooldownRef.current = true;
     gestureNeedsResetRef.current = true;
@@ -172,13 +196,31 @@ function GameDashboard() {
 
     const selectedChoice = currentQ.choices[index];
 
+    console.log('[GESTURE CHOICE APPLY]', {
+      requestedOption: index + 1,
+      currentQuestionRef: currentQuestionRef.current,
+      cqIndex,
+      questionTitle: currentQ.title,
+      selectedChoice: {
+        text: selectedChoice.text,
+        budgetChange: selectedChoice.budgetChange,
+        reputationChange: selectedChoice.reputationChange,
+        employeeAdd: selectedChoice.employeeAdd,
+        employeeRemove: selectedChoice.employeeRemove
+      },
+      allChoices: currentQ.choices.map((choice, i) => ({
+        option: i + 1,
+        text: choice.text,
+        employeeAdd: choice.employeeAdd,
+        employeeRemove: choice.employeeRemove,
+        budgetChange: choice.budgetChange,
+        reputationChange: choice.reputationChange
+      }))
+    });
+
     if (applyChoiceRef.current) {
       applyChoiceRef.current(selectedChoice);
     }
-
-    setTimeout(() => {
-      try { lastGestureRef.current = null; } catch (e) {}
-    }, 600);
   };
 
   useEffect(() => {
@@ -209,83 +251,53 @@ function GameDashboard() {
         setGestureStatus('Așteaptă mâna în fața camerei...');
         setGestureLabel('Niciun gest');
         lastGestureRef.current = null;
+        gestureNeedsResetRef.current = false;
         return;
       }
 
       const landmarks = results.multiHandLandmarks[0];
       const count = countExtendedFingers(landmarks);
 
-      // Ignore duplicate frames if the gestures are still the same
+      const complex = getComplexQuestions();
+      const cqIndex = complex.length > 0 ? currentQuestionRef.current % complex.length : 0;
+      const currentQ = complex[cqIndex];
+      const optionCount = currentQ?.choices?.length || 0;
+
       if (lastGestureRef.current === count) {
         return;
       }
+
       lastGestureRef.current = count;
 
-      const complex = getComplexQuestions();
-      const cqIndex =
-        complex.length > 0
-          ? activeQuestionIdRef.current % complex.length
-          : 0;
+      console.log('[GESTURE FRAME]', {
+        count,
+        currentQuestionState: currentQuestion,
+        currentQuestionRef: currentQuestionRef.current,
+        cqIndex,
+        optionCount,
+        questionTitle: currentQ?.title,
+        gestureNeedsReset: gestureNeedsResetRef.current,
+        gestureCooldown: gestureCooldownRef.current,
+        gestureLock: gestureLockRef.current
+      });
 
-      const currentQ = complex[cqIndex];
-      const optionCount = currentQ?.choices?.length || 0;
-      let shouldResetGesture = false;
-
-      /* =========================
-         SCROLL GESTURES
-      ========================= */
-
-      // PUMN = scroll down
       if (count === 0) {
-        window.scrollBy({
-          top: 260,
-          behavior: 'smooth'
-        });
-
-        setGestureStatus('Scroll jos');
-        setGestureLabel('Pumn');
         gestureNeedsResetRef.current = false;
-        shouldResetGesture = true;
-      } else if (count === 5) {
-        window.scrollBy({
-          top: -260,
-          behavior: 'smooth'
-        });
-
-        setGestureStatus('Scroll sus');
-        setGestureLabel('Palmă');
-        gestureNeedsResetRef.current = false;
-        shouldResetGesture = true;
-      } else if (count >= 1 && count <= optionCount) {
-        setGestureStatus(
-          `Ridici ${count} degete: selectez opțiunea ${count}.`
-        );
-
-        setGestureLabel(`${count} degete`);
-
-        if (!gestureLockRef.current && !gestureNeedsResetRef.current) {
-          gestureLockRef.current = true;
-          applyGestureChoice(count - 1);
-        }
-      } else if (count === 4) {
         lastGestureRef.current = null;
-        gestureNeedsResetRef.current = false;
+        setGestureStatus('Mână resetată. Ridică 1, 2 sau 3 degete pentru a alege.');
+        setGestureLabel('Reset');
+        return;
+      }
 
-        setGestureStatus('Reset gesturi');
-        setGestureLabel('4 degete');
-      } else {
-        setGestureStatus(
-          `Gest ignorat. Întrebarea are ${optionCount} opțiuni.`
-        );
-
+      if (count >= 1 && count <= optionCount) {
+        setGestureStatus(`Ridici ${count} degete: selectez opțiunea ${count}.`);
         setGestureLabel(`${count} degete`);
+        applyGestureChoice(count - 1);
+        return;
       }
 
-      if (shouldResetGesture) {
-        setTimeout(() => {
-          lastGestureRef.current = null;
-        }, 500);
-      }
+      setGestureStatus(`Gest ignorat. Întrebarea curentă are ${optionCount} opțiuni.`);
+      setGestureLabel(`${count} degete`);
     };
 
     const setupHands = async () => {
@@ -323,7 +335,7 @@ function GameDashboard() {
       });
 
       await camera.start();
-      setGestureStatus('FaceID pornit. Folosește 1/2/3 degete sau pumn/palmă.');
+      setGestureStatus('FaceID pornit. Folosește 1/2/3 degete pentru opțiuni. Coboară mâna pentru reset.');
     };
 
     setupHands().catch((error) => {
@@ -783,17 +795,50 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
-    if (!choice || gestureLockRef.current) return;
+    if (!choice) {
+      console.warn('[CHOICE BLOCKED] Missing choice.');
+      return;
+    }
+
+    if (gestureLockRef.current) {
+      console.warn('[CHOICE BLOCKED] Choice already processing.', {
+        currentQuestionRef: currentQuestionRef.current,
+        choice
+      });
+      return;
+    }
 
     gestureLockRef.current = true;
 
-    try { console.log('applyChoice called (source)', { currentQuestion: currentQuestionRef.current, choice }); } catch (e) {}
     try {
       const complex = getComplexQuestions();
-      const cq = complex[activeQuestionIdRef.current % complex.length];
-      console.log('Current question (source):', cq?.title, 'Displayed choices:', cq?.choices?.map(c => c.text));
-      console.log('Employees before:', employees.length, employees.map(e => e.name));
-    } catch (e) {}
+      const cqIndex = complex.length > 0 ? currentQuestionRef.current % complex.length : 0;
+      const cq = complex[cqIndex];
+      console.log('[CHOICE APPLY START]', {
+        currentQuestionRef: currentQuestionRef.current,
+        cqIndex,
+        questionTitle: cq?.title,
+        displayedChoices: cq?.choices?.map((c, i) => ({
+          option: i + 1,
+          text: c.text,
+          employeeAdd: c.employeeAdd,
+          employeeRemove: c.employeeRemove,
+          budgetChange: c.budgetChange,
+          reputationChange: c.reputationChange
+        })),
+        selectedChoice: {
+          text: choice.text,
+          employeeAdd: choice.employeeAdd,
+          employeeRemove: choice.employeeRemove,
+          budgetChange: choice.budgetChange,
+          reputationChange: choice.reputationChange
+        },
+        employeesBefore: employees.length,
+        employeeNamesBefore: employees.map(e => e.name)
+      });
+    } catch (e) {
+      console.warn('[CHOICE DEBUG ERROR]', e);
+    }
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
     
@@ -859,7 +904,6 @@ function GameDashboard() {
       finalizeGame({ budget: newBudget, reputation: newReputation, employees: newEmployees });
     } else {
       currentQuestionRef.current = nextQ;
-      activeQuestionIdRef.current = nextQ;
       lastGestureRef.current = null;
       gestureNeedsResetRef.current = true;
 
@@ -1251,7 +1295,7 @@ function GameDashboard() {
             <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Instrucțiuni FaceID</h4>
             <p style={{ margin: '.35rem 0' }}>Folosește camera ta și FaceID-ul bazat pe Google MediaPipe Hands pentru a controla simulatorul cu gesturi.</p>
             <p style={{ margin: '.35rem 0' }}><strong>1 deget</strong> = opțiunea 1, <strong>2 degete</strong> = opțiunea 2, <strong>3 degete</strong> = opțiunea 3.</p>
-            <p style={{ margin: '.35rem 0' }}>După fiecare răspuns, coboară mâna scurt, apoi ridică din nou degetele pentru următoarea întrebare.</p>
+            <p style={{ margin: '.35rem 0' }}>După fiecare răspuns, coboară mâna scurt pentru reset, apoi ridică din nou degetele pentru următoarea întrebare.</p>
             <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat.</p>
             <p style={{ margin: '.35rem 0' }}>Dacă deschizi doar fișierul direct din Chrome, poate să nu funcționeze corect cu camera și MediaPipe.</p>
           </div>
