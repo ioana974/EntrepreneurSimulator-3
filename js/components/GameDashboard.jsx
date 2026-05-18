@@ -41,6 +41,10 @@ function GameDashboard() {
   const [gestureLabel, setGestureLabel] = useState('Niciun gest');
   const gestureCooldownRef = useRef(false);
   const lastGestureRef = useRef(null);
+  const currentQuestionRef = useRef(currentQuestion);
+  useEffect(() => {
+    currentQuestionRef.current = currentQuestion;
+  }, [currentQuestion]);
 
   // Game finality
   const [gameEnded, setGameEnded] = useState(false);
@@ -140,7 +144,8 @@ function GameDashboard() {
   const applyGestureChoice = (index) => {
     const complex = getComplexQuestions();
     if (!complex || complex.length === 0) return;
-    const currentQ = complex[currentQuestion % complex.length];
+    const cqIndex = currentQuestionRef.current % complex.length;
+    const currentQ = complex[cqIndex];
     if (!currentQ || !currentQ.choices || index < 0) return;
     // If the user shows more fingers than available choices, map to the last choice
     const chosenIndex = Math.min(index, currentQ.choices.length - 1);
@@ -150,7 +155,7 @@ function GameDashboard() {
       gestureCooldownRef.current = false;
     }, 1200);
     try {
-      console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title });
+      console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title, currentQIndex: cqIndex });
     } catch (e) {}
     applyChoice(currentQ.choices[chosenIndex]);
   };
@@ -1154,8 +1159,7 @@ function GameDashboard() {
             <p style={{ margin: '.35rem 0' }}>Folosește camera ta și FaceID-ul bazat pe Google MediaPipe Hands pentru a controla simulatorul cu gesturi.</p>
             <p style={{ margin: '.35rem 0' }}><strong>1 deget</strong> = opțiunea 1, <strong>2 degete</strong> = opțiunea 2, <strong>3 degete</strong> = opțiunea 3.</p>
             <p style={{ margin: '.35rem 0' }}><strong>Pumn</strong> = scroll jos în listă, <strong>palmă deschisă</strong> = scroll sus.</p>
-            <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat și de deschidere în browserul Chrome.</p>
-            <p style={{ margin: '.35rem 0' }}>Ca să vezi dacă funcționează, deschide terminalul în folderul proiectului și rulează: <code>npm start</code>. Apoi deschide în Chrome: <code>http://localhost:5000/game.html</code>.</p>
+            <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat.</p>
             <p style={{ margin: '.35rem 0' }}>Dacă deschizi doar fișierul direct din Chrome, poate să nu funcționeze corect cu camera și MediaPipe.</p>
           </div>
         </div>
@@ -1310,7 +1314,6 @@ function GameDashboard() {
         <h4 style={{ margin: '0 0 .75rem', color: 'var(--accent-yellow)' }}>Notă testare</h4>
         <p style={{ margin: '.35rem 0' }}>Dacă vezi acest ecran în Chrome și camera cere permisiune, acceptă-o. Gesturile funcționează doar când jocul este pornit și ai dat acces la cameră.</p>
         <p style={{ margin: '.35rem 0' }}><strong>Server local</strong> înseamnă că pagina este servită de calculatorul tău, nu doar deschisă direct dintr-un fișier.</p>
-        <p style={{ margin: '.35rem 0' }}>Rulează <code>npm start</code> în terminal în folderul proiectului și apoi deschide <code>http://localhost:5000/game.html</code> în Chrome.</p>
         <p style={{ margin: '.35rem 0' }}>Deschiderea directă a fișierului în Chrome poate bloca funcționalitatea camerei și MediaPipe.</p>
       </div>
     </div>
