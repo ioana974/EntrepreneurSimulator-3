@@ -41,6 +41,10 @@ function GameDashboard() {
   const [gestureLabel, setGestureLabel] = useState('Niciun gest');
   const gestureCooldownRef = useRef(false);
   const lastGestureRef = useRef(null);
+  const currentQuestionRef = useRef(currentQuestion);
+  useEffect(() => { currentQuestionRef.current = currentQuestion; }, [currentQuestion]);
+  const applyChoiceRef = useRef(null);
+  useEffect(() => { applyChoiceRef.current = applyChoice; }, [applyChoice]);
 
   // Game finality
   const [gameEnded, setGameEnded] = useState(false);
@@ -138,14 +142,17 @@ function GameDashboard() {
   };
 
   const applyGestureChoice = (index) => {
-    const currentQ = getComplexQuestions()[currentQuestion % getComplexQuestions().length];
-    if (!currentQ || !currentQ.choices || index < 0 || index >= currentQ.choices.length) return;
+    const complex = getComplexQuestions();
+    if (!complex || complex.length === 0) return;
+    const cqIndex = currentQuestionRef.current % complex.length;
+    const currentQ = complex[cqIndex];
+    if (!currentQ || !currentQ.choices || index < 0) return;
+    const chosenIndex = Math.min(index, currentQ.choices.length - 1);
     if (gestureCooldownRef.current) return;
     gestureCooldownRef.current = true;
-    setTimeout(() => {
-      gestureCooldownRef.current = false;
-    }, 1200);
-    applyChoice(currentQ.choices[index]);
+    setTimeout(() => { gestureCooldownRef.current = false; }, 1200);
+    try { console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title, currentQIndex: cqIndex }); } catch (e) {}
+    if (applyChoiceRef.current) applyChoiceRef.current(currentQ.choices[chosenIndex]); else applyChoice(currentQ.choices[chosenIndex]);
   };
 
   useEffect(() => {
@@ -712,6 +719,7 @@ function GameDashboard() {
 
   // --- Apply choice & advance ---
   const applyChoice = (choice) => {
+    try { console.log('applyChoice called', { currentQuestion, choiceText: choice?.text }); } catch (e) {}
     const newBudget = Math.round(budget + (choice.budgetChange || 0));
     const newReputation = Math.max(0, Math.min(100, reputation + (choice.reputationChange || 0)));
     
@@ -768,6 +776,7 @@ function GameDashboard() {
     setEmployees(newEmployees);
 
     const nextQ = currentQuestion + 1;
+    try { console.log('applyChoice advancing', { currentQuestion, nextQ }); } catch (e) {}
     const complexQuestions = getComplexQuestions();
     const totalQuestions = complexQuestions.length;
     if (nextQ >= totalQuestions) {
@@ -1146,8 +1155,7 @@ function GameDashboard() {
             <p style={{ margin: '.35rem 0' }}>Folosește camera ta și FaceID-ul bazat pe Google MediaPipe Hands pentru a controla simulatorul cu gesturi.</p>
             <p style={{ margin: '.35rem 0' }}><strong>1 deget</strong> = opțiunea 1, <strong>2 degete</strong> = opțiunea 2, <strong>3 degete</strong> = opțiunea 3.</p>
             <p style={{ margin: '.35rem 0' }}><strong>Pumn</strong> = scroll jos în listă, <strong>palmă deschisă</strong> = scroll sus.</p>
-            <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat și de deschidere în browserul Chrome.</p>
-            <p style={{ margin: '.35rem 0' }}>Ca să vezi dacă funcționează, deschide terminalul în folderul proiectului și rulează: <code>npm start</code>. Apoi deschide în Chrome: <code>http://localhost:5000/game.html</code>.</p>
+            <p style={{ margin: '.35rem 0' }}><strong>Server</strong> înseamnă programul local care afișează pagina web. Nu e nevoie de internet pentru server, doar de Node.js instalat.</p>
             <p style={{ margin: '.35rem 0' }}>Dacă deschizi doar fișierul direct din Chrome, poate să nu funcționeze corect cu camera și MediaPipe.</p>
           </div>
         </div>
