@@ -45,6 +45,10 @@ function GameDashboard() {
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
+  const applyChoiceRef = useRef(null);
+  useEffect(() => {
+    applyChoiceRef.current = applyChoice;
+  }, [applyChoice]);
 
   // Game finality
   const [gameEnded, setGameEnded] = useState(false);
@@ -157,7 +161,12 @@ function GameDashboard() {
     try {
       console.log('Gesture -> choice', { index, chosenIndex, choices: currentQ.choices.length, title: currentQ.title, currentQIndex: cqIndex });
     } catch (e) {}
-    applyChoice(currentQ.choices[chosenIndex]);
+    // Use the latest applyChoice from ref to avoid stale closure captured by MediaPipe handler
+    if (applyChoiceRef.current) {
+      applyChoiceRef.current(currentQ.choices[chosenIndex]);
+    } else {
+      applyChoice(currentQ.choices[chosenIndex]);
+    }
   };
 
   useEffect(() => {
