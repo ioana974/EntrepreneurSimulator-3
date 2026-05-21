@@ -540,7 +540,10 @@
 
         function toggleMenu() {
             const menu = document.getElementById('mobile-menu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            const hamburger = document.getElementById('hamburger');
+            if (!menu) return;
+            menu.classList.toggle('active');
+            if (hamburger) hamburger.classList.toggle('active');
         }
 
         function toggleLanguage() {
@@ -548,12 +551,10 @@
             localStorage.setItem('lessonLanguage', currentLanguage);
             document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
             
-            // Update all elements with data-ro and data-en attributes
             document.querySelectorAll('[data-ro][data-en]').forEach(element => {
                 if (element.nodeType === Node.ELEMENT_NODE) {
                     const text = currentLanguage === 'ro' ? element.getAttribute('data-ro') : element.getAttribute('data-en');
                     
-                    // For button elements, update only the text content, preserving the toggle icon
                     if (element.tagName === 'BUTTON') {
                         element.querySelector('span:first-child').textContent = text;
                     } else if (element.tagName === 'A') {
@@ -565,7 +566,6 @@
             });
         }
 
-        // Set initial button text based on saved language
         window.addEventListener('load', () => {
             document.getElementById('lang-btn').textContent = currentLanguage === 'ro' ? 'EN' : 'RO';
         });

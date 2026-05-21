@@ -604,7 +604,10 @@
 
         function toggleMenu() {
             const menu = document.getElementById('mobile-menu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            const hamburger = document.getElementById('hamburger');
+            if (!menu) return;
+            menu.classList.toggle('active');
+            if (hamburger) hamburger.classList.toggle('active');
         }
 
         function toggleLanguage() {

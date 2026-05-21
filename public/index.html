@@ -448,11 +448,17 @@
 
     function toggleMenu() {
       const menu = document.getElementById('mobile-menu');
-      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      const hamburger = document.getElementById('hamburger');
+      if (!menu) return;
+      menu.classList.toggle('active');
+      if (hamburger) hamburger.classList.toggle('active');
     }
 
     function closeMenu() {
-      document.getElementById('mobile-menu').style.display = 'none';
+      const menu = document.getElementById('mobile-menu');
+      const hamburger = document.getElementById('hamburger');
+      if (menu) menu.classList.remove('active');
+      if (hamburger) hamburger.classList.remove('active');
     }
 
     function navigateTo(page) {
